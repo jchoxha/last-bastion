@@ -26,12 +26,12 @@ newRun=function(classId,seed){discardWorld();originalNewRun(classId,seed);bridge
 function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','edge','coreMesh','routeLines','routes','gatePos','hitSet'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
 function unpack(value){if(value?.$v)return V3(...value.$v);if(Array.isArray(value))return value.map(unpack);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,unpack(v)]));return value;}
 function snapshot(){
- if(!G||G.phase==='over')return null;
+ if(!G||G.phase==='over')return null;const liveEnemies=G.enemies.filter(e=>!e.dead);
  return {version:1,savedAt:new Date().toISOString(),config:RUN_SETTINGS,seed:G.seed,classId:G.classId,rng:G.rng.getState(),
-  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player'].map(k=>[k,G[k]]))),
+  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
   cells:G.cells.map(col=>col.map(c=>({type:c.type,obst:c.obst,site:c.site,lvl:c.lvl,ramp:c.ramp}))),
   sites:G.sites.map(pack),activeSite:G.site?.id??null,towers:G.towers.map(t=>({...pack(t),build:t.b.id})),
-  enemies:G.enemies.filter(e=>!e.dead).map(pack),bolts:G.bolts.map(b=>({...pack(b),hitIndices:b.hitSet?[...b.hitSet].map(e=>G.enemies.indexOf(e)).filter(i=>i>=0):null})),
+  enemies:liveEnemies.map(pack),bolts:G.bolts.map(b=>({...pack(b),hitIndices:b.hitSet?[...b.hitSet].map(e=>liveEnemies.indexOf(e)).filter(i=>i>=0):null})),
   chests:G.chests.map(pack),shrines:G.shrines.map(pack),lairs:G.lairs.map(pack),relics:G.relics.map(r=>r.id),
   draft:!$('draft').classList.contains('hidden')?(G.draft||[]).map(c=>({kind:c.kind,id:(c.r||c.u).id})):null};
 }
@@ -59,14 +59,34 @@ function restoreSave(s){
  $('start').classList.add('hidden');$('end').classList.add('hidden');$('hud').classList.remove('hidden');$('draft').classList.add('hidden');$('className').textContent=CLASSES[G.classId].name;buildHotbar();renderRelics();setView(G.view);updateHud();
  if(s.draft){restoredDraft=s.draft;openDraft(G.draftSource);}bridge.started();setMsg('Run restored','Your ground, defenses, and progress are intact.',3);
 }
-function saveRun(){const s=snapshot();if(!s){bridge.notify('Start a run before saving.');return false;}return bridge.save(s);}
+function saveRun(silent=false){const s=snapshot();if(!s){if(!silent)bridge.notify('Start a run before saving.');return false;}const ok=bridge.save(s,silent);if(ok&&$('saveState'))$('saveState').textContent='Saved '+new Date().toLocaleTimeString();return ok;}
 function pauseGame(paused){menuPaused=paused;keys={};if(paused&&document.pointerLockElement)document.exitPointerLock();}
 window.bastion={snapshot,restoreSave,pause:pauseGame,save:saveRun};
 function installIntegration(){
  const bar=document.createElement('div');bar.id='runToolbar';bar.innerHTML='<button id="saveRun">Save game</button><button id="menuRun">Menu / pause</button><span id="saveState">Autosaves every 30 seconds</span>';document.body.appendChild(bar);
  $('saveRun').onclick=()=>saveRun();$('menuRun').onclick=()=>{pauseGame(true);if(G&&G.phase!=='over')saveRun();bridge.menu();};
- addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();pauseGame(true);bridge.menu();}},true);
- setInterval(()=>{if(G&&G.phase!=='over'&&!menuPaused)saveRun();},30000);
+ addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();pauseGame(true);saveRun(true);bridge.menu();}},true);
+ addEventListener('blur',()=>{if(G&&G.phase!=='over'&&!menuPaused){pauseGame(true);saveRun(true);bridge.menu();}});
+ addEventListener('pagehide',()=>{if(G&&G.phase!=='over')saveRun(true);});
+ setInterval(()=>{if(G&&G.phase!=='over'&&!menuPaused)saveRun(true);},30000);
+ $('c').addEventListener('wheel',e=>{if(!G||menuPaused)return;e.preventDefault();G.cameraDistance=clamp((G.cameraDistance||8)+e.deltaY*.012,4,22);},{passive:false});
+ const actions=document.createElement('div');actions.id='missionActions';actions.innerHTML='<button id="missionPrimary">Found bastion (B)</button><button id="cycleView">Change view (V)</button><span id="missionHint">WASD move · Shift sprint · wheel zoom</span>';document.body.appendChild(actions);
+ $('missionPrimary').onclick=()=>{if(menuPaused||!G||!$('draft').classList.contains('hidden'))return;if(G.phase==='explore')foundSite();else if(G.phase==='build')startWave();};
+ $('cycleView').onclick=()=>{if(G&&!menuPaused)setView(G.view==='top'?'third':G.view==='third'?'first':'top');};
  $('seed').value=RUN_SETTINGS.seed;
  if(bridge.saved){try{restoreSave(bridge.saved);}catch(err){bridge.notify('Could not load: '+err.message);bridge.menu();}}
 }
+
+// Cursor previews reuse path checks until a structure or site changes.
+let placementCache=new Map();
+const uncachedCanPlace=canPlace;
+canPlace=function(b,x,z){const k=b.id+'/'+x+'/'+z;if(!placementCache.has(k))placementCache.set(k,uncachedCanPlace(b,x,z));return placementCache.get(k);};
+const plainPlace=place,plainSell=sell,plainFound=foundSite,plainRestore=restoreSave,plainNew=newRun;
+place=function(...args){const r=plainPlace(...args);placementCache.clear();return r;};
+sell=function(...args){const r=plainSell(...args);placementCache.clear();return r;};
+foundSite=function(...args){placementCache.clear();return plainFound(...args);};
+restoreSave=function(...args){placementCache.clear();return plainRestore(...args);};
+newRun=function(...args){placementCache.clear();return plainNew(...args);};
+window.bastion.restoreSave=restoreSave;
+const baseHud=updateHud;
+updateHud=function(){baseHud();const primary=$('missionPrimary');if(!primary)return;primary.textContent=G.phase==='explore'?'Found bastion (B)':G.phase==='build'?'Start wave '+G.wave+' (Space)':'Hold the line';primary.disabled=G.phase==='fight'||G.phase==='over';const b=BUILDS[G.selected];$('missionHint').textContent=G.phase==='build'?b.name+' · '+buildCost(b)+' gold'+(b.range?' · '+b.range+' m range':'')+' · F place / X sell':'WASD move · Shift sprint · wheel zoom · mouse buttons attack';};

@@ -5,7 +5,7 @@ const nodes=new Map();const document={getElementById:id=>{if(!nodes.has(id))node
 let source=fs.readFileSync('work/bastion-integrated.js','utf8');source=source.slice(0,source.lastIndexOf('try{initThree();'));
 const settings={seed:'BASTION',size:64,hilliness:.15,trees:.22,scale:.5,dynamic:false};
 const sandbox={parent:{__lastBastionBridge:{THREE,generateWorld,settings,started(){},notify(){},menu(){},save(){return true;}}},document,console,innerWidth:1200,innerHeight:800,devicePixelRatio:1,setTimeout:()=>0,setInterval:()=>0,requestAnimationFrame:()=>0,addEventListener(){}};sandbox.window=sandbox;
-vm.createContext(sandbox);vm.runInContext(source+`\nscene=new THREE.Scene();camera=new THREE.PerspectiveCamera();sun=new THREE.DirectionalLight();renderer={render(){}};globalThis.api={newRun,foundSite,startWave,spawnEnemy,damage,place,canPlace,secureSite,snapshot,restoreSave,validateSave,openDraft,closeDraft,updateEnemies,updateTowers,updateBolts,makeWave,terrainPassable,cellToWorld,heightAt,getG:()=>G,builds:BUILDS,setPos:(x,z)=>{G.player.pos=cellToWorld(x,z);G.player.pos.y=heightAt(G.player.pos.x,G.player.pos.z);}};`,sandbox);
+vm.createContext(sandbox);vm.runInContext(source+`\nscene=new THREE.Scene();camera=new THREE.PerspectiveCamera();sun=new THREE.DirectionalLight();renderer={render(){}};globalThis.api={newRun,foundSite,startWave,spawnEnemy,damage,place,sell,canPlace,secureSite,snapshot,restoreSave,validateSave,openDraft,closeDraft,updateEnemies,updateTowers,updateBolts,makeWave,terrainPassable,cellToWorld,heightAt,getG:()=>G,builds:BUILDS,setPos:(x,z)=>{G.player.pos=cellToWorld(x,z);G.player.pos.y=heightAt(G.player.pos.x,G.player.pos.z);}};`,sandbox);
 const a=sandbox.api;let saves=0;
 function comparable(s){const c=JSON.parse(JSON.stringify(s));delete c.savedAt;return c;}
 function roundtrip(){const s=a.snapshot();assert(s);a.restoreSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(comparable(a.snapshot()),comparable(s));saves++;}
@@ -18,6 +18,13 @@ assert.equal(a.getG().towers.length,8);roundtrip();
 a.startWave();assert.equal(a.getG().phase,'fight');assert(a.getG().spawnQueue.length>0);a.updateEnemies(.5);a.updateTowers(.1);a.updateBolts(.1);roundtrip();
 const e=a.spawnEnemy('grunt',0,1),gold=a.getG().gold;a.damage(e,100000);assert(e.dead);assert(a.getG().gold>gold);
 a.getG().enemies=a.getG().enemies.filter(e=>!e.dead);a.openDraft('shrine');roundtrip();a.closeDraft();
+// A dead enemy before a live one must not shift piercing projectile hit references.
+const dead=a.spawnEnemy('grunt',0,1),live=a.spawnEnemy('runner',0,1);a.damage(dead,99999);live.hp=7;
+a.getG().bolts.push({pos:new THREE.Vector3(0,10,0),vel:new THREE.Vector3(1,0,0),mesh:new THREE.Mesh(),dmg:12,life:1,pierce:true,hitSet:new Set([dead,live])});
+roundtrip();const restoredBolt=a.getG().bolts.at(-1);assert.equal(restoredBolt.hitSet.size,1);assert.equal([...restoredBolt.hitSet][0].hp,7);
+// Selling after a discount uses the actual purchase price.
+const tower=a.getG().towers.find(t=>t.b.id==='arrow'),before=a.getG().gold;a.getG().taken.cheap=true;a.sell(tower.cx,tower.cz);assert.equal(a.getG().gold-before,Math.round(tower.paid*.6));delete a.getG().taken.cheap;
+console.log('PASS: piercing-projectile references survive removed enemies; selling refunds actual paid cost.');
 const bad=JSON.parse(JSON.stringify(a.snapshot()));bad.version=999;assert.throws(()=>a.restoreSave(bad));assert.equal(a.getG().classId,'ranger');
 const broken=JSON.parse(JSON.stringify(a.snapshot()));broken.cells=[];assert.throws(()=>a.restoreSave(broken));
 console.log(`PASS: classes, camps, bastion registration, all 8 builds, wave/combat, draft, ${saves} exact save/load round trips, and corrupt-save rejection.`);
