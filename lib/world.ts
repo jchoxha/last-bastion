@@ -1,10 +1,10 @@
-export type Settings={seed:string;size:number;hilliness:number;trees:number;scale?:number;dynamic?:boolean};
+export type Settings={seed:string;size:number;hilliness:number;trees:number;scale?:number;dynamic?:boolean;maxSize?:number;terrain?:World};
 export type Cell={x:number;z:number;h:number;parent:number;dx:number;dz:number;ramp:boolean};
 export type World={cells:Cell[];settings:Settings;root:number;originX:number;originZ:number;stats:{tiles:number;ramps:number;height:number;reachable:number}};
 export const TILE=6, RISE=3, MAX_SIZE=128;
 export function random(seed:string){let h=2166136261;for(const c of seed)h=Math.imul(h^c.charCodeAt(0),16777619);return()=>{h+=0x6D2B79F5;let t=Math.imul(h^h>>>15,1|h);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
 export function generateWorld(settings:Settings,previous?:World):World{
- const n=settings.size;if(!Number.isInteger(n)||n<10||n>MAX_SIZE||n%2!==0)throw new Error('Map size must be an even number from 10–128 tiles.');
+ const n=settings.size;if(!Number.isInteger(n)||n<10||n>1024||n%2!==0)throw new Error('Map size must be an even number from 10–128 tiles.');
  const border=previous?(n-previous.settings.size)/2:0;
  if(previous&&(!Number.isInteger(border)||border<1))throw new Error('Expansion requires an even size increase.');
  const originX=previous?previous.originX-border:0,originZ=previous?previous.originZ-border:0;

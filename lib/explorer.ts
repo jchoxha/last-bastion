@@ -48,7 +48,7 @@ export function createExplorer(host:HTMLDivElement,onStats?:(stats:World["stats"
  if(mode==='walk'){sun.position.copy(pos).add(new THREE.Vector3(24,44,16));sun.target.position.copy(pos);Object.assign(sun.shadow.camera,{left:-55,right:55,top:55,bottom:-55,far:180});sun.shadow.camera.updateProjectionMatrix();}
  controls.update();renderer.render(scene,camera);}
  frame=requestAnimationFrame(tick);
- return{setWorld,setMode,setOptions,setScale,setDynamic,resetCamera,key,dispose(){cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',blur);controls.dispose();disposeGroup(terrain);disposeGroup(pathGroup);disposeGroup(gridGroup);disposeGroup(player);sun.shadow.dispose();renderer.dispose();renderer.domElement.remove();}};
+ return{getWorld:()=>w,setWorld,setMode,setOptions,setScale,setDynamic,resetCamera,key,dispose(){cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener('keydown',down);window.removeEventListener('keyup',up);window.removeEventListener('blur',blur);controls.dispose();disposeGroup(terrain);disposeGroup(pathGroup);disposeGroup(gridGroup);disposeGroup(player);sun.shadow.dispose();renderer.dispose();renderer.domElement.remove();}};
 }
 
 

@@ -2,7 +2,7 @@ const fs=require('fs');let html=fs.readFileSync('game/last-bastion-original.html
 const source=html.match(/<script>\s*([\s\S]*?)<\/script>/)[1];let code=source;
 function rep(a,b){if(!code.includes(a))throw Error('Integration anchor missing: '+a.slice(0,80));code=code.replace(a,b);}
 rep('function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}','function mulberry32(a){const rng=function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};rng.getState=()=>a|0;rng.setState=v=>{a=v|0};return rng}');
-rep('const WORLD=100, CELL=2, HALF=(WORLD-1)/2, SITE_R=9, WAVES_PER_SITE=5, SITES_TO_WIN=4, MAX_WAVE=WAVES_PER_SITE*SITES_TO_WIN, LSTEP=1.7;','const WORLD=RUN_SETTINGS.size, CELL=6*RUN_SETTINGS.scale, HALF=(WORLD-1)/2, SITE_R=9, WAVES_PER_SITE=5, SITES_TO_WIN=4, MAX_WAVE=WAVES_PER_SITE*SITES_TO_WIN, LSTEP=3*RUN_SETTINGS.scale;');
+rep('const WORLD=100, CELL=2, HALF=(WORLD-1)/2, SITE_R=9, WAVES_PER_SITE=5, SITES_TO_WIN=4, MAX_WAVE=WAVES_PER_SITE*SITES_TO_WIN, LSTEP=1.7;','let WORLD=RUN_SETTINGS.size, HALF=(WORLD-1)/2;const CELL=6*RUN_SETTINGS.scale, SITE_R=9, WAVES_PER_SITE=5, SITES_TO_WIN=4, MAX_WAVE=WAVES_PER_SITE*SITES_TO_WIN, LSTEP=3*RUN_SETTINGS.scale;');
 rep('renderer.shadowMap.enabled=true;','renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.outputColorSpace=THREE.SRGBColorSpace;');
 rep('0x1a1522,.7','0x1a1522,1.1');rep('DirectionalLight(0xffe2b8,.9)','DirectionalLight(0xffe2b8,1.8)');
 rep('const s=30;','sun.shadow.normalBias=.035;sun.shadow.bias=-.0001;const s=55;');
@@ -11,6 +11,7 @@ rep('G.phase=\'build\';refreshRoutes();',"G.sites.push(site);G.phase='build';ref
 rep("if(!free(cx,cz)){log('Clear ground is needed for a core');return}","if(!free(cx,cz)||cellAt(cx,cz).ramp){log('Clear, flat ground is needed for a core');return}");
 rep('if(f>.56&&rng()<.7)', 'if(f>.56&&rng()<Math.min(.8,RUN_SETTINGS.trees*2.5))');
 rep('(24+rng()*20)+i*2','(WORLD*.24+rng()*WORLD*.16)+i');rep('pickSpot(8,46)','pickSpot(8,WORLD*.46)');rep('pickSpot(14,46)','pickSpot(14,WORLD*.46)');
+code=code.replaceAll('Space starts','Enter starts');
 code=code.replaceAll('lvlCol[c.lvl+1]','lvlCol[clamp(c.lvl+1,0,3)]').replaceAll('lc[c.lvl+1]','lc[clamp(c.lvl+1,0,3)]');
 rep('if(!G||G.phase===\'over\'||!$(\'draft\').classList.contains(\'hidden\'))return;',"if(menuPaused||!G||G.phase==='over'||!$('draft').classList.contains('hidden'))return;");
 code=code.replaceAll("if(!G||G.phase==='over'||!$('draft').classList.contains('hidden'))return;","if(menuPaused||!G||G.phase==='over'||!$('draft').classList.contains('hidden'))return;");
@@ -21,6 +22,21 @@ const foundSource=source.slice(source.indexOf('function foundSite'),source.index
 const meshes=foundSource.slice(foundSource.indexOf('// meshes'),foundSource.indexOf("G.phase='build'"));
 const restoreVisuals=`function restoreSiteVisuals(site){const [cx,cz]=site.core,r=site.r,id=site.id;G.world.add(site.group);${meshes}}`;
 const integration=fs.readFileSync('game/integration.js','utf8');
+rep("if(e.code==='Space'){e.preventDefault();startWave()}","if(e.code==='Space'){e.preventDefault();jumpPlayer()}if(e.code==='Enter')startWave();if(e.code==='Tab'){e.preventDefault();toggleBuildMode()}");
+rep("if(e.code==='KeyF'){","if(e.code==='KeyF'&&G.buildMode){");rep("if(e.code==='KeyX'){","if(e.code==='KeyX'&&G.buildMode){");
+rep("else P.pos.y=heightAt(P.pos.x,P.pos.z);",";");
+rep("const canFight=G.phase!=='build';","const canFight=!G.buildMode;");
+const lockStart=code.indexOf("    if(G.view!=='top'&&document.pointerLockElement!==c&&!G.noLock){");
+const lockEnd=code.indexOf("    if(e.button===0)",lockStart);
+if(lockStart<0||lockEnd<0)throw Error('Missing lock handler');
+code=code.slice(0,lockStart)+"    if(!G.buildMode&&G.view!=='top'&&document.pointerLockElement!==c)requestAimLock();\n"+code.slice(lockEnd);
+rep("if(G){G.noLock=true;log('Mouse lock is unavailable here. Aim by moving the mouse, turn with Q, E or arrow keys.')}","if(G&&!G.noLock){G.noLock=true;log('Mouse capture unavailable: hold a mouse button and drag to aim. Tab opens building.')}");
+rep("if(document.pointerLockElement===c&&G&&G.view!=='top')", "if(G&&!menuPaused&&!G.buildMode&&G.view!=='top'&&(document.pointerLockElement===c||keys.MouseL||keys.MouseR))");
+rep("else{P.baseYaw+=turn*2.4*dt;P.yaw=P.baseYaw-mouse.x*1.5;P.pitch=clamp(mouse.y*.8,-1.1,1.1)}", "else{P.yaw+=turn*2.4*dt;P.baseYaw=P.yaw;if(keys.ArrowUp)P.pitch=clamp(P.pitch+1.5*dt,-1.1,1.1);if(keys.ArrowDown)P.pitch=clamp(P.pitch-1.5*dt,-1.1,1.1)}");
+code=code.replaceAll("if(G.phase==='build'){const ap=aimPoint();","if(G.buildMode&&G.phase==='build'){const ap=aimPoint();");
+rep("mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;","if(document.pointerLockElement!==c){mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;}else{mouse.x=0;mouse.y=0;}");
+rep("if(ap&&!paused&&G.site&&G.phase!=='explore')","if(ap&&!paused&&G.buildMode&&G.site&&G.phase!=='explore')");
+
 rep('keys[e.code]=true;',"keys[e.code]=true;if(e.repeat)return;");
 rep('mx*P.speed*dt,mz*P.speed*dt','mx*P.speed*dt*(keys.ShiftLeft||keys.ShiftRight?1.55:1),mz*P.speed*dt*(keys.ShiftLeft||keys.ShiftRight?1.55:1)');
 rep('multiplyScalar(-5.5)','multiplyScalar(-(G.cameraDistance||8))');
@@ -37,12 +53,17 @@ rep('wallCol=new THREE.Color(0x17131d)','wallCol=new THREE.Color(0x30382e)');
 rep('new THREE.Color(0x1f2c27)','new THREE.Color(0x354b35)');
 rep("sun.target.position.copy(p);","sun.target.position.copy(p);");
 rep('initThree();bindInput();buildStart();requestAnimationFrame(frame);',`${restoreVisuals}\n${integration}\ntry{initThree();bindInput();buildStart();installIntegration();requestAnimationFrame(frame);}catch(err){bridge.notify('Game could not start: '+err.message);bridge.menu();}`);
+code=code.replaceAll('Mouse lock is unavailable here. Aim by moving the mouse, turn with Q, E or arrow keys.','Mouse capture unavailable: hold a mouse button and drag to aim. Tab opens building.');
 code='const bridge=parent.__lastBastionBridge;const THREE=bridge.THREE;const RUN_SETTINGS=bridge.settings;\n'+code;
 html=html.replace(/<link href="https:\/\/fonts.googleapis.com[^>]+>/,'').replace(/<script src="https:\/\/cdnjs[^>]+><\/script>/,'');
 html=html.replace(/<script>\s*[\s\S]*?<\/script>/,()=>'<script>'+code+'</script>');
 html=html.replace('</style>',`#runToolbar{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:35;display:flex;gap:7px;align-items:center;background:#171821dc;border:1px solid #75694e;padding:7px;border-radius:5px}#runToolbar button{font-size:14px;padding:7px 10px}#saveState{font-size:12px;padding:0 8px;color:#b6b09e}#start .lead{font-size:17px}#start .panel{max-height:90vh;overflow:auto}#hotbar{bottom:16px}#help{bottom:130px}#relics{bottom:130px}@media(max-width:800px){#saveState{display:none}#runToolbar{top:auto;bottom:110px}#hotbar{max-width:96vw;flex-wrap:wrap;justify-content:center}.tl{width:180px}.tr .big{font-size:26px}}\n</style>`);
+html=html.replaceAll('Space starts','Enter starts').replaceAll('WASD move, mouse aim, V change view','WASD move · Space jump · Shift sprint · V view').replaceAll('1 to 8 pick a build, F or click to place','Tab toggles building · 1–8 select · F or click places').replaceAll('Q, E or arrows turn without mouse lock','Click to capture aim; hold a mouse button to drag aim if capture is unavailable. Q/E also turn.');
+html=html.replaceAll('press Space','press Enter').replaceAll('Space to','Enter to');
+html=html.replaceAll('Space starts','Enter starts').replaceAll('WASD move, mouse aim, V change view','WASD move · Space jump · Shift sprint · V view').replaceAll('1 to 8 pick a build, F or click to place','Tab toggles building · 1–8 select · F or click places').replaceAll('Q, E or arrows turn without mouse lock','Click to capture aim; hold a mouse button to drag aim if capture is unavailable. Q/E also turn.');
+html=html.replaceAll('press Space','press Enter').replaceAll('Space to','Enter to');
 html=html.replace('There are no roads:','Connected chains and ramps form the terrain. There are no roads:');
-html=html.replace('</style>',`#hotbar{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:min(780px,calc(100% - 24px));max-width:none;gap:5px}#hotbar .slot{width:auto;min-width:0}#missionActions{position:fixed;top:86px;left:50%;transform:translateX(-50%);display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:90%;z-index:12}#missionActions button{font-size:14px;padding:7px 11px;border-radius:4px}#missionHint{flex-basis:100%;text-align:center;color:#d2d8bf;font-size:12px;text-shadow:0 1px 4px #000}#runToolbar{top:12px;bottom:auto}#centerMsg{pointer-events:none}#start~#missionActions{display:none}body:has(#start.hidden) #missionActions{display:flex}body:has(#start:not(.hidden)) #missionActions{display:none}@media(max-width:800px){#hotbar{grid-template-columns:repeat(4,minmax(0,1fr));bottom:10px}#hotbar .slot{padding:5px 4px}.slot .n{font-size:13px;min-height:24px}.slot .p{font-size:12px}#runToolbar{top:76px;bottom:auto;white-space:nowrap}#missionActions{top:124px;width:94%;max-width:none}#centerMsg{top:29%;font-size:23px;width:90%}#tip{bottom:158px;white-space:normal;width:90%}#log{top:178px;font-size:13px;max-width:70%}#relics{bottom:157px}.tl{left:12px;top:12px;width:160px}.tr{right:12px;top:12px}.tr .wave{font-size:15px}.tr .view{font-size:12px}}\n</style>`);
+html=html.replace('</style>',`#hotbar{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:min(780px,calc(100% - 24px));max-width:none;gap:5px}#hotbar .slot{width:auto;min-width:0}#missionActions{position:fixed;top:86px;left:50%;transform:translateX(-50%);display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:90%;z-index:12}#missionActions button{font-size:14px;padding:7px 11px;border-radius:4px}#missionHint{flex-basis:100%;text-align:center;color:#d2d8bf;font-size:12px;text-shadow:0 1px 4px #000}#runToolbar{top:12px;bottom:auto}#centerMsg,#cross{pointer-events:none}#start~#missionActions{display:none}body:has(#start.hidden) #missionActions{display:flex}body:has(#start:not(.hidden)) #missionActions{display:none}@media(max-width:800px){#hotbar{grid-template-columns:repeat(4,minmax(0,1fr));bottom:10px}#hotbar .slot{padding:5px 4px}.slot .n{font-size:13px;min-height:24px}.slot .p{font-size:12px}#runToolbar{top:76px;bottom:auto;white-space:nowrap}#missionActions{top:124px;width:94%;max-width:none}#centerMsg{top:29%;font-size:23px;width:90%}#tip{bottom:158px;white-space:normal;width:90%}#log{top:178px;font-size:13px;max-width:70%}#relics{bottom:157px}.tl{left:12px;top:12px;width:160px}.tr{right:12px;top:12px}.tr .wave{font-size:15px}.tr .view{font-size:12px}}\n</style>`);
 fs.writeFileSync('lib/bastion-source.ts','// Generated from the supplied prototype and game/integration.js.\nexport const bastionSource='+JSON.stringify(html)+';\n');
 fs.writeFileSync('work/bastion-integrated.js',code);
 console.log('Integrated Last Bastion mechanics and terrain bridge.');

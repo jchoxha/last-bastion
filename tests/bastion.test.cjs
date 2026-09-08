@@ -5,7 +5,7 @@ const nodes=new Map();const document={getElementById:id=>{if(!nodes.has(id))node
 let source=fs.readFileSync('work/bastion-integrated.js','utf8');source=source.slice(0,source.lastIndexOf('try{initThree();'));
 const settings={seed:'BASTION',size:64,hilliness:.15,trees:.22,scale:.5,dynamic:false};
 const sandbox={parent:{__lastBastionBridge:{THREE,generateWorld,settings,started(){},notify(){},menu(){},save(){return true;}}},document,console,innerWidth:1200,innerHeight:800,devicePixelRatio:1,setTimeout:()=>0,setInterval:()=>0,requestAnimationFrame:()=>0,addEventListener(){}};sandbox.window=sandbox;
-vm.createContext(sandbox);vm.runInContext(source+`\nscene=new THREE.Scene();camera=new THREE.PerspectiveCamera();sun=new THREE.DirectionalLight();renderer={render(){}};globalThis.api={newRun,foundSite,startWave,spawnEnemy,damage,place,sell,canPlace,secureSite,snapshot,restoreSave,validateSave,openDraft,closeDraft,updateEnemies,updateTowers,updateBolts,makeWave,terrainPassable,cellToWorld,heightAt,getG:()=>G,builds:BUILDS,setPos:(x,z)=>{G.player.pos=cellToWorld(x,z);G.player.pos.y=heightAt(G.player.pos.x,G.player.pos.z);}};`,sandbox);
+vm.createContext(sandbox);vm.runInContext(source+`\nscene=new THREE.Scene();camera=new THREE.PerspectiveCamera();sun=new THREE.DirectionalLight();renderer={render(){}};globalThis.api={jumpPlayer,tryMove,updatePlayer,expandTerrain,toggleBuildMode,newRun,foundSite,startWave,spawnEnemy,damage,place,sell,canPlace,secureSite,snapshot,restoreSave,validateSave,openDraft,closeDraft,updateEnemies,updateTowers,updateBolts,makeWave,terrainPassable,cellToWorld,heightAt,getG:()=>G,builds:BUILDS,setPos:(x,z)=>{G.player.pos=cellToWorld(x,z);G.player.pos.y=heightAt(G.player.pos.x,G.player.pos.z);}};`,sandbox);
 const a=sandbox.api;let saves=0;
 function comparable(s){const c=JSON.parse(JSON.stringify(s));delete c.savedAt;return c;}
 function roundtrip(){const s=a.snapshot();assert(s);a.restoreSave(JSON.parse(JSON.stringify(s)));assert.deepEqual(comparable(a.snapshot()),comparable(s));saves++;}
@@ -29,9 +29,21 @@ const bad=JSON.parse(JSON.stringify(a.snapshot()));bad.version=999;assert.throws
 const broken=JSON.parse(JSON.stringify(a.snapshot()));broken.cells=[];assert.throws(()=>a.restoreSave(broken));
 console.log(`PASS: classes, camps, bastion registration, all 8 builds, wave/combat, draft, ${saves} exact save/load round trips, and corrupt-save rejection.`);
 
+// Dynamic growth keeps positions and defenses while reindexing the grid.
+const beforeGrowth=JSON.parse(JSON.stringify(a.snapshot()));const position=a.getG().player.pos.clone();settings.maxSize=80;a.expandTerrain();assert.equal(a.getG().cells.length,80);assert(a.getG().player.pos.equals(position));assert.equal(a.getG().towers[0].cx,beforeGrowth.towers[0].cx+8);assert.equal(a.getG().sites[0].core[0],beforeGrowth.sites[0].core[0]+8);a.expandTerrain();assert.equal(a.getG().cells.length,80);roundtrip();a.restoreSave(beforeGrowth);delete settings.maxSize;
+// Jump rises, lands, and allows an airborne save. Walking down a ledge retains altitude.
+a.setPos(32,32);const py=a.getG().player.pos.y;a.jumpPlayer();a.updatePlayer(.05);assert(a.getG().player.pos.y>py+.2);roundtrip();for(let i=0;i<80;i++)a.updatePlayer(.025);assert.equal(a.getG().player.pos.y,a.heightAt(a.getG().player.pos.x,a.getG().player.pos.z));
+const p=a.getG().player.pos;p.y+=10;const airborne=p.y;a.tryMove(p,.1,0);assert.equal(p.y,airborne);a.updatePlayer(.05);assert(p.y<airborne);a.restoreSave(beforeGrowth);
+a.toggleBuildMode();assert.equal(a.getG().buildMode,true);assert.equal(a.getG().view,'top');a.toggleBuildMode();assert.equal(a.getG().buildMode,false);
+console.log('PASS: jump/landing/airborne save, build mode, expansion preservation, expansion cap, expanded-save round trip.');
+
 // Complete four sites using the game's actual founding and securing rules.
 for(let count=0;count<4;count++){
  if(!a.getG().site){let ok=false;for(let x=10;x<54&&!ok;x++)for(let z=10;z<54&&!ok;z++){a.setPos(x,z);a.foundSite();ok=!!a.getG().site;}assert(ok,'Legal ground remains for bastion '+(count+1));}
  a.getG().enemies=a.getG().enemies.filter(e=>e.mode==='roam');a.getG().spawnQueue=[];a.getG().site.wave=5;a.secureSite();
 }
 assert.equal(a.getG().phase,'over');assert.equal(a.getG().sites.filter(s=>s.status==='secured').length,4);console.log('PASS: four distinct legal bastions can be secured and trigger victory.');
+
+// A saved, already-expanded lab map is used verbatim in a new run.
+const small=generateWorld({...settings,size:20,seed:'SAVED-MAP'});const grown=generateWorld({...settings,size:36,seed:'SAVED-MAP'},small);settings.terrain=grown;settings.size=64;a.newRun('knight','SAVED-MAP');const pad=(64-grown.settings.size)/2;for(const tile of grown.cells){const c=a.getG().cells[tile.x-grown.originX+pad][tile.z-grown.originZ+pad];assert.equal(c.lvl,tile.h);assert.equal(!!c.ramp,tile.ramp);}delete settings.terrain;
+console.log('PASS: saved lab terrain and explored extensions preserved when starting a game.');
