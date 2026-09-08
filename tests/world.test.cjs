@@ -1,0 +1,7 @@
+const assert=require('node:assert/strict');
+const {generateWorld,growWorld,heightAt,cellHeight,TILE}=require('../lib/world.ts');
+const start=performance.now();let checked=0;
+function check(w){assert.equal(w.stats.reachable,w.stats.tiles);for(const c of w.cells){assert.equal(heightAt(w,(c.x+.5)*TILE,(c.z+.5)*TILE),cellHeight(c,(c.x+.5)*TILE,(c.z+.5)*TILE));if(c.parent<0)continue;const p=w.cells[c.parent],x=(c.x+p.x+1)*TILE/2,z=(c.z+p.z+1)*TILE/2;assert.equal(cellHeight(c,x,z),cellHeight(p,x,z));}checked++;}
+for(const size of [10,20,64,128])for(const hilliness of [0,.15,1])for(let seed=0;seed<3;seed++){const s={size,hilliness,seed:String(seed),trees:.22};const w=generateWorld(s);check(w);assert.deepEqual(generateWorld(s),w);}
+for(const hilliness of [0,.15,1]){let w=generateWorld({size:20,hilliness,seed:'growth',trees:.22,scale:1,dynamic:true});while(w.settings.size<128){const old=w;w=growWorld(w);check(w);assert.deepEqual(growWorld(old),w);const lookup=new Map(w.cells.map(c=>[`${c.x},${c.z}`,c]));for(const c of old.cells){const b=lookup.get(`${c.x},${c.z}`);for(const k of ['x','z','h','ramp','dx','dz'])assert.equal(b[k],c[k]);if(c.parent>=0){const p=old.cells[c.parent],np=w.cells[b.parent];assert.equal(np.x,p.x);assert.equal(np.z,p.z);}}}assert.equal(growWorld(w),w);}
+console.log(`${checked} worlds passed connectivity, continuous ramps, coordinate sampling, deterministic growth, preservation, and cap checks in ${Math.round(performance.now()-start)} ms.`);
