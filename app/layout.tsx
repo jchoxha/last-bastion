@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Bonk World Lab', description: 'Explore seeded, connected procedural terrain inspired by Megabonk.',
+  title: 'Last Bastion — World Lab', description: 'Explore seeded, connected procedural terrain inspired by Megabonk.',
 };
 
 export default function RootLayout({
@@ -31,4 +31,5 @@ export default function RootLayout({
     </html>
   );
 }
+
 

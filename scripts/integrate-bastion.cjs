@@ -1,0 +1,32 @@
+const fs=require('fs');let html=fs.readFileSync('game/last-bastion-original.html','utf8');
+const source=html.match(/<script>\s*([\s\S]*?)<\/script>/)[1];let code=source;
+function rep(a,b){if(!code.includes(a))throw Error('Integration anchor missing: '+a.slice(0,80));code=code.replace(a,b);}
+rep('function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}','function mulberry32(a){const rng=function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};rng.getState=()=>a|0;rng.setState=v=>{a=v|0};return rng}');
+rep('const WORLD=100, CELL=2, HALF=(WORLD-1)/2, SITE_R=9, WAVES_PER_SITE=5, SITES_TO_WIN=4, MAX_WAVE=WAVES_PER_SITE*SITES_TO_WIN, LSTEP=1.7;','const WORLD=RUN_SETTINGS.size, CELL=6*RUN_SETTINGS.scale, HALF=(WORLD-1)/2, SITE_R=9, WAVES_PER_SITE=5, SITES_TO_WIN=4, MAX_WAVE=WAVES_PER_SITE*SITES_TO_WIN, LSTEP=3*RUN_SETTINGS.scale;');
+rep('renderer.shadowMap.enabled=true;','renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;renderer.outputColorSpace=THREE.SRGBColorSpace;');
+rep('0x1a1522,.7','0x1a1522,1.1');rep('DirectionalLight(0xffe2b8,.9)','DirectionalLight(0xffe2b8,1.8)');
+rep('const s=30;','sun.shadow.normalBias=.035;sun.shadow.bias=-.0001;const s=55;');
+rep('far:120','far:180');rep('new THREE.Fog(0x120f18,60,125)','new THREE.Fog(0x120f18,80,Math.max(180,WORLD*CELL*.9))');
+rep('G.phase=\'build\';refreshRoutes();',"G.sites.push(site);G.phase='build';refreshRoutes();");
+rep("if(!free(cx,cz)){log('Clear ground is needed for a core');return}","if(!free(cx,cz)||cellAt(cx,cz).ramp){log('Clear, flat ground is needed for a core');return}");
+rep('if(f>.56&&rng()<.7)', 'if(f>.56&&rng()<Math.min(.8,RUN_SETTINGS.trees*2.5))');
+rep('(24+rng()*20)+i*2','(WORLD*.24+rng()*WORLD*.16)+i');rep('pickSpot(8,46)','pickSpot(8,WORLD*.46)');rep('pickSpot(14,46)','pickSpot(14,WORLD*.46)');
+code=code.replaceAll('lvlCol[c.lvl+1]','lvlCol[clamp(c.lvl+1,0,3)]').replaceAll('lc[c.lvl+1]','lc[clamp(c.lvl+1,0,3)]');
+rep('if(!G||G.phase===\'over\'||!$(\'draft\').classList.contains(\'hidden\'))return;',"if(menuPaused||!G||G.phase==='over'||!$('draft').classList.contains('hidden'))return;");
+code=code.replaceAll("if(!G||G.phase==='over'||!$('draft').classList.contains('hidden'))return;","if(menuPaused||!G||G.phase==='over'||!$('draft').classList.contains('hidden'))return;");
+rep('G.time+=dt;', 'if(menuPaused)return;G.time+=dt;');
+const visualStart=source.indexOf('  // meshes\n',source.indexOf('function foundSite'));
+// Handle the supplied CRLF file without depending on its line endings.
+const foundSource=source.slice(source.indexOf('function foundSite'),source.indexOf('function wobble'));
+const meshes=foundSource.slice(foundSource.indexOf('// meshes'),foundSource.indexOf("G.phase='build'"));
+const restoreVisuals=`function restoreSiteVisuals(site){const [cx,cz]=site.core,r=site.r,id=site.id;G.world.add(site.group);${meshes}}`;
+const integration=fs.readFileSync('game/integration.js','utf8');
+rep('initThree();bindInput();buildStart();requestAnimationFrame(frame);',`${restoreVisuals}\n${integration}\ntry{initThree();bindInput();buildStart();installIntegration();requestAnimationFrame(frame);}catch(err){bridge.notify('Game could not start: '+err.message);bridge.menu();}`);
+code='const bridge=parent.__lastBastionBridge;const THREE=bridge.THREE;const RUN_SETTINGS=bridge.settings;\n'+code;
+html=html.replace(/<link href="https:\/\/fonts.googleapis.com[^>]+>/,'').replace(/<script src="https:\/\/cdnjs[^>]+><\/script>/,'');
+html=html.replace(/<script>\s*[\s\S]*?<\/script>/,()=>'<script>'+code+'</script>');
+html=html.replace('</style>',`#runToolbar{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:35;display:flex;gap:7px;align-items:center;background:#171821dc;border:1px solid #75694e;padding:7px;border-radius:5px}#runToolbar button{font-size:14px;padding:7px 10px}#saveState{font-size:12px;padding:0 8px;color:#b6b09e}#start .lead{font-size:17px}#start .panel{max-height:90vh;overflow:auto}#hotbar{bottom:16px}#help{bottom:130px}#relics{bottom:130px}@media(max-width:800px){#saveState{display:none}#runToolbar{top:auto;bottom:110px}#hotbar{max-width:96vw;flex-wrap:wrap;justify-content:center}.tl{width:180px}.tr .big{font-size:26px}}\n</style>`);
+html=html.replace('There are no roads:','Connected chains and ramps form the terrain. There are no roads:');
+fs.writeFileSync('lib/bastion-source.ts','// Generated from the supplied prototype and game/integration.js.\nexport const bastionSource='+JSON.stringify(html)+';\n');
+fs.writeFileSync('work/bastion-integrated.js',code);
+console.log('Integrated Last Bastion mechanics and terrain bridge.');
