@@ -21,7 +21,7 @@ const visualStart=source.indexOf('  // meshes\n',source.indexOf('function foundS
 const foundSource=source.slice(source.indexOf('function foundSite'),source.indexOf('function wobble'));
 const meshes=foundSource.slice(foundSource.indexOf('// meshes'),foundSource.indexOf("G.phase='build'"));
 let restoreVisuals=`function restoreSiteVisuals(site){const [cx,cz]=site.core,r=site.r,id=site.id;G.world.add(site.group);${meshes}}`;
-const integration=fs.readFileSync('game/integration.js','utf8')+'\n'+fs.readFileSync('game/walls.js','utf8')+'\n'+fs.readFileSync('game/spatial.js','utf8')+'\n'+fs.readFileSync('game/combat.js','utf8')+'\n'+fs.readFileSync('game/lifecycle.js','utf8')+'\n'+fs.readFileSync('game/rework.js','utf8')+'\n'+fs.readFileSync('game/portals.js','utf8');
+const integration=fs.readFileSync('game/integration.js','utf8')+'\n'+fs.readFileSync('game/walls.js','utf8')+'\n'+fs.readFileSync('game/spatial.js','utf8')+'\n'+fs.readFileSync('game/combat.js','utf8')+'\n'+fs.readFileSync('game/lifecycle.js','utf8')+'\n'+fs.readFileSync('game/rework.js','utf8')+'\n'+fs.readFileSync('game/portals.js','utf8')+'\n'+fs.readFileSync('game/navigation.js','utf8')+'\n'+fs.readFileSync('game/controls.js','utf8');
 rep('function buildWorldMeshes(){','function buildWorldMeshes(){G.generatedBodies=[];');
 rep('dummy.position.set(p.x+jx,y+.5,p.z+jz);',"G.generatedBodies.push({...bodyCircle(p.x+jx,p.z+jz,y,.24,3.3*s,'tree'),draw:[{mesh:crown,index:i},{mesh:trunk,index:i}]});dummy.position.set(p.x+jx,y+.5,p.z+jz);");
 rep('rock.setMatrixAt(i,dummy.matrix)',"rock.setMatrixAt(i,dummy.matrix);G.generatedBodies.push({...bodyCircle(p.x,p.z,G.cells[x][z].lvl*LSTEP,.85*s*1.2,1.7*s,'rock'),draw:[{mesh:rock,index:i}]})");
@@ -83,6 +83,8 @@ code=code.replace("(Math.abs(x-cx)===r||Math.abs(z-cz)===r)","Math.hypot(x-cx,z-
 code=code.replace("if(keys.MouseL&&canFight&&(G.view!=='top'||!mouseOverHud))meleeAttack();",'').replace('if(keys.MouseR&&canFight)rangedAttack();','');
 code=code.replace('[0,1,p11,p01,0,1],[0,-1,p00,p10,3,2]', '[0,1,p11,p01,1,0],[0,-1,p00,p10,2,3]');
 code=code.replace("if(ap&&!paused&&G.buildMode&&G.site&&G.phase!=='explore')", "if(ap&&!paused&&G.buildMode)");
+code=code.replace('if(!ch.taken&&ch.pos.distanceTo(P.pos)<1.6)', 'if(false)').replace('if(!sh.used&&sh.pos.distanceTo(P.pos)<2.2)', 'if(false)');
+html=html.replace(/(<b>Controls<\/b>[\s\S]*?id="helpToggle">hide<\/span>)[\s\S]*?(?=\n  <\/div>)/, '$1<div>W/S move · Space jump · Shift sprint · V view</div><div>First person: mouse look · hold Alt for cursor</div><div>Third person: A/D rotate; RMB + A/D strafe</div><div>Top view: RMB rotates; WASD moves</div><div>1–6/click: select move; repeat or LMB: cast</div><div>RMB a move: toggle automatic use</div><div>Tab: target · Escape: clear target · E: interact</div><div>B: build/combat · 1–9 defenses · 0 portal</div><div>LMB places · E sells · Enter starts a wave</div><div>Menu/Pause pauses; switching tabs does not</div>');
 const updatedFound=code.slice(code.indexOf('function foundSite'),code.indexOf('function wobble'));
 restoreVisuals=`function restoreSiteVisuals(site){const [cx,cz]=site.core,r=site.r,id=site.id;G.world.add(site.group);${updatedFound.slice(updatedFound.indexOf('// meshes'),updatedFound.indexOf('G.sites.push(site)'))}}`;
 rep('initThree();bindInput();buildStart();requestAnimationFrame(frame);',`${restoreVisuals}\n${integration}\ntry{initThree();bindInput();buildStart();installIntegration();requestAnimationFrame(frame);}catch(err){bridge.notify('Game could not start: '+err.message);bridge.menu();}`);

@@ -23,12 +23,12 @@ function discardWorld(){if(!G?.world)return;scene.remove(G.world);const geometri
 const originalNewRun=newRun;
 newRun=function(classId,seed){discardWorld();originalNewRun(classId,seed);bridge.started();};
 
-function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','coreMesh','routeLines','routes','gatePos','hitSet'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
+function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','coreMesh','routeLines','routes','gatePos','hitSet','travelPlan','planRevision','recoveryPos','recoveryStall'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
 function unpack(value){if(value?.$v)return V3(...value.$v);if(Array.isArray(value))return value.map(unpack);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,unpack(v)]));return value;}
 function snapshot(){
  if(!G||G.phase==='over')return null;const liveEnemies=G.enemies.filter(e=>!e.dead);
  return {version:1,savedAt:new Date().toISOString(),config:{...RUN_SETTINGS,terrain:undefined},seed:G.seed,classId:G.classId,rng:G.rng.getState(),
-  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance','buildMode','combatMode','abilityCds','admin','cameraYaw','cameraPitch','activeAbility','guardUntil','focusUntil','skills','autoEnabled','economy'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
+  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance','buildMode','combatMode','abilityCds','admin','cameraYaw','cameraPitch','activeAbility','guardUntil','focusUntil','skills','autoEnabled','economy','targetLocked'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
   cells:G.cells.map(col=>col.map(c=>({type:c.type,obst:c.obst,site:c.site,lvl:c.lvl,ramp:c.ramp}))),
   sites:G.sites.map(pack),activeSite:G.site?.id??null,towers:G.towers.map(t=>({...pack(t),build:t.b.id})),
   enemies:liveEnemies.map(pack),bolts:G.bolts.map(b=>({...pack(b),hitIndices:b.hitSet?[...b.hitSet].map(e=>liveEnemies.indexOf(e)).filter(i=>i>=0):null})),
@@ -66,8 +66,6 @@ window.bastion={snapshot,restoreSave,pause:pauseGame,save:saveRun};
 function installIntegration(){
  const bar=document.createElement('div');bar.id='runToolbar';bar.innerHTML='<button id="saveRun">Save game</button><button id="menuRun">Menu / pause</button><span id="saveState">Autosaves every 30 seconds</span>';document.body.appendChild(bar);
  $('saveRun').onclick=()=>saveRun();$('menuRun').onclick=()=>{pauseGame(true);if(G&&G.phase!=='over')saveRun();bridge.menu();};
- addEventListener('keydown',e=>{if(e.code==='Escape'){if(G?.armedArea!=null){G.armedArea=null;e.preventDefault();return;}e.preventDefault();pauseGame(true);saveRun(true);bridge.menu();}},true);
- addEventListener('blur',()=>{if(G&&G.phase!=='over'&&!menuPaused){pauseGame(true);saveRun(true);bridge.menu();}});
  addEventListener('pagehide',()=>{if(G&&G.phase!=='over')saveRun(true);});
  setInterval(()=>{if(G&&G.phase!=='over'&&!menuPaused)saveRun(true);},30000);
  $('c').addEventListener('wheel',e=>{if(!G||menuPaused)return;e.preventDefault();G.cameraDistance=clamp((G.cameraDistance||8)+e.deltaY*.012,4,22);},{passive:false});
