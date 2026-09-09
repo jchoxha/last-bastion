@@ -23,7 +23,7 @@ function discardWorld(){if(!G?.world)return;scene.remove(G.world);const geometri
 const originalNewRun=newRun;
 newRun=function(classId,seed){discardWorld();originalNewRun(classId,seed);bridge.started();};
 
-function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','edge','coreMesh','routeLines','routes','gatePos','hitSet'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
+function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','coreMesh','routeLines','routes','gatePos','hitSet'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
 function unpack(value){if(value?.$v)return V3(...value.$v);if(Array.isArray(value))return value.map(unpack);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,unpack(v)]));return value;}
 function snapshot(){
  if(!G||G.phase==='over')return null;const liveEnemies=G.enemies.filter(e=>!e.dead);
@@ -41,6 +41,7 @@ function validateSave(s){
  for(const k of ['sites','towers','enemies','bolts','chests','shrines','lairs','relics'])if(!Array.isArray(s[k])||s[k].length>20000)throw Error('Invalid saved '+k);
  if(s.sites.length>4||s.activeSite!==null&&!s.sites.some(site=>site.id===s.activeSite)||s.state.phase!=='explore'&&s.activeSite===null)throw Error('Invalid bastion state.');
  if(s.towers.some(t=>!BUILDS.some(b=>b.id===t.build)||!inGrid(t.cx,t.cz))||s.enemies.some(e=>!ENEMIES[e.type])||s.relics.some(id=>!RELICS.some(r=>r.id===id)))throw Error('Unknown saved item.');
+ if(s.towers.some(t=>t.edge&&(!['N','E','S','W'].includes(t.edge)||t.build!=='barricade')))throw Error('Invalid wall edge.');
  if(s.draft&&s.draft.some(c=>!(c.kind==='relic'?RELICS:UPGRADES).some(r=>r.id===c.id)))throw Error('Invalid relic draft.');
  for(const key of ['wave','gold','kills','time'])if(!Number.isFinite(s.state[key])||s.state[key]<0)throw Error('Invalid run statistics.');
  const p=s.state.player;if(!p||!Array.isArray(p.pos?.$v)||p.pos.$v.length!==3||!p.pos.$v.every(Number.isFinite)||!Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0)throw Error('Invalid player state.');
@@ -51,7 +52,7 @@ function restoreSave(s){
  scene.add(G.world);buildWorldMeshes();buildMinimapBase();
  G.playerMesh=makePlayerMesh();G.playerMesh.position.copy(G.player.pos);G.playerMesh.visible=G.player.dead<=0;G.world.add(G.playerMesh);
  for(const saved of s.sites){const site={...unpack(saved),group:new THREE.Group(),routes:[]};restoreSiteVisuals(site);G.sites.push(site);if(site.status==='secured')site.edge.material.color.setHex(0x4ea88c);if(site.id===s.activeSite)G.site=site;}
- for(const saved of s.towers){const t={...unpack(saved),b:BUILDS.find(b=>b.id===saved.build)};t.mesh=towerMesh(t.b);t.mesh.position.copy(t.pos);G.world.add(t.mesh);G.towers.push(t);G.cells[t.cx][t.cz].tower=t;}
+ for(const saved of s.towers){const t={...unpack(saved),b:BUILDS.find(b=>b.id===saved.build)};t.mesh=t.edge?wallMesh(t):towerMesh(t.b);t.mesh.position.copy(t.pos);G.world.add(t.mesh);G.towers.push(t);if(!t.edge)G.cells[t.cx][t.cz].tower=t;}
  for(const saved of s.enemies){const e=spawnEnemy(saved.type,null,1);Object.assign(e,unpack(saved));e.mesh.position.copy(e.pos);}
  for(const saved of s.bolts){const b=unpack(saved);b.mesh=new THREE.Mesh(b.hitIndices?new THREE.BoxGeometry(.12,.12,.9):new THREE.SphereGeometry(b.aoe?.22:.12,8,6),new THREE.MeshBasicMaterial({color:b.aoe?0xe2672a:0xe7dcc3}));b.mesh.position.copy(b.pos);if(b.hitIndices)b.hitSet=new Set(b.hitIndices.map(i=>G.enemies[i]).filter(Boolean));G.world.add(b.mesh);G.bolts.push(b);}
  for(const ch of G.chests)if(ch.taken)G.world.remove(ch.mesh);for(const sh of G.shrines)if(sh.used)sh.mesh.material.emissiveIntensity=0;
@@ -95,7 +96,7 @@ updateHud=function(){baseHud();const primary=$('missionPrimary');if(!primary)ret
 // Player-only vertical physics; enemies continue to follow connected terrain routes.
 function jumpPlayer(){if(!G||menuPaused||G.player.dead>0)return;const p=G.player;if(p.pos.y<=heightAt(p.pos.x,p.pos.z)+.08){p.vy=9;p.pos.y+=.09;}}
 const groundedMove=tryMove;
-tryMove=function(pos,dx,dz){if(pos!==G.player.pos)return groundedMove(pos,dx,dz);const limit=WORLD*CELL/2-.4;const attempt=(x,z)=>{x=clamp(x,-limit,limit);z=clamp(z,-limit,limit);const [cx,cz]=worldToCell(V3(x,0,z));const h=heightAt(x,z);if(!solid(cx,cz)&&cellAt(cx,cz).type!=='core'&&h<=pos.y+.28){pos.x=x;pos.z=z;return true;}return false;};if(!attempt(pos.x+dx,pos.z+dz)){attempt(pos.x+dx,pos.z);attempt(pos.x,pos.z+dz);}};
+tryMove=function(pos,dx,dz){if(pos!==G.player.pos)return groundedMove(pos,dx,dz);const limit=WORLD*CELL/2-.4;const attempt=(x,z)=>{x=clamp(x,-limit,limit);z=clamp(z,-limit,limit);const [cx,cz]=worldToCell(V3(x,0,z));const h=heightAt(x,z);if(!wallCrossing(...worldToCell(pos),cx,cz)&&!solid(cx,cz)&&cellAt(cx,cz).type!=='core'&&h<=pos.y+.28){pos.x=x;pos.z=z;return true;}return false;};if(!attempt(pos.x+dx,pos.z+dz)){attempt(pos.x+dx,pos.z);attempt(pos.x,pos.z+dz);}};
 const walkingUpdate=updatePlayer;
 updatePlayer=function(dt){walkingUpdate(dt);const p=G.player;if(p.dead>0){p.vy=0;return;}p.vy=(p.vy||0)-24*dt;p.pos.y+=p.vy*dt;const ground=heightAt(p.pos.x,p.pos.z);if(p.pos.y<=ground){p.pos.y=ground;p.vy=0;}G.playerMesh.position.copy(p.pos);if(RUN_SETTINGS.dynamic&&!menuPaused&&Math.max(Math.abs(p.pos.x),Math.abs(p.pos.z))>(WORLD/2-6)*CELL)expandTerrain();};
 function toggleBuildMode(){if(!G||menuPaused)return;G.buildMode=!G.buildMode;keys={};if(G.buildMode){G.combatView=G.view;setView('top');document.exitPointerLock?.();}else{setView(G.combatView||'third');}updateHud();}

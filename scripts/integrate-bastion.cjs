@@ -21,7 +21,8 @@ const visualStart=source.indexOf('  // meshes\n',source.indexOf('function foundS
 const foundSource=source.slice(source.indexOf('function foundSite'),source.indexOf('function wobble'));
 const meshes=foundSource.slice(foundSource.indexOf('// meshes'),foundSource.indexOf("G.phase='build'"));
 const restoreVisuals=`function restoreSiteVisuals(site){const [cx,cz]=site.core,r=site.r,id=site.id;G.world.add(site.group);${meshes}}`;
-const integration=fs.readFileSync('game/integration.js','utf8');
+const integration=fs.readFileSync('game/integration.js','utf8')+'\n'+fs.readFileSync('game/walls.js','utf8');
+rep('updateCamera();renderer.render(scene,camera);','previewWall();updateCamera();renderer.render(scene,camera);');
 rep("if(e.code==='Space'){e.preventDefault();startWave()}","if(e.code==='Space'){e.preventDefault();jumpPlayer()}if(e.code==='Enter')startWave();if(e.code==='Tab'){e.preventDefault();toggleBuildMode()}");
 rep("if(e.code==='KeyF'){","if(e.code==='KeyF'&&G.buildMode){");rep("if(e.code==='KeyX'){","if(e.code==='KeyX'&&G.buildMode){");
 rep("else P.pos.y=heightAt(P.pos.x,P.pos.z);",";");
