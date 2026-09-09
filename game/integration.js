@@ -28,7 +28,7 @@ function unpack(value){if(value?.$v)return V3(...value.$v);if(Array.isArray(valu
 function snapshot(){
  if(!G||G.phase==='over')return null;const liveEnemies=G.enemies.filter(e=>!e.dead);
  return {version:1,savedAt:new Date().toISOString(),config:{...RUN_SETTINGS,terrain:undefined},seed:G.seed,classId:G.classId,rng:G.rng.getState(),
-  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance','buildMode','combatMode','abilityCds','admin'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
+  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance','buildMode','combatMode','abilityCds','admin','cameraYaw','cameraPitch','activeAbility','guardUntil','focusUntil','skills'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
   cells:G.cells.map(col=>col.map(c=>({type:c.type,obst:c.obst,site:c.site,lvl:c.lvl,ramp:c.ramp}))),
   sites:G.sites.map(pack),activeSite:G.site?.id??null,towers:G.towers.map(t=>({...pack(t),build:t.b.id})),
   enemies:liveEnemies.map(pack),bolts:G.bolts.map(b=>({...pack(b),hitIndices:b.hitSet?[...b.hitSet].map(e=>liveEnemies.indexOf(e)).filter(i=>i>=0):null})),
@@ -66,13 +66,13 @@ window.bastion={snapshot,restoreSave,pause:pauseGame,save:saveRun};
 function installIntegration(){
  const bar=document.createElement('div');bar.id='runToolbar';bar.innerHTML='<button id="saveRun">Save game</button><button id="menuRun">Menu / pause</button><span id="saveState">Autosaves every 30 seconds</span>';document.body.appendChild(bar);
  $('saveRun').onclick=()=>saveRun();$('menuRun').onclick=()=>{pauseGame(true);if(G&&G.phase!=='over')saveRun();bridge.menu();};
- addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();pauseGame(true);saveRun(true);bridge.menu();}},true);
+ addEventListener('keydown',e=>{if(e.code==='Escape'){if(G?.armedArea!=null){G.armedArea=null;e.preventDefault();return;}e.preventDefault();pauseGame(true);saveRun(true);bridge.menu();}},true);
  addEventListener('blur',()=>{if(G&&G.phase!=='over'&&!menuPaused){pauseGame(true);saveRun(true);bridge.menu();}});
  addEventListener('pagehide',()=>{if(G&&G.phase!=='over')saveRun(true);});
  setInterval(()=>{if(G&&G.phase!=='over'&&!menuPaused)saveRun(true);},30000);
  $('c').addEventListener('wheel',e=>{if(!G||menuPaused)return;e.preventDefault();G.cameraDistance=clamp((G.cameraDistance||8)+e.deltaY*.012,4,22);},{passive:false});
- const actions=document.createElement('div');actions.id='missionActions';actions.innerHTML='<button id="buildMode">Build mode (Tab)</button><button id="missionPrimary">Found bastion (B)</button><button id="cycleView">Change view (V)</button><span id="missionHint">Space jump · Shift sprint · Tab build · wheel zoom</span>';document.body.appendChild(actions);
- $('missionPrimary').onclick=()=>{if(menuPaused||!G||!$('draft').classList.contains('hidden'))return;if(G.phase==='explore')foundSite();else if(G.phase==='build')startWave();};
+ const actions=document.createElement('div');actions.id='missionActions';actions.innerHTML='<button id="buildMode">Build mode (Tab)</button><button id="missionPrimary">Place bastion core (B)</button><button id="cycleView">Change view (V)</button><span id="missionHint">Space jump · Shift sprint · Tab build · wheel zoom</span>';document.body.appendChild(actions);
+ $('missionPrimary').onclick=()=>{if(menuPaused||!G||!$('draft').classList.contains('hidden'))return;if(G.phase==='explore')selectCore();else if(G.phase==='build')startWave();};
  $('buildMode').onclick=toggleBuildMode;
  $('cycleView').onclick=()=>{if(G&&!menuPaused)setView(G.view==='top'?'third':G.view==='third'?'first':'top');};
  $('seed').value=RUN_SETTINGS.seed;
@@ -91,7 +91,7 @@ restoreSave=function(...args){placementCache.clear();return plainRestore(...args
 newRun=function(...args){placementCache.clear();return plainNew(...args);};
 window.bastion.restoreSave=restoreSave;
 const baseHud=updateHud;
-updateHud=function(){baseHud();const primary=$('missionPrimary');if(!primary)return;primary.textContent=G.phase==='explore'?'Found bastion (B)':G.phase==='build'?'Start wave '+G.wave+' (Enter)':'Hold the line';primary.disabled=G.phase==='fight'||G.phase==='over';const b=BUILDS[G.selected];$('missionHint').textContent=G.phase==='build'?b.name+' · '+buildCost(b)+' gold'+(b.range?' · '+b.range+' m range':'')+' · Tab build · F place / X sell':'Space jump · Shift sprint · Tab build · wheel zoom · mouse buttons attack';};
+updateHud=function(){baseHud();const primary=$('missionPrimary');if(!primary)return;primary.textContent=G.phase==='explore'?'Place bastion core (B)':G.phase==='build'?'Start wave '+G.wave+' (Enter)':'Hold the line';primary.disabled=G.phase==='fight'||G.phase==='over';const b=BUILDS[G.selected];$('missionHint').textContent=G.phase==='build'?b.name+' · '+buildCost(b)+' gold'+(b.range?' · '+b.range+' m range':'')+' · Tab build · F place / X sell':'Space jump · Shift sprint · Tab build · wheel zoom · RMB camera · 1–6 moves';};
 
 // Player-only vertical physics; enemies continue to follow connected terrain routes.
 function jumpPlayer(){if(!G||menuPaused||G.player.dead>0)return;const p=G.player;if(p.pos.y<=heightAt(p.pos.x,p.pos.z)+.08){p.vy=9;p.pos.y+=.09;}}
@@ -99,7 +99,7 @@ const groundedMove=tryMove;
 tryMove=function(pos,dx,dz){if(pos!==G.player.pos)return groundedMove(pos,dx,dz);const limit=WORLD*CELL/2-.4;const attempt=(x,z)=>{x=clamp(x,-limit,limit);z=clamp(z,-limit,limit);const [cx,cz]=worldToCell(V3(x,0,z));const h=heightAt(x,z);if(!wallCrossing(...worldToCell(pos),cx,cz)&&!solid(cx,cz)&&cellAt(cx,cz).type!=='core'&&h<=pos.y+.28){pos.x=x;pos.z=z;return true;}return false;};if(!attempt(pos.x+dx,pos.z+dz)){attempt(pos.x+dx,pos.z);attempt(pos.x,pos.z+dz);}};
 const walkingUpdate=updatePlayer;
 updatePlayer=function(dt){walkingUpdate(dt);const p=G.player;if(p.dead>0){p.vy=0;return;}p.vy=(p.vy||0)-24*dt;p.pos.y+=p.vy*dt;const ground=heightAt(p.pos.x,p.pos.z);if(p.pos.y<=ground){p.pos.y=ground;p.vy=0;}G.playerMesh.position.copy(p.pos);if(RUN_SETTINGS.dynamic&&!menuPaused&&Math.max(Math.abs(p.pos.x),Math.abs(p.pos.z))>(WORLD/2-6)*CELL)expandTerrain();};
-function toggleBuildMode(){if(!G||menuPaused)return;G.buildMode=!G.buildMode;keys={};if(G.buildMode){G.combatView=G.view;setView('top');document.exitPointerLock?.();}else{setView(G.combatView||'third');}updateHud();}
+function toggleBuildMode(){if(!G||menuPaused)return;G.buildMode=!G.buildMode;G.armedArea=null;G.uiNext=0;keys={};document.exitPointerLock?.();updateHud();}
 const modeHud=updateHud;
 updateHud=function(){modeHud();if($('buildMode'))$('buildMode').textContent=G.buildMode?'Combat mode (Tab)':'Build mode (Tab)';};
 function expandTerrain(){const max=Math.min(1024,RUN_SETTINGS.maxSize||1024);if(WORLD>=max)return;const old=WORLD,next=Math.min(max,WORLD+16),offset=(next-old)/2;if(offset<1)return;

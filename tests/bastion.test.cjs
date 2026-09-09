@@ -13,8 +13,8 @@ a.newRun('ranger','BASTION');assert.equal(a.getG().player.maxHp,85);assert.equal
 let founded=false;for(let x=11;x<53&&!founded;x+=3)for(let z=11;z<53&&!founded;z+=3){a.setPos(x,z);a.foundSite();founded=!!a.getG().site;}
 assert(founded,'A legal bastion can be founded');assert.equal(a.getG().sites.length,1,'Founded bastion is registered');
 a.getG().gold=10000;
-for(const b of a.builds){let placed=false;for(const [x,z]of a.getG().site.cells){if(a.canPlace(b,x,z)){a.place(b,x,z);placed=true;break;}}assert(placed,'Can place '+b.id);}
-assert.equal(a.getG().towers.length,a.builds.length);roundtrip();
+for(const b of a.builds.filter(b=>!b.core)){let placed=false;for(const [x,z]of [...a.getG().site.cells].sort((p,q)=>Math.hypot(p[0]-a.getG().site.core[0],p[1]-a.getG().site.core[1])-Math.hypot(q[0]-a.getG().site.core[0],q[1]-a.getG().site.core[1]))){if(a.canPlace(b,x,z)){const count=a.getG().towers.length;a.place(b,x,z);if(a.getG().towers.length>count){placed=true;break;}}}assert(placed,'Can place '+b.id);}
+assert.equal(a.getG().towers.length,a.builds.length-1);roundtrip();
 a.startWave();assert.equal(a.getG().phase,'fight');assert(a.getG().spawnQueue.length>0);a.updateEnemies(.5);a.updateTowers(.1);a.updateBolts(.1);roundtrip();
 const e=a.spawnEnemy('grunt',0,1),gold=a.getG().gold;a.damage(e,100000);assert(e.dead);assert(a.getG().gold>gold);
 a.getG().enemies=a.getG().enemies.filter(e=>!e.dead);a.openDraft('shrine');roundtrip();a.closeDraft();
@@ -34,7 +34,7 @@ const beforeGrowth=JSON.parse(JSON.stringify(a.snapshot()));const position=a.get
 // Jump rises, lands, and allows an airborne save. Walking down a ledge retains altitude.
 a.setPos(32,32);const py=a.getG().player.pos.y;a.jumpPlayer();a.updatePlayer(.05);assert(a.getG().player.pos.y>py+.2);roundtrip();for(let i=0;i<80;i++)a.updatePlayer(.025);assert.equal(a.getG().player.pos.y,a.heightAt(a.getG().player.pos.x,a.getG().player.pos.z));
 const p=a.getG().player.pos;p.y+=10;const airborne=p.y;a.tryMove(p,.1,0);assert.equal(p.y,airborne);a.updatePlayer(.05);assert(p.y<airborne);a.restoreSave(beforeGrowth);
-a.toggleBuildMode();assert.equal(a.getG().buildMode,true);assert.equal(a.getG().view,'top');a.toggleBuildMode();assert.equal(a.getG().buildMode,false);
+a.toggleBuildMode();assert.equal(a.getG().buildMode,true);assert.equal(a.getG().view,beforeGrowth.state.view);a.toggleBuildMode();assert.equal(a.getG().buildMode,false);
 console.log('PASS: jump/landing/airborne save, build mode, expansion preservation, expansion cap, expanded-save round trip.');
 
 // Complete four sites using the game's actual founding and securing rules.
@@ -59,7 +59,7 @@ console.log('PASS: four walls plus tower, shared-edge deduplication and selling,
 
 // The final segment around a core must be rejected, including diagonal bypasses.
 delete settings.terrain;settings.hilliness=0;a.newRun('knight','WALL-ROUTES');a.setPos(40,40);a.foundSite();assert(a.getG().site);a.getG().gold=100000;const [coreX,coreZ]=a.getG().site.core;
-let rejected=0;for(const [dx,dz,side]of [[0,-1,'S'],[1,0,'W'],[0,1,'N'],[-1,0,'E']]){if(a.canPlace(wallBuild,coreX+dx,coreZ+dz,side))a.place(wallBuild,coreX+dx,coreZ+dz,side);else rejected++;}assert(rejected>0,'Walls cannot remove required enemy clearance to core');
+let rejected=0;for(const [dx,dz,side]of [[0,-1,'S'],[1,0,'W'],[0,1,'N'],[-1,0,'E']]){const count=a.getG().towers.length;a.place(wallBuild,coreX+dx,coreZ+dz,side);if(a.getG().towers.length===count)rejected++;}assert(rejected>0,'Walls cannot remove required enemy clearance to core');
 // Check a separate wall between empty cells, with no core/tower collision involved.
 const wallX=coreX+3,wallZ=coreZ+3;a.place(wallBuild,wallX,wallZ,'E');assert(a.getG().towers.some(t=>t.cx===wallX&&t.cz===wallZ&&t.edge==='E'));const from=a.cellToWorld(wallX,wallZ);a.getG().player.pos.copy(from);a.getG().player.pos.x+=1.45;const xBefore=a.getG().player.pos.x;a.tryMove(a.getG().player.pos,.2,0);assert.equal(a.getG().player.pos.x,xBefore);
 console.log('PASS: cannot seal core routes; player movement respects edge walls.');

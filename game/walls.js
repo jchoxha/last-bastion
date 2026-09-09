@@ -9,7 +9,7 @@ const terrainStep=stepOk;
 stepOk=function(ax,az,bx,bz,extra){return !wallCrossing(ax,az,bx,bz)&&terrainStep(ax,az,bx,bz,extra);};
 function wallSide(cx,cz,point){if(!point&&typeof raycaster!=='undefined'&&raycaster)point=aimPoint();if(!point)return 'N';const [px,pz]=worldToCell(point);if(px!==cx||pz!==cz)return 'N';const center=cellToWorld(cx,cz),dx=point.x-center.x,dz=point.z-center.z;return Math.abs(dx)>Math.abs(dz)?(dx>0?'E':'W'):(dz>0?'S':'N');}
 function wallPlacement(cx,cz,side){const c=cellAt(cx,cz);if(!c||!G.site||c.site!==G.site.id)return 'Outside the active bastion';if(c.type==='core')return 'Keep the core clear';const [dx,dz]=WALL_SIDES[side],n=cellAt(cx+dx,cz+dz);if(!n)return 'Outside the world';if(c.ramp||!terrainPassable(cx,cz,cx+dx,cz+dz))return 'Choose a level edge, away from a cliff or ramp';if(wallIndex().has(edgeKey(cx,cz,side)))return 'This edge already has a wall';
- const cacheKey='edge/'+edgeKey(cx,cz,side);if(!placementCache.has(cacheKey)){pendingWall=edgeKey(cx,cz,side);try{placementCache.set(cacheKey,routeOpen(computeDist()));}finally{pendingWall=null;}}
+ if(!validatingPlacement)return '';const cacheKey='edge/'+edgeKey(cx,cz,side);if(!placementCache.has(cacheKey)){pendingWall=edgeKey(cx,cz,side);try{placementCache.set(cacheKey,routeOpen(computeDist()));}finally{pendingWall=null;}}
  return placementCache.get(cacheKey)?'':'Keep a route from every gate to the core';}
 const centeredCanPlace=canPlace;
 canPlace=function(b,cx,cz,side){return b.wall?!wallPlacement(cx,cz,side||wallSide(cx,cz)):centeredCanPlace(b,cx,cz);};
