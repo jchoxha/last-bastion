@@ -1,0 +1,20 @@
+const oldInstall=installIntegration;
+installIntegration=function(){installCombat();oldInstall();};
+const physicalNew=newRun,physicalRestore=restoreSave,physicalFound=foundSite;
+newRun=function(...args){selectedEnemy=null;physicalNew(...args);rebuildCollision();updateCombatUI();};
+restoreSave=function(...args){selectedEnemy=null;physicalRestore(...args);rebuildCollision();if(G.site)refreshRoutes();updateCombatUI();};
+foundSite=function(...args){physicalFound(...args);rebuildCollision();if(G.site){if(blockedAt(G.player.pos.x,G.player.pos.z,G.player.pos.y,.35)){const origin=G.player.pos.clone();let placed=false;for(let r=1.7;r<6&&!placed;r+=.5)for(let i=0;i<16&&!placed;i++){const p=origin.clone().add(V3(Math.cos(i*Math.PI/8)*r,0,Math.sin(i*Math.PI/8)*r));p.y=heightAt(p.x,p.z);if(Math.abs(p.y-origin.y)<.4&&!blockedAt(p.x,p.z,p.y,.35)){G.player.pos.copy(p);G.playerMesh.position.copy(p);placed=true;}}}refreshRoutes();}};
+window.bastion.restoreSave=restoreSave;
+const physicalBuildMeshes=buildWorldMeshes;
+buildWorldMeshes=function(){physicalBuildMeshes();rebuildCollision();};
+const combatHud=updateHud;
+updateHud=function(){combatHud();if(combatUIReady&&G)updateCombatUI();};
+const physicalHit=playerHit;
+playerHit=function(n){if(!G.admin?.god)physicalHit(n);};
+
+const obstructedFirst=firstInRange;
+firstInRange=function(t,r){let best=null;for(const e of G.enemies){if(e.dead||e.pos.distanceTo(t.pos)>r+e.d.size)continue;if(projectileObstacle(t.pos.clone().add(V3(0,2.1,0)),e.pos.clone().add(V3(0,e.d.size,0)),t.mesh))continue;if(!best||e.prog>best.prog)best=e;}return best;};
+const cameraWithoutCollision=updateCamera;
+updateCamera=function(){cameraWithoutCollision();if(G.view==='third'){const f=facing(),right=V3(-f.z,0,f.x),p=G.player.pos;camera.position.copy(p).addScaledVector(f,-(G.cameraDistance||8)).addScaledVector(right,1.3).add(V3(0,2.5,0));const look=camera.position.clone().add(V3(f.x*Math.cos(G.player.pitch)*30,Math.sin(G.player.pitch)*30,f.z*Math.cos(G.player.pitch)*30));camera.lookAt(look);const head=G.player.pos.clone().add(V3(0,1.6,0)),hit=projectileObstacle(head,camera.position);if(hit&&hit.distanceTo(head)>1)camera.position.copy(hit).add(head.sub(hit).normalize().multiplyScalar(.25));}};
+const originalToggleBuild=toggleBuildMode;
+toggleBuildMode=function(){originalToggleBuild();if(G){G.uiNext=0;updateCombatUI();}};

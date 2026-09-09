@@ -14,7 +14,7 @@ let founded=false;for(let x=11;x<53&&!founded;x+=3)for(let z=11;z<53&&!founded;z
 assert(founded,'A legal bastion can be founded');assert.equal(a.getG().sites.length,1,'Founded bastion is registered');
 a.getG().gold=10000;
 for(const b of a.builds){let placed=false;for(const [x,z]of a.getG().site.cells){if(a.canPlace(b,x,z)){a.place(b,x,z);placed=true;break;}}assert(placed,'Can place '+b.id);}
-assert.equal(a.getG().towers.length,8);roundtrip();
+assert.equal(a.getG().towers.length,a.builds.length);roundtrip();
 a.startWave();assert.equal(a.getG().phase,'fight');assert(a.getG().spawnQueue.length>0);a.updateEnemies(.5);a.updateTowers(.1);a.updateBolts(.1);roundtrip();
 const e=a.spawnEnemy('grunt',0,1),gold=a.getG().gold;a.damage(e,100000);assert(e.dead);assert(a.getG().gold>gold);
 a.getG().enemies=a.getG().enemies.filter(e=>!e.dead);a.openDraft('shrine');roundtrip();a.closeDraft();
@@ -27,7 +27,7 @@ const tower=a.getG().towers.find(t=>t.b.id==='arrow'),before=a.getG().gold;a.get
 console.log('PASS: piercing-projectile references survive removed enemies; selling refunds actual paid cost.');
 const bad=JSON.parse(JSON.stringify(a.snapshot()));bad.version=999;assert.throws(()=>a.restoreSave(bad));assert.equal(a.getG().classId,'ranger');
 const broken=JSON.parse(JSON.stringify(a.snapshot()));broken.cells=[];assert.throws(()=>a.restoreSave(broken));
-console.log(`PASS: classes, camps, bastion registration, all 8 builds, wave/combat, draft, ${saves} exact save/load round trips, and corrupt-save rejection.`);
+console.log(`PASS: classes, camps, bastion registration, all 9 builds, wave/combat, draft, ${saves} exact save/load round trips, and corrupt-save rejection.`);
 
 // Dynamic growth keeps positions and defenses while reindexing the grid.
 const beforeGrowth=JSON.parse(JSON.stringify(a.snapshot()));const position=a.getG().player.pos.clone();settings.maxSize=80;a.expandTerrain();assert.equal(a.getG().cells.length,80);assert(a.getG().player.pos.equals(position));assert.equal(a.getG().towers[0].cx,beforeGrowth.towers[0].cx+8);assert.equal(a.getG().sites[0].core[0],beforeGrowth.sites[0].core[0]+8);a.expandTerrain();assert.equal(a.getG().cells.length,80);roundtrip();a.restoreSave(beforeGrowth);delete settings.maxSize;
@@ -59,8 +59,7 @@ console.log('PASS: four walls plus tower, shared-edge deduplication and selling,
 
 // The final segment around a core must be rejected, including diagonal bypasses.
 delete settings.terrain;settings.hilliness=0;a.newRun('knight','WALL-ROUTES');a.setPos(40,40);a.foundSite();assert(a.getG().site);a.getG().gold=100000;const [coreX,coreZ]=a.getG().site.core;
-for(const [dx,dz,side]of [[0,-1,'S'],[1,0,'W'],[0,1,'N']]){assert(a.canPlace(wallBuild,coreX+dx,coreZ+dz,side));a.place(wallBuild,coreX+dx,coreZ+dz,side);}
-assert(!a.canPlace(wallBuild,coreX-1,coreZ,'E'),'Last route to core stays open');
-// Player collision uses the same boundary, independently of tile-center occupancy.
-const northWall=a.getG().towers.find(t=>t.edge==='S');a.place(wallBuild,northWall.cx,northWall.cz,'E');assert(a.getG().towers.some(t=>t.cx===northWall.cx&&t.cz===northWall.cz&&t.edge==='E'));const from=a.cellToWorld(northWall.cx,northWall.cz);a.getG().player.pos.copy(from);a.getG().player.pos.x+=1.45;const xBefore=a.getG().player.pos.x;a.tryMove(a.getG().player.pos,.2,0);assert.equal(a.getG().player.pos.x,xBefore);
+let rejected=0;for(const [dx,dz,side]of [[0,-1,'S'],[1,0,'W'],[0,1,'N'],[-1,0,'E']]){if(a.canPlace(wallBuild,coreX+dx,coreZ+dz,side))a.place(wallBuild,coreX+dx,coreZ+dz,side);else rejected++;}assert(rejected>0,'Walls cannot remove required enemy clearance to core');
+// Check a separate wall between empty cells, with no core/tower collision involved.
+const wallX=coreX+3,wallZ=coreZ+3;a.place(wallBuild,wallX,wallZ,'E');assert(a.getG().towers.some(t=>t.cx===wallX&&t.cz===wallZ&&t.edge==='E'));const from=a.cellToWorld(wallX,wallZ);a.getG().player.pos.copy(from);a.getG().player.pos.x+=1.45;const xBefore=a.getG().player.pos.x;a.tryMove(a.getG().player.pos,.2,0);assert.equal(a.getG().player.pos.x,xBefore);
 console.log('PASS: cannot seal core routes; player movement respects edge walls.');

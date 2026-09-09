@@ -28,7 +28,7 @@ function unpack(value){if(value?.$v)return V3(...value.$v);if(Array.isArray(valu
 function snapshot(){
  if(!G||G.phase==='over')return null;const liveEnemies=G.enemies.filter(e=>!e.dead);
  return {version:1,savedAt:new Date().toISOString(),config:{...RUN_SETTINGS,terrain:undefined},seed:G.seed,classId:G.classId,rng:G.rng.getState(),
-  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance','buildMode'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
+  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance','buildMode','combatMode','abilityCds','admin'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
   cells:G.cells.map(col=>col.map(c=>({type:c.type,obst:c.obst,site:c.site,lvl:c.lvl,ramp:c.ramp}))),
   sites:G.sites.map(pack),activeSite:G.site?.id??null,towers:G.towers.map(t=>({...pack(t),build:t.b.id})),
   enemies:liveEnemies.map(pack),bolts:G.bolts.map(b=>({...pack(b),hitIndices:b.hitSet?[...b.hitSet].map(e=>liveEnemies.indexOf(e)).filter(i=>i>=0):null})),
