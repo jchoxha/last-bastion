@@ -28,7 +28,7 @@ function unpack(value){if(value?.$v)return V3(...value.$v);if(Array.isArray(valu
 function snapshot(){
  if(!G||G.phase==='over')return null;const liveEnemies=G.enemies.filter(e=>!e.dead);
  return {version:1,savedAt:new Date().toISOString(),config:{...RUN_SETTINGS,terrain:undefined},seed:G.seed,classId:G.classId,rng:G.rng.getState(),
-  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance','buildMode','combatMode','abilityCds','admin','cameraYaw','cameraPitch','activeAbility','guardUntil','focusUntil','skills'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
+  state:pack(Object.fromEntries(['phase','wave','gold','kills','taken','mult','placedCount','view','selected','time','spawnQueue','spawnT','draftSource','startPos','player','cameraDistance','buildMode','combatMode','abilityCds','admin','cameraYaw','cameraPitch','activeAbility','guardUntil','focusUntil','skills','autoEnabled','economy'].filter(k=>G[k]!==undefined).map(k=>[k,G[k]]))),
   cells:G.cells.map(col=>col.map(c=>({type:c.type,obst:c.obst,site:c.site,lvl:c.lvl,ramp:c.ramp}))),
   sites:G.sites.map(pack),activeSite:G.site?.id??null,towers:G.towers.map(t=>({...pack(t),build:t.b.id})),
   enemies:liveEnemies.map(pack),bolts:G.bolts.map(b=>({...pack(b),hitIndices:b.hitSet?[...b.hitSet].map(e=>liveEnemies.indexOf(e)).filter(i=>i>=0):null})),
@@ -39,7 +39,7 @@ function validateSave(s){
  if(!s||s.version!==1||!CLASSES[s.classId]||typeof s.seed!=='string'||s.seed.length>80||!s.state||!['explore','build','fight'].includes(s.state.phase)||!Number.isFinite(s.rng))throw Error('This save is invalid or from an unsupported version.');
  if(!Array.isArray(s.cells)||s.cells.length!==WORLD||s.cells.some(col=>!Array.isArray(col)||col.length!==WORLD||col.some(c=>!Number.isFinite(c.lvl)||c.lvl<0||c.lvl>WORLD*WORLD||c.ramp&&(!Array.isArray(c.ramp)||c.ramp.length!==2||Math.abs(c.ramp[0])+Math.abs(c.ramp[1])!==1))))throw Error('Invalid terrain in saved game.');
  for(const k of ['sites','towers','enemies','bolts','chests','shrines','lairs','relics'])if(!Array.isArray(s[k])||s[k].length>20000)throw Error('Invalid saved '+k);
- if(s.sites.length>4||s.activeSite!==null&&!s.sites.some(site=>site.id===s.activeSite)||s.state.phase!=='explore'&&s.activeSite===null)throw Error('Invalid bastion state.');
+ if(s.sites.length>200||s.activeSite!==null&&!s.sites.some(site=>site.id===s.activeSite)||s.state.phase!=='explore'&&s.activeSite===null)throw Error('Invalid bastion state.');
  if(s.towers.some(t=>!BUILDS.some(b=>b.id===t.build)||!inGrid(t.cx,t.cz))||s.enemies.some(e=>!ENEMIES[e.type])||s.relics.some(id=>!RELICS.some(r=>r.id===id)))throw Error('Unknown saved item.');
  if(s.towers.some(t=>t.edge&&(!['N','E','S','W'].includes(t.edge)||t.build!=='barricade')))throw Error('Invalid wall edge.');
  if(s.draft&&s.draft.some(c=>!(c.kind==='relic'?RELICS:UPGRADES).some(r=>r.id===c.id)))throw Error('Invalid relic draft.');
@@ -71,8 +71,8 @@ function installIntegration(){
  addEventListener('pagehide',()=>{if(G&&G.phase!=='over')saveRun(true);});
  setInterval(()=>{if(G&&G.phase!=='over'&&!menuPaused)saveRun(true);},30000);
  $('c').addEventListener('wheel',e=>{if(!G||menuPaused)return;e.preventDefault();G.cameraDistance=clamp((G.cameraDistance||8)+e.deltaY*.012,4,22);},{passive:false});
- const actions=document.createElement('div');actions.id='missionActions';actions.innerHTML='<button id="buildMode">Build mode (Tab)</button><button id="missionPrimary">Place bastion core (B)</button><button id="cycleView">Change view (V)</button><span id="missionHint">Space jump · Shift sprint · Tab build · wheel zoom</span>';document.body.appendChild(actions);
- $('missionPrimary').onclick=()=>{if(menuPaused||!G||!$('draft').classList.contains('hidden'))return;if(G.phase==='explore')selectCore();else if(G.phase==='build')startWave();};
+ const actions=document.createElement('div');actions.id='missionActions';actions.innerHTML='<button id="buildMode">Build mode (B)</button><button id="missionPrimary">Start defense wave</button><button id="cycleView">Change view (V)</button><span id="missionHint">Space jump · Shift sprint · B build · wheel zoom</span>';document.body.appendChild(actions);
+ $('missionPrimary').onclick=()=>{if(menuPaused||!G||!$('draft').classList.contains('hidden'))return;if(G.phase==='build')startWave();};
  $('buildMode').onclick=toggleBuildMode;
  $('cycleView').onclick=()=>{if(G&&!menuPaused)setView(G.view==='top'?'third':G.view==='third'?'first':'top');};
  $('seed').value=RUN_SETTINGS.seed;
@@ -91,7 +91,7 @@ restoreSave=function(...args){placementCache.clear();return plainRestore(...args
 newRun=function(...args){placementCache.clear();return plainNew(...args);};
 window.bastion.restoreSave=restoreSave;
 const baseHud=updateHud;
-updateHud=function(){baseHud();const primary=$('missionPrimary');if(!primary)return;primary.textContent=G.phase==='explore'?'Place bastion core (B)':G.phase==='build'?'Start wave '+G.wave+' (Enter)':'Hold the line';primary.disabled=G.phase==='fight'||G.phase==='over';const b=BUILDS[G.selected];$('missionHint').textContent=G.phase==='build'?b.name+' · '+buildCost(b)+' gold'+(b.range?' · '+b.range+' m range':'')+' · Tab build · F place / X sell':'Space jump · Shift sprint · Tab build · wheel zoom · RMB camera · 1–6 moves';};
+updateHud=function(){baseHud();const primary=$('missionPrimary');if(!primary)return;primary.textContent=G.phase==='explore'?'Place bastion core (B)':G.phase==='build'?'Start wave '+G.wave+' (Enter)':'Hold the line';primary.disabled=G.phase==='fight'||G.phase==='over';primary.style.display=G.site?'':'none';const b=BUILDS[G.selected];$('missionHint').textContent=G.phase==='build'?b.name+' · '+buildCost(b)+' gold'+(b.range?' · '+b.range+' m range':'')+' · B build · F place / X sell':'Space jump · Shift sprint · B build · wheel zoom · RMB camera · 1–6 moves';};
 
 // Player-only vertical physics; enemies continue to follow connected terrain routes.
 function jumpPlayer(){if(!G||menuPaused||G.player.dead>0)return;const p=G.player;if(p.pos.y<=heightAt(p.pos.x,p.pos.z)+.08){p.vy=9;p.pos.y+=.09;}}
@@ -101,7 +101,7 @@ const walkingUpdate=updatePlayer;
 updatePlayer=function(dt){walkingUpdate(dt);const p=G.player;if(p.dead>0){p.vy=0;return;}p.vy=(p.vy||0)-24*dt;p.pos.y+=p.vy*dt;const ground=heightAt(p.pos.x,p.pos.z);if(p.pos.y<=ground){p.pos.y=ground;p.vy=0;}G.playerMesh.position.copy(p.pos);if(RUN_SETTINGS.dynamic&&!menuPaused&&Math.max(Math.abs(p.pos.x),Math.abs(p.pos.z))>(WORLD/2-6)*CELL)expandTerrain();};
 function toggleBuildMode(){if(!G||menuPaused)return;G.buildMode=!G.buildMode;G.armedArea=null;G.uiNext=0;keys={};document.exitPointerLock?.();updateHud();}
 const modeHud=updateHud;
-updateHud=function(){modeHud();if($('buildMode'))$('buildMode').textContent=G.buildMode?'Combat mode (Tab)':'Build mode (Tab)';};
+updateHud=function(){modeHud();if($('buildMode'))$('buildMode').textContent=G.buildMode?'Combat mode (B)':'Build mode (B)';};
 function expandTerrain(){const max=Math.min(1024,RUN_SETTINGS.maxSize||1024);if(WORLD>=max)return;const old=WORLD,next=Math.min(max,WORLD+16),offset=(next-old)/2;if(offset<1)return;
  const s=snapshot();if(!s)return;const previous={settings:{...RUN_SETTINGS,size:old},originX:0,originZ:0,root:0,cells:[],stats:{}};
  for(let z=0;z<old;z++)for(let x=0;x<old;x++){const c=s.cells[x][z];previous.cells.push({x,z,h:c.lvl,parent:-1,ramp:!!c.ramp,dx:c.ramp?.[0]||0,dz:c.ramp?.[1]||0});}
@@ -111,4 +111,4 @@ function expandTerrain(){const max=Math.min(1024,RUN_SETTINGS.maxSize||1024);if(
 }
 
 function requestAimLock(){const c=$('c');if(!c.requestPointerLock){G.noLock=true;return;}try{const result=c.requestPointerLock();if(result?.catch)result.catch(()=>{if(!G.noLock)log('Mouse capture unavailable: hold a mouse button and drag to aim. Tab opens building.');G.noLock=true;});}catch{G.noLock=true;}}
-document.addEventListener('pointerlockchange',()=>{keys.MouseL=false;keys.MouseR=false;if(G&&document.pointerLockElement===$('c')){G.noLock=false;mouse.x=mouse.y=0;}});
+document.addEventListener('pointerlockchange',()=>{keys.MouseL=false;if(document.pointerLockElement!==$('c'))keys.MouseR=false;if(G&&document.pointerLockElement===$('c')){G.noLock=false;mouse.x=mouse.y=0;}});

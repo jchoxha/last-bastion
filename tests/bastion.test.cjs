@@ -38,18 +38,18 @@ a.toggleBuildMode();assert.equal(a.getG().buildMode,true);assert.equal(a.getG().
 console.log('PASS: jump/landing/airborne save, build mode, expansion preservation, expansion cap, expanded-save round trip.');
 
 // Complete four sites using the game's actual founding and securing rules.
-for(let count=0;count<4;count++){
+for(let count=0;count<4;count++){if(a.getG().economy)a.getG().economy.gateKits=1;
  if(!a.getG().site){let ok=false;for(let x=10;x<54&&!ok;x++)for(let z=10;z<54&&!ok;z++){a.setPos(x,z);a.foundSite();ok=!!a.getG().site;}assert(ok,'Legal ground remains for bastion '+(count+1));}
  a.getG().enemies=a.getG().enemies.filter(e=>e.mode==='roam');a.getG().spawnQueue=[];a.getG().site.wave=5;a.secureSite();
 }
-assert.equal(a.getG().phase,'over');assert.equal(a.getG().sites.filter(s=>s.status==='secured').length,4);console.log('PASS: four distinct legal bastions can be secured and trigger victory.');
+assert.equal(a.getG().phase,'explore');assert.equal(a.getG().sites.filter(s=>s.status==='secured').length,4);console.log('PASS: four distinct legal bastions can be secured and continue the frontier.');
 
 // A saved, already-expanded lab map is used verbatim in a new run.
 const small=generateWorld({...settings,size:20,seed:'SAVED-MAP'});const grown=generateWorld({...settings,size:36,seed:'SAVED-MAP'},small);settings.terrain=grown;settings.size=64;a.newRun('knight','SAVED-MAP');const pad=(64-grown.settings.size)/2;for(const tile of grown.cells){const c=a.getG().cells[tile.x-grown.originX+pad][tile.z-grown.originZ+pad];assert.equal(c.lvl,tile.h);assert.equal(!!c.ramp,tile.ramp);}delete settings.terrain;
 console.log('PASS: saved lab terrain and explored extensions preserved when starting a game.');
 
 // Four edge walls coexist with a center tower, shared edges are unique, and saves retain walls.
-let wallSite=false;for(let x=11;x<53&&!wallSite;x+=3)for(let z=11;z<53&&!wallSite;z+=3){a.setPos(x,z);a.foundSite();wallSite=!!a.getG().site;}assert(wallSite);a.getG().gold=100000;
+let wallSite=false;for(let x=11;x<53&&!wallSite;x+=3)for(let z=11;z<53&&!wallSite;z+=3){a.setPos(x,z);a.foundSite();wallSite=!!a.getG().site;}assert(wallSite);a.getG().gold=100000;if(a.getG().economy)Object.assign(a.getG().economy,{logs:10000,stone:10000,ore:10000,gateKits:2});
 const wallBuild=a.builds.find(b=>b.wall),arrowBuild=a.builds.find(b=>b.id==='arrow');let lot=null;
 for(const [x,z] of a.getG().site.cells){if(a.canPlace(arrowBuild,x,z)&&['N','E','S','W'].every(side=>a.canPlace(wallBuild,x,z,side))){lot=[x,z];break;}}assert(lot,'Find a flat tower lot');const [wx,wz]=lot;a.place(arrowBuild,wx,wz);const centerTower=a.getG().cells[wx][wz].tower;
 for(const side of ['N','E','S','W']){assert(a.canPlace(wallBuild,wx,wz,side));a.place(wallBuild,wx,wz,side);}assert.equal(a.getG().towers.filter(t=>t.edge&&t.cx===wx&&t.cz===wz).length,4);assert.equal(a.getG().cells[wx][wz].tower,centerTower);assert(!a.canPlace(wallBuild,wx+1,wz,'W'),'Shared edge cannot be bought twice');assert(!a.stepOk(wx,wz,wx+1,wz));assert(!a.stepOk(wx,wz,wx+1,wz+1),'No diagonal corner cutting');roundtrip();assert.equal(a.getG().cells[wx][wz].tower.b.id,'arrow');
@@ -58,7 +58,7 @@ const preservedEdges=a.getG().towers.filter(t=>t.edge).map(t=>[t.cx,t.cz,t.edge]
 console.log('PASS: four walls plus tower, shared-edge deduplication and selling, blocked cardinal/diagonal routes, wall saves and expansion.');
 
 // The final segment around a core must be rejected, including diagonal bypasses.
-delete settings.terrain;settings.hilliness=0;a.newRun('knight','WALL-ROUTES');a.setPos(40,40);a.foundSite();assert(a.getG().site);a.getG().gold=100000;const [coreX,coreZ]=a.getG().site.core;
+delete settings.terrain;settings.hilliness=0;a.newRun('knight','WALL-ROUTES');a.setPos(40,40);a.foundSite();assert(a.getG().site);a.getG().gold=100000;if(a.getG().economy)Object.assign(a.getG().economy,{logs:10000,stone:10000,ore:10000,gateKits:2});const [coreX,coreZ]=a.getG().site.core;
 let rejected=0;for(const [dx,dz,side]of [[0,-1,'S'],[1,0,'W'],[0,1,'N'],[-1,0,'E']]){const count=a.getG().towers.length;a.place(wallBuild,coreX+dx,coreZ+dz,side);if(a.getG().towers.length===count)rejected++;}assert(rejected>0,'Walls cannot remove required enemy clearance to core');
 // Check a separate wall between empty cells, with no core/tower collision involved.
 const wallX=coreX+3,wallZ=coreZ+3;a.place(wallBuild,wallX,wallZ,'E');assert(a.getG().towers.some(t=>t.cx===wallX&&t.cz===wallZ&&t.edge==='E'));const from=a.cellToWorld(wallX,wallZ);a.getG().player.pos.copy(from);a.getG().player.pos.x+=1.45;const xBefore=a.getG().player.pos.x;a.tryMove(a.getG().player.pos,.2,0);assert.equal(a.getG().player.pos.x,xBefore);
