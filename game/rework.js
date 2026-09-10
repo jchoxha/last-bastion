@@ -5,7 +5,7 @@ place=function(...args){validatingPlacement=true;try{return checkedPlace(...args
 const cameraForward=()=>V3(Math.sin(G.cameraYaw??G.player.yaw),0,Math.cos(G.cameraYaw??G.player.yaw));
 updateCamera=function(){if(!G)return;const p=G.player.pos;G.cameraYaw??=G.player.yaw;G.cameraPitch??=-.18;const f=cameraForward(),pitch=G.cameraPitch,dir=V3(f.x*Math.cos(pitch),Math.sin(pitch),f.z*Math.cos(pitch)),distance=G.cameraDistance||8;
  if(G.view==='top'){camera.position.copy(p).addScaledVector(f,-distance*1.875).add(V3(0,distance*4.25,0));camera.lookAt(p);}
- else if(G.view==='third'){const focus=p.clone().add(V3(0,1.5,0));camera.position.copy(focus).addScaledVector(dir,-distance).addScaledVector(V3(-f.z,0,f.x),.85);camera.lookAt(camera.position.clone().addScaledVector(dir,30));}
+ else if(G.view==='third'){const focus=p.clone().add(V3(0,1.5,0));camera.position.copy(focus).addScaledVector(dir,-distance);camera.lookAt(focus);}
  else{camera.position.copy(p).add(V3(0,1.6,0));camera.lookAt(camera.position.clone().add(dir));}
  camera.far=Math.max(500,WORLD*CELL*1.2);camera.updateProjectionMatrix();sun.position.set(p.x+25,p.y+45,p.z+20);sun.target.position.copy(p);};
 const cameraMovement=updatePlayer;

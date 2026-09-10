@@ -1,8 +1,11 @@
 # Current verification
 
-- `npm run test:game` builds the integrated game and verifies the current settlement loop, construction, NPC training, production, level unlocks, wards, node regrowth and save/load.
-- `npm run test:world` checks seeded world connectivity and expansion.
-- `node --experimental-strip-types tests/geometry.test.cjs` checks camera obstruction and ramp walls.
-- Browser scripts require current standalone copies at `work/settlement-qa.html` and `work/frontier-qa.html`, served on localhost:4177. They use the installed Chrome and bundled Playwright runtime.
+- `npm run test:game`: integrates the game and checks construction, staffing, training, wards, node regrowth, save/load, shared-edge walls/wire, manual work, follow continuity, talent prerequisites, portal teleportation, siege completion, trading, captured buildings and constructed ramps.
+- `npm run test:world`: 57 seeded terrain connectivity, ramp, expansion and preservation checks.
+- `node tests/geometry.test.cjs`: opaque ramp sides and third-person camera obstruction.
+- `node tests/browser-campaign.cjs`: native Chrome UI checks for the catalog, wall plans, Escape, NPC priority checkboxes, settlement browser, talents, merchant trading and save restoration.
+- `node tests/browser-placement.cjs`: native mouse and F placement with visible failure feedback.
 
-Earlier bastion/combat/frontier/rework/navigation-controls files preserve tests for the previous game rules (instant builds, no starting base and all abilities initially unlocked). The current gameplay suite supersedes those assumptions.
+Browser tests use the current standalone copied to `work/placement-qa.html`, served on localhost:4177, with installed Chrome and bundled Playwright. Test pages have separate storage from the user's file-based session.
+
+Earlier combat/frontier/rework scripts retain assumptions from previous game rules. The settlement and campaign suites cover the current behavior.

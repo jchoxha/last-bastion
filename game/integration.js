@@ -23,7 +23,7 @@ function discardWorld(){if(!G?.world)return;scene.remove(G.world);const geometri
 const originalNewRun=newRun;
 newRun=function(classId,seed){discardWorld();originalNewRun(classId,seed);bridge.started();};
 
-function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','coreMesh','routeLines','routes','gatePos','hitSet','travelPlan','planRevision','recoveryPos','recoveryStall'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
+function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','coreMesh','routeLines','routes','gatePos','hitSet','travelPlan','planRevision','recoveryPos','recoveryStall','seenTarget','bash','path','pathTarget','wildPath'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
 function unpack(value){if(value?.$v)return V3(...value.$v);if(Array.isArray(value))return value.map(unpack);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,unpack(v)]));return value;}
 function snapshot(){
  if(!G||G.phase==='over')return null;const liveEnemies=G.enemies.filter(e=>!e.dead);
@@ -41,7 +41,7 @@ function validateSave(s){
  for(const k of ['sites','towers','enemies','bolts','chests','shrines','lairs','relics'])if(!Array.isArray(s[k])||s[k].length>20000)throw Error('Invalid saved '+k);
  if(s.sites.length>200||s.activeSite!==null&&!s.sites.some(site=>site.id===s.activeSite)||s.state.phase!=='explore'&&s.activeSite===null)throw Error('Invalid bastion state.');
  if(s.towers.some(t=>!BUILDS.some(b=>b.id===t.build)||!inGrid(t.cx,t.cz))||s.enemies.some(e=>!ENEMIES[e.type])||s.relics.some(id=>!RELICS.some(r=>r.id===id)))throw Error('Unknown saved item.');
- if(s.towers.some(t=>t.edge&&(!['N','E','S','W'].includes(t.edge)||t.build!=='barricade')))throw Error('Invalid wall edge.');
+ if(s.towers.some(t=>t.edge&&(!['N','E','S','W'].includes(t.edge)||!['barricade','gate','wire'].includes(t.build))))throw Error('Invalid wall edge.');
  if(s.draft&&s.draft.some(c=>!(c.kind==='relic'?RELICS:UPGRADES).some(r=>r.id===c.id)))throw Error('Invalid relic draft.');
  for(const key of ['wave','gold','kills','time'])if(!Number.isFinite(s.state[key])||s.state[key]<0)throw Error('Invalid run statistics.');
  const p=s.state.player;if(!p||!Array.isArray(p.pos?.$v)||p.pos.$v.length!==3||!p.pos.$v.every(Number.isFinite)||!Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0)throw Error('Invalid player state.');
