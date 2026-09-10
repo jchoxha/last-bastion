@@ -9,3 +9,6 @@
 Browser tests use the current standalone copied to `work/placement-qa.html`, served on localhost:4177, with installed Chrome and bundled Playwright. Test pages have separate storage from the user's file-based session.
 
 Earlier combat/frontier/rework scripts retain assumptions from previous game rules. The settlement and campaign suites cover the current behavior.
+
+- `node tests/expedition.test.cjs`: actual 4x terrain, stairs, footprint/corner collision, crew requirements, reset work, seeded recipes and save/load.
+- `node tests/browser-expedition.cjs`: 4x defaults, sky, voxel rendering, creature lab and first-person cliff clearance.

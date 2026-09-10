@@ -23,7 +23,7 @@ function discardWorld(){if(!G?.world)return;scene.remove(G.world);const geometri
 const originalNewRun=newRun;
 newRun=function(classId,seed){discardWorld();originalNewRun(classId,seed);bridge.started();};
 
-function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','coreMesh','routeLines','routes','gatePos','hitSet','travelPlan','planRevision','recoveryPos','recoveryStall','seenTarget','bash','path','pathTarget','wildPath'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
+function pack(value){if(value?.isVector3)return{$v:value.toArray()};if(Array.isArray(value))return value.map(pack);if(value&&typeof value==='object'){const out={};for(const [k,v]of Object.entries(value)){if(['mesh','group','body','hb','d','b','coreMesh','routeLines','routes','gatePos','hitSet','travelPlan','planRevision','recoveryPos','recoveryStall','bodies','voxelLast','seenTarget','bash','path','pathTarget','wildPath'].includes(k)||typeof v==='function'||v?.isObject3D||v instanceof Set)continue;out[k]=pack(v);}return out;}return value;}
 function unpack(value){if(value?.$v)return V3(...value.$v);if(Array.isArray(value))return value.map(unpack);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).map(([k,v])=>[k,unpack(v)]));return value;}
 function snapshot(){
  if(!G||G.phase==='over')return null;const liveEnemies=G.enemies.filter(e=>!e.dead);

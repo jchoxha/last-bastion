@@ -6,7 +6,7 @@ import WorldLab from './world-lab';
 import {generateWorld,type Settings,type World} from '@/lib/world';
 import {bastionSource} from '@/lib/bastion-source';
 import {parseSave,SAVE_KEY,type SaveGame} from '@/lib/save-game';
-const DEFAULT:Settings={seed:'MEGABONK',size:64,hilliness:.15,trees:.22,scale:1,dynamic:false};
+const DEFAULT:Settings={seed:'MEGABONK',size:64,hilliness:.15,trees:.22,scale:4,dynamic:false};
 type Session={id:number;settings:Settings;saved:SaveGame|null};
 type GameWindow=Window & {bastion?:{pause:(paused:boolean)=>void;save:()=>boolean}};
 export default function Bastion(){
@@ -14,7 +14,7 @@ export default function Bastion(){
  const notify=(message:string)=>{setNotice(message);if(timeout.current)clearTimeout(timeout.current);timeout.current=setTimeout(()=>setNotice(''),6500);};
  useEffect(()=>{try{const stored=localStorage.getItem('bastion-maps-v1');if(stored)setMaps(JSON.parse(stored));const raw=localStorage.getItem(SAVE_KEY);if(raw)setSaved(parseSave(raw));}catch{notify('The saved game could not be read. You can still start a new run.');}return()=>{if(timeout.current)clearTimeout(timeout.current);};},[]);
  const menu=()=>{(iframe.current?.contentWindow as GameWindow|null)?.bastion?.pause(true);setScreen('menu');};
- const start=(load:SaveGame|null)=>{if(started)(iframe.current?.contentWindow as GameWindow|null)?.bastion?.save();const config=load?load.config:{...settings,size:Math.max(64,settings.size),scale:settings.scale??1,dynamic:settings.dynamic??false};setSetup(false);setSession({id:Date.now(),settings:config,saved:load});setStarted(false);setScreen('game');};
+ const start=(load:SaveGame|null)=>{if(started)(iframe.current?.contentWindow as GameWindow|null)?.bastion?.save();const config=load?load.config:{...settings,size:Math.max(64,settings.size),scale:settings.scale??4,dynamic:settings.dynamic??false};setSetup(false);setSession({id:Date.now(),settings:config,saved:load});setStarted(false);setScreen('game');};
  useEffect(()=>{if(!session)return;const bridge={THREE,generateWorld,settings:session.settings,saved:session.saved,notify,started:()=>setStarted(true),menu,save:(value:SaveGame,silent=false)=>{try{const raw=JSON.stringify(value);const checked=parseSave(raw);localStorage.setItem(SAVE_KEY,raw);setSaved(checked);if(!silent)notify('Game saved on this device.');return true;}catch{notify('Saving failed. Browser storage may be full or unavailable; keep this run open.');return false;}}};(window as Window & {__lastBastionBridge?:unknown}).__lastBastionBridge=bridge;if(iframe.current)iframe.current.srcdoc=bastionSource;return()=>{delete (window as Window & {__lastBastionBridge?:unknown}).__lastBastionBridge;};},[session]);
  const resume=()=>{setScreen('game');(iframe.current?.contentWindow as GameWindow|null)?.bastion?.pause(false);iframe.current?.focus();};
  const exportSave=()=>{if(!saved)return;const blob=new Blob([JSON.stringify(saved)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='last-bastion-save.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
