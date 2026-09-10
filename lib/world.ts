@@ -1,11 +1,11 @@
-export type Settings={seed:string;size:number;hilliness:number;trees:number;scale?:number;dynamic?:boolean;maxSize?:number;terrainMode?:'rolling';terrain?:World};
+export type Settings={seed:string;size:number;hilliness:number;trees:number;scale?:number;dynamic?:boolean;maxSize?:number;terrainMode?:'rolling'|'plateaus';terrain?:World};
 export type Cell={x:number;z:number;h:number;parent:number;dx:number;dz:number;ramp:boolean};
 export type World={cells:Cell[];settings:Settings;root:number;originX:number;originZ:number;stats:{tiles:number;ramps:number;height:number;reachable:number}};
 export const TILE=6, RISE=3, MAX_SIZE=128;
 export function random(seed:string){let h=2166136261;for(const c of seed)h=Math.imul(h^c.charCodeAt(0),16777619);return()=>{h+=0x6D2B79F5;let t=Math.imul(h^h>>>15,1|h);t^=t+Math.imul(t^t>>>7,61|t);return((t^t>>>14)>>>0)/4294967296;};}
 export function generateWorld(settings:Settings,previous?:World):World{
  if(settings.terrainMode==='rolling')return generateRollingWorld(settings,previous);
- const n=settings.size;if(!Number.isInteger(n)||n<10||n>1024||n%2!==0)throw new Error('Map size must be an even number from 10–128 tiles.');
+ const n=settings.size;if(!Number.isInteger(n)||n<10||(n>1024&&settings.terrainMode!=='plateaus')||n%2!==0)throw new Error('Map size must be an even number from 10–128 tiles.');
  const border=previous?(n-previous.settings.size)/2:0;
  if(previous&&(!Number.isInteger(border)||border<1))throw new Error('Expansion requires an even size increase.');
  const originX=previous?previous.originX-border:0,originZ=previous?previous.originZ-border:0;
@@ -14,7 +14,12 @@ export function generateWorld(settings:Settings,previous?:World):World{
  const neighbors=(i:number)=>dirs.map(([dx,dz])=>at(i%n+originX+dx,Math.floor(i/n)+originZ+dz)).filter(i=>i>=0);
  const add=(i:number,h:number,parent:number,ramp=false,dx=0,dz=0)=>{cells[i]={x:i%n+originX,z:Math.floor(i/n)+originZ,h,parent,ramp,dx,dz};order.push(i);};
  let root=Math.floor(n/2)*n+Math.floor(n/2);
- if(previous){for(const c of previous.cells){const p=previous.cells[c.parent];const i=at(c.x,c.z);cells[i]={...c,parent:p?at(p.x,p.z):-1};order.push(i);}const oldRoot=previous.cells[previous.root];root=at(oldRoot.x,oldRoot.z);}else add(root,0,-1);
+ if(previous){for(const c of previous.cells){const p=previous.cells[c.parent];const i=at(c.x,c.z);cells[i]={...c,parent:p?at(p.x,p.z):-1};order.push(i);}const oldRoot=previous.cells[previous.root];root=at(oldRoot.x,oldRoot.z);}else{add(root,0,-1);if(settings.terrainMode==='plateaus'){
+  // Grow the connected world outward from the flat starter apron. Later base
+  // placement then cannot erase a ramp that was the only route to a region.
+  const rx=root%n+originX,rz=Math.floor(root/n)+originZ;
+  for(let z=rz-4;z<=rz+4;z++)for(let x=rx-4;x<=rx+4;x++){const i=at(x,z);if(i<0||i===root)continue;const parent=at(x===rx?x:x+Math.sign(rx-x),x===rx?z+Math.sign(rz-z):z);add(i,0,parent);}
+ }}
  let current=root,frontier=0;
  // Only components adjacent to the newly occupied ramp can lose access.
  // Stop searching a component as soon as a flat neighbor is found.

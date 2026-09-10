@@ -14,3 +14,5 @@ Earlier combat/frontier/rework scripts retain assumptions from previous game rul
 - `node tests/browser-rolling.cjs`: current seed-only menu, 2x default, rendered ground/collision agreement, foliage, pivots, expansion and save restoration.
 - `node --experimental-strip-types tests/rolling-world.test.cjs`: deterministic rolling generation, walkable slopes, preservation of trees/buildings/NPCs through expansion, and articulated joint bounds.
 - `browser-expedition.cjs` records the previous 4x/cliff UI and is historical; `expedition.test.cjs` continues to verify legacy stair and cliff-save behavior.
+
+Current new-world default: `node tests/browser-plateaus.cjs` and `node --experimental-strip-types tests/rounded-plateaus.test.cjs`. Rolling-world tests retain coverage for prairie saves from the previous update.

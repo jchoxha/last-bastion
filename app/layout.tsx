@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Last Bastion — Endless Frontier', description: 'Explore a rolling wilderness, defend your portals and grow a living settlement.',
+  title: 'Last Bastion — Endless Frontier', description: 'Explore a terraced wilderness, defend your portals and grow a living settlement.',
 };
 
 export default function RootLayout({

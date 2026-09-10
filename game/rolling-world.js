@@ -1,5 +1,5 @@
 /* Continuous terrain is opt-in per save: legacy runs retain their cliffs. */
-const rollingEnabled=()=>RUN_SETTINGS.terrainMode==='rolling';
+const rollingEnabled=()=>['rolling','plateaus'].includes(RUN_SETTINGS.terrainMode);
 const terracedHeight=heightAt;
 function rollingGround(x,z){
  const gx=x/CELL+HALF,gz=z/CELL+HALF,ix=Math.floor(gx),iz=Math.floor(gz),smooth=t=>t*t*(3-2*t),u=smooth(gx-ix),v=smooth(gz-iz);
@@ -28,7 +28,7 @@ function seedFoliage(){
  batch(grass,tuft,0xffffff,'grass');batch(bushes,new THREE.IcosahedronGeometry(1,1),0xffffff,'bush');batch(flowers,new THREE.IcosahedronGeometry(1,0),0xffffff,'flower');G.world.add(group);G.foliage=group;G.foliageCenter=p.clone();
 }
 const rollingMotion=updatePlayer;
-updatePlayer=function(dt){rollingMotion(dt);if(!rollingEnabled())return;if(!G.groundCenter||G.groundCenter.distanceTo(G.player.pos)>36){if(G.terrain){G.world.remove(G.terrain);G.terrain.geometry.dispose();G.terrain.material.dispose();}buildTerrainMesh();}if(!G.foliageCenter||G.foliageCenter.distanceTo(G.player.pos)>20)seedFoliage();};
+updatePlayer=function(dt){rollingMotion(dt);if(!rollingEnabled())return;if(!G.groundCenter||G.groundCenter.distanceTo(G.player.pos)>36){if(G.terrain){G.world.remove(G.terrain);G.terrain.geometry.dispose();(Array.isArray(G.terrain.material)?G.terrain.material:[G.terrain.material]).forEach(m=>m.dispose());}buildTerrainMesh();}if(!G.foliageCenter||G.foliageCenter.distanceTo(G.player.pos)>20)seedFoliage();};
 const rollingRun=newRun;
 newRun=function(...args){rollingRun(...args);updateHud();if(rollingEnabled()){buildMinimapBase();seedFoliage();scene.fog=new THREE.Fog(0xaec7d1,110,220);}};
 const rollingRestore=restoreSave;
@@ -41,7 +41,7 @@ installIntegration=function(){rollingInstall();if(rollingEnabled()){$('seed').re
 // never rerolls a visited location or duplicates a recovered ruin.
 function discoverRollingRegions(){
  if(!rollingEnabled())return;const c=colony();c.exploredRegions??={};const span=CELL*16,px=Math.floor(G.player.pos.x/span),pz=Math.floor(G.player.pos.z/span);
- for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const x=px+dx,z=pz+dz,id=x+','+z;if(c.exploredRegions[id])continue;const rng=mulberry32(hashStr(G.seed+'/region/'+id)),wx=(x+.25+rng()*.5)*span,wz=(z+.25+rng()*.5)*span,pos=V3(wx,heightAt(wx,wz),wz);if(!inGrid(...worldToCell(pos))||pos.distanceTo(G.player.pos)>180)continue;c.exploredRegions[id]=true;if(G.sites.some(s=>s.corePos.distanceTo(pos)<s.r*CELL+30)||c.landmarks.some(l=>l.pos.distanceTo(pos)<60))continue;
+ for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const x=px+dx,z=pz+dz,id=x+','+z;if(c.exploredRegions[id])continue;const rng=mulberry32(hashStr(G.seed+'/region/'+id)),wx=(x+.25+rng()*.5)*span,wz=(z+.25+rng()*.5)*span,pos=V3(wx,heightAt(wx,wz),wz);if(!inGrid(...worldToCell(pos))||pos.distanceTo(G.player.pos)>180)continue;c.exploredRegions[id]=true;if(RUN_SETTINGS.terrainMode==='plateaus'&&!plateauClearing(pos,2))continue;if(G.sites.some(s=>s.corePos.distanceTo(pos)<s.r*CELL+30)||c.landmarks.some(l=>l.pos.distanceTo(pos)<60))continue;
  const kind=['ruins','water','dungeon','village'][Math.floor(rng()*4)],site={id:'region-'+id,kind,pos,stage:0,claimed:false,name:kind==='village'?'Wayfarer settlement':kind==='dungeon'?'Ashvault dungeon':kind==='water'?'Springwater pool':'Old-world ruins'};c.landmarks.push(site);landmarkVisual(site);
  if(kind==='village'){const merchant={id:'trader-'+id,pos:pos.clone().add(V3(0,0,2)),hp:250,maxHp:250,role:'laborer',settled:true,stock:{logs:100,stone:80,ore:40,gateKits:2},escorts:[]};for(let j=0;j<2;j++)merchant.escorts.push({id:'escort-'+id+'-'+j,pos:pos.clone().add(V3(j?3:-3,0,1)),hp:160,maxHp:160,role:'knight'});c.caravans.push(merchant);restoreCaravans();}
  rebuildCollision();G.foliageCenter=null;
@@ -53,7 +53,7 @@ animateWilderness=function(dt){rollingDiscoveryUpdate(dt);if(!rollingEnabled())r
 const localHorizonCamera=updateCamera;updateCamera=function(){localHorizonCamera();if(rollingEnabled()){camera.far=700;camera.updateProjectionMatrix();}};
 
 const groundedLandmarkVisual=landmarkVisual;
-landmarkVisual=function(site){if(rollingEnabled()){
+landmarkVisual=function(site){if(RUN_SETTINGS.terrainMode==='rolling'){
  const [cx,cz]=worldToCell(site.pos),radius=site.kind==='water'?1:2;
  for(let dx=-radius;dx<=radius;dx++)for(let dz=-radius;dz<=radius;dz++){const cell=cellAt(cx+dx,cz+dz);if(cell){cell.lvl=site.pos.y/LSTEP;cell.ramp=null;cell.obst=null;}}
  const cleared=new Set();for(const body of G.generatedBodies||[])if(['tree','rock'].includes(body.source)&&Math.abs(body.x-site.pos.x)<radius*CELL+CELL/2&&Math.abs(body.z-site.pos.z)<radius*CELL+CELL/2){body.depleted=true;cleared.add(Math.round(body.x*100)+','+Math.round(body.z*100));for(const part of body.draw||[]){part.mesh.setMatrixAt(part.index,new THREE.Matrix4().makeScale(0,0,0));part.mesh.instanceMatrix.needsUpdate=true;}}economy().nodes=economy().nodes.filter(n=>!cleared.has(n.id));G.groundCenter=null;
