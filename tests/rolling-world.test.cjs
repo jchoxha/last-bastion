@@ -1,0 +1,12 @@
+process.env.GAME_SCALE='2';process.env.GAME_ROLLING='1';
+const {api:a,assert,THREE}=require('./combat-harness.cjs');
+const {generateWorld}=require('../lib/world.ts');
+const settings={seed:'ROLLING-QA',size:64,scale:2,hilliness:.15,trees:.22,terrainMode:'rolling'};
+const first=generateWorld(settings),again=generateWorld(settings);assert.deepEqual(first.cells,again.cells);assert.notEqual(first.cells[0].h,generateWorld({...settings,seed:'DIFFERENT'}).cells[0].h);
+const expanded=generateWorld({...settings,size:80},first),old=new Map(first.cells.map(c=>[c.x+','+c.z,c.h]));for(const c of expanded.cells)if(old.has(c.x+','+c.z))assert.equal(c.h,old.get(c.x+','+c.z));
+a.newRun('ranger','ROLLING-QA');let g=a.getG();assert.equal(a.cellToWorld(1,1).distanceTo(a.cellToWorld(2,1)),12);assert(g.foliage.children[0].count>100);
+let maxSlope=0;for(let x=-270;x<270;x+=3.7)for(let z=-270;z<270;z+=5.3){const h=a.heightAt(x,z);for(const [dx,dz]of [[.2,0],[0,.2]])maxSlope=Math.max(maxSlope,Math.abs(a.heightAt(x+dx,z+dz)-h)/.2);}assert(maxSlope<.6,'Natural surface stays walkable');console.log('PASS deterministic rolling hills and preserved expansion samples; maximum slope',maxSlope.toFixed(3));
+const parts=g.playerMesh.userData.voxelParts;for(const name of ['legL','legR','armL','armR']){parts[name].geometry.computeBoundingBox();assert(Math.abs(parts[name].geometry.boundingBox.max.y)<1e-6,'Limb hangs from its hip or shoulder');}assert.equal(parts.hood.parent,parts.head);console.log('PASS hip and shoulder pivots, head attachment');
+const before={gold:g.gold,buildings:g.towers.length,npcs:a.economy().workers.length,home:g.sites[0].corePos.clone(),height:a.heightAt(100,100)},trees=g.generatedBodies.filter(b=>b.source==='tree'&&!b.depleted).map(b=>[b.x,b.z]);
+a.expandTerrain();g=a.getG();assert.equal(g.cells.length,80);assert.equal(g.gold,before.gold);assert.equal(g.towers.length,before.buildings);assert.equal(a.economy().workers.length,before.npcs);assert(g.sites[0].corePos.equals(before.home));assert.equal(a.heightAt(100,100),before.height);for(const [x,z]of trees)assert(g.generatedBodies.some(b=>b.source==='tree'&&b.x===x&&b.z===z),'Existing trees do not shuffle on expansion');
+const save=JSON.parse(JSON.stringify(a.snapshot()));a.restoreSave(save);assert.equal(a.getG().cells.length,80);assert.equal(a.heightAt(100,100),before.height);console.log('PASS expansion and reload preserve home, people, buildings, terrain and tree positions');

@@ -11,4 +11,6 @@ Browser tests use the current standalone copied to `work/placement-qa.html`, ser
 Earlier combat/frontier/rework scripts retain assumptions from previous game rules. The settlement and campaign suites cover the current behavior.
 
 - `node tests/expedition.test.cjs`: actual 4x terrain, stairs, footprint/corner collision, crew requirements, reset work, seeded recipes and save/load.
-- `node tests/browser-expedition.cjs`: 4x defaults, sky, voxel rendering, creature lab and first-person cliff clearance.
+- `node tests/browser-rolling.cjs`: current seed-only menu, 2x default, rendered ground/collision agreement, foliage, pivots, expansion and save restoration.
+- `node --experimental-strip-types tests/rolling-world.test.cjs`: deterministic rolling generation, walkable slopes, preservation of trees/buildings/NPCs through expansion, and articulated joint bounds.
+- `browser-expedition.cjs` records the previous 4x/cliff UI and is historical; `expedition.test.cjs` continues to verify legacy stair and cliff-save behavior.

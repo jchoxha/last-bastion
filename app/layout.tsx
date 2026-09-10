@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Last Bastion — World Lab', description: 'Explore seeded, connected procedural terrain inspired by Megabonk.',
+  title: 'Last Bastion — Endless Frontier', description: 'Explore a rolling wilderness, defend your portals and grow a living settlement.',
 };
 
 export default function RootLayout({
