@@ -16,3 +16,6 @@ Earlier combat/frontier/rework scripts retain assumptions from previous game rul
 - `browser-expedition.cjs` records the previous 4x/cliff UI and is historical; `expedition.test.cjs` continues to verify legacy stair and cliff-save behavior.
 
 Current new-world default: `node tests/browser-plateaus.cjs` and `node --experimental-strip-types tests/rounded-plateaus.test.cjs`. Rolling-world tests retain coverage for prairie saves from the previous update.
+
+- `node tests/browser-traversal.cjs`: actual climb key presses, stamina HUD, release, and 24-nearby-enemy simulation timing.
+- `node --experimental-strip-types tests/traversal-performance.test.cjs`: low-framerate ramp steps, cliff/wall climbing, mantle, stamina exhaustion/recovery, gameplay rays and safe airborne saves.
