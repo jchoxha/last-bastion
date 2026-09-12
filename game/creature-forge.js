@@ -30,6 +30,32 @@ registerCreatureRecipe = function (id, spec, remember = true) {
   return result;
 };
 const forgeSpawnBase = spawnEnemy;
+// Successful pipeline assets join ordinary wilderness grunt slots automatically.
+// Explicit test spawns and scripted combat keep their requested species.
+const generatedWildernessBase = wildernessSpawn;
+wildernessSpawn = function (position, type = 'grunt', scale = 1) {
+  const generated =
+    type === 'grunt' ? bridge.creatures?.generatedCreatures?.() : null;
+  if (!generated?.length) return generatedWildernessBase(position, type, scale);
+  const species = (colony().species ??= {});
+  const eligible = generated.filter(
+    (creature) => species[creature.id] || Object.keys(species).length < 64,
+  );
+  if (!eligible.length) return generatedWildernessBase(position, type, scale);
+  const creature = eligible[Math.floor(G.rng() * eligible.length)];
+  if (!ENEMIES[creature.id])
+    registerCreatureRecipe(creature.id, { forge: creature }, false);
+  if (!forgeDefinitions.has(creature.id))
+    return generatedWildernessBase(position, type, scale);
+  const enemy = generatedWildernessBase(position, creature.id, scale);
+  if (enemy)
+    species[creature.id] = {
+      base: 'grunt',
+      name: creature.spec.name,
+      forgeJson: JSON.stringify(creature),
+    };
+  return enemy;
+};
 spawnEnemy = function (type, gate, scale) {
   const enemy = forgeSpawnBase(type, gate, scale),
     definition = forgeDefinitions.get(type);
@@ -65,6 +91,7 @@ animateVoxelActor = function (actor, dt) {
   else forgeLastPositions.set(actor, actor.pos.clone());
   rig.setAnimation(moving ? 'walk' : 'idle');
   rig.update(dt);
+  actor.body = rig.mesh;
 };
 const forgeUpdateBase = updatePlayer;
 updatePlayer = function (dt) {

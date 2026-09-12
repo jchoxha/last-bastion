@@ -18,7 +18,9 @@
     "build:wiki": "node scripts/build-wiki.mjs",
     "test:creatures": "node tests/creatures.test.mjs",
     "dev:creature-provider": "node --env-file-if-exists=.env.creatures scripts/creature-provider.mjs",
-    "test:wiki": "node scripts/integrate-bastion.cjs && node tests/wiki.test.mjs"
+    "test:wiki": "node scripts/integrate-bastion.cjs && node tests/wiki.test.mjs",
+    "dev:creature-pipeline": "node --env-file-if-exists=.env.creatures scripts/creature-pipeline/server.mjs",
+    "test:creature-pipeline": "node --test tests/creature-pipeline.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",
@@ -53,6 +55,7 @@
     "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
+    "gltf-validator": "^2.0.0-dev.3.10",
     "oxfmt": "0.61.0",
     "oxlint": "1.76.0",
     "oxlint-tsgolint": "7.0.2001",

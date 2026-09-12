@@ -20,7 +20,7 @@ The editable source is [docs/GAME-WIKI.md](docs/GAME-WIKI.md). Run `npm run buil
 
 ## Creature generation
 
-Open **Creature forge** on the main menu to author and save creature definitions, inspect canine/humanoid prototype rigs, export GLB templates, and spawn test enemies in a running game. Local generation works offline. Optional AI authoring uses a separately configured local service; no paid provider is enabled by default. See [docs/CREATURE-PIPELINE.md](docs/CREATURE-PIPELINE.md) for setup, contracts, supported body plans, and remaining production-asset stages.
+Open **Creature forge** on the main menu. The local model pipeline uses Chimera Cards' actual forge and art, generates a textured mesh and body-specific rig through Tripo, adds walk animation, validates the GLB, and installs it in the game library and ordinary wilderness spawns. Start it with `npm run dev:creature-pipeline`; a Tripo API key/credits are required. The integration has passed simulated-provider and synthetic-asset tests; live generated rig quality still needs verification. Offline procedural prototypes remain available. See [docs/CREATURE-PIPELINE.md](docs/CREATURE-PIPELINE.md) for setup and precise limits.
 
 ## Development setup
 

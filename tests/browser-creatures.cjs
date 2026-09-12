@@ -187,6 +187,7 @@ const {
       damage(e, 3);
       if (!(e.hp < before)) throw Error('Generated enemy cannot take damage.');
     }, saved.id);
+    await page.close(); // Release the active game renderer before the separate offline check.
     const offline = await browser.newPage();
     offline.on('pageerror', (error) => errors.push(error.message));
     await offline.route(/^https?:/, (route) => route.abort());

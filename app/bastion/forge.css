@@ -34,6 +34,19 @@
   grid-template-columns: minmax(280px, 0.85fr) minmax(340px, 1.4fr);
   gap: 20px;
 }
+.pipeline-panel {
+  margin-bottom: 24px;
+}
+.pipeline-panel output {
+  display: block;
+  margin: 14px 0;
+  color: #d4c394;
+}
+.pipeline-panel ul {
+  display: grid;
+  gap: 10px;
+  padding-left: 20px;
+}
 .forge-panel {
   border: 1px solid #3c5147;
   border-radius: 16px;

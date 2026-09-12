@@ -1,8 +1,49 @@
 # Creature generation pipeline
 
-Status: working authoring and runtime prototype. Open **Creature forge** on the main menu, or `#forge`. AI mesh generation, finished creature skins, companion AI, and new elemental combat effects are not implemented. No paid service is enabled by default.
+Status: an automated Chimera → image → mesh → rig → animation → game installation worker is implemented, alongside the older procedural prototype. Open **Creature forge** on the main menu, or `#forge`. The Tripo integration has been tested with simulated provider responses and a synthetic skinned test asset, not a live paid generation. No real generated creature has passed visual rig review in this integration yet. A Tripo API key and credits are required for the current mesh worker; no paid service is enabled by default.
 
-## Try it now
+## Automated model pipeline
+
+The worker executes Chimera Cards' actual `forgeCreature` and validators from pinned commit `38a3f180eabe0c2684590ac7956cb489ea545c04`. It bundles that code locally and replaces only its text-provider transport. It does not replace the forge with Last Bastion's seeded name generator. Existing creatures use Chimera's `ROSTER`, bestiary and `public/art/gen/<id>[-<form>].png`. New concepts use Chimera's forge and canonical `creatureArtPrompt`, rendered by the configured Tripo image endpoint. A heuristic fallback is treated as a failed production job, not a successful AI generation.
+
+1. Resolve an existing Chimera creature and its art, or forge a new definition and portrait.
+2. Derive a neutral modeling reference from that art, preserving identity while separating limbs and removing scenery/effects.
+3. Generate a textured PBR mesh with a target of 20,000 faces.
+4. Ask the provider to check the mesh's riggability. Reject a body-type mismatch. Explicitly request the quadruped or biped rig using `v2.5-20260210`; never rely on the API's biped default for a wolf.
+5. Retarget an in-place walk animation and download the embedded GLB.
+6. Validate the GLB and write immutable assets under `public/creatures/`, then update the manifest atomically. The browser refreshes the library and selects a completed creature automatically.
+7. Installed creatures automatically replace ordinary wilderness **grunt** spawn slots. They also support the forge's explicit test-spawn action. Scripted raids and explicit enemy selections retain their species. Spawned definitions are saved with the run, subject to the existing 64-species limit.
+
+Only canine quadrupeds and humanoid bipeds are wired through this first worker. Other forms need their own tested rig/animation adapters. Walk is currently the only generated animation; idle/rest use the bind pose and attacks use existing gameplay without a dedicated clip. Creature identity is shared with Chimera, but its signature cards are retained as source data rather than installed as Last Bastion combat effects. Generated enemies currently award no gold.
+
+### Start on this PC
+
+Copy `creature-pipeline.env.example` to the untracked `.env.creatures` and set `TRIPO_API_KEY` locally. For **new concepts**, also set `CREATURE_AI_MODEL` and optionally `CREATURE_AI_URL`/`CREATURE_AI_KEY`. The default text endpoint is local Ollama's OpenAI-compatible endpoint; no model is downloaded or selected automatically. Existing roster creatures, including Voltfang, do not need text inference. Never paste keys into the app, source files, or a public manifest.
+
+```sh
+npm run dev:creature-pipeline
+```
+
+The worker binds to `http://127.0.0.1:8790`. On first start it clones Chimera into ignored `work/chimera-cards`, checks out the pinned revision, and bundles the source. `CHIMERA_SOURCE_DIR` can point at an existing checkout of that exact revision. It does not edit or push to Chimera. Updating the source pin requires testing its schema/art contracts again.
+
+Open the local game → Creature forge → **Connect local worker**. Select Voltfang, Canine quadruped, regular, and seed `voltfang-1`. **Generate and install creature** starts the entire chain and consumes Tripo API credits. When credentials are absent, **Prepare Chimera inputs** saves the definition/art and shows the exact blocked stage without contacting Tripo. After configuration changes, restart the worker, reconnect, and **Resume saved job**.
+
+Jobs continue when the forge is closed. Closing the worker pauses processing; restarting it requires explicit resume. Each stage's task ID is saved before polling. Resuming polls existing tasks instead of submitting duplicates. A connection failure after submitting but before receiving a task ID is marked uncertain; the worker refuses to resubmit automatically. Check the provider console to reconcile that case. Changing the seed creates a different job, which can incur new charges. There are no automatic generation retries or spending loops.
+
+### Storage, hosting and validation limits
+
+- `work/creature-pipeline/jobs/<job-id>/`: durable job state, complete Chimera definition, source art, neutral reference, mesh, rig and animated GLB. Failure retains successful stages. Provider keys are never written into job state.
+- `public/creatures/index.json` and immutable `asset_<hash>.glb/.png`: only installed assets. The normal Pages build copies these files into the published game. The local worker installs files automatically; it does not autonomously commit/push provider output. Normal checked source/asset commits publish through the existing main-branch workflow.
+- Public GitHub Pages is a static client and does not run the worker. Use the local app for local generation. An installed library can travel with a deployed build; a raw standalone HTML file requires the accompanying asset directory for generated models. Offline procedural prototypes still work without it.
+- Game saves retain validated definitions, never meshes or provider URLs. The generated-asset manifest associates the creature's stable definition ID with its current asset. Missing/offline assets fall back to procedural visuals; the preview labels load failures. Keep the worker running for assets that have not been included in a published build.
+- Technical checks reject invalid glTF, external resources, missing texture/skin/animation, excessive bone counts, and oversized content. Budgets are 32 MiB per GLB, 40,000 triangles, 96 bones, 12 draw primitives, 8 materials and 2048-pixel textures. At least 90% of vertices must be skinned. Runtime verifies SHA-256 before parsing, loads on demand, shares geometry/textures and clones skeletons and hit-flash materials per actor.
+- These checks **cannot prove anatomically correct joint placement or attractive deformation**. Inspect shoulders, hips, paws, jaw and tail in the real animation before treating a creature as finished. The first live asset also needs orientation/scale and crowded-scene performance checks. Current loader normalization assumes Tripo's default +X-forward output and records the yaw in the manifest. Reference conditioning and choosing the right rig improve the inputs; they cannot guarantee a successful AI skeleton.
+
+Local TRELLIS.2 weights were found on this PC, but the installed ComfyUI Python failed to start with `ModuleNotFoundError: No module named 'torch'`. TRELLIS supplies meshes, not rigs. A working local mesh backend plus a separately tested automatic rigging/animation backend remains an alternative integration, not a working free path in this release. No existing ComfyUI installation was modified.
+
+Provider contracts checked against the official [image-to-model API](https://developers.tripo3d.ai/en/docs/generation-image-to-model/standard), [rig check](https://developers.tripo3d.ai/en/docs/animations-rig-check), [auto rig](https://developers.tripo3d.ai/en/docs/animations-rig), and [animation retargeting](https://developers.tripo3d.ai/en/docs/animations-retarget) documentation on September 12, 2026. Tripo Studio membership and API credentials/credits are separate configuration concerns; this integration does not bypass export restrictions.
+
+## Procedural prototype tools
 
 1. Open Creature forge. Describe the creature, choose its taxonomy, physical body plan, form, role, and seed.
 2. Click **Generate locally**. The same complete input gives the same definition. Concept text is retained as the description; local generation does not interpret natural language into a detailed mesh.
@@ -24,13 +65,13 @@ The vocabulary is based on Chimera Cards at commit `38a3f180eabe0c2684590ac7956c
 - A physical plan is chosen independently within the supported compatibility list. That list is intentionally small: it does not yet describe every plausible skeleton within a family or hybrid. Expand it alongside tested rigs. In particular, humanoid hybrids use a humanoid prototype, while Aberration combinations remain concepts.
 - Avian, aquatic, arthropod, draconic, serpentine, amorphous and radial plans are marked **planned**. They can produce definitions and reference briefs, but cannot be previewed or spawned as if they had a working rig.
 
-`lib/creatures/core.ts` owns validation, generation, stable content IDs, derived statistics, reference prompts, and the provider contract. Providers cannot supply arbitrary code, stat overrides, executable effects, remote asset URLs or unreviewed rigs. Displayed free text is rendered as text by React.
+`lib/creatures/core.ts` owns definition validation, stable content IDs, derived statistics, reference prompts, and the text-authoring contract. Definitions cannot supply arbitrary code, stat overrides, executable effects or asset URLs. The separate generated-asset manifest/loader accepts the worker's validated GLBs; technical acceptance is distinct from visual rig review. Displayed free text is rendered as text by React.
 
 ## What the rig exports mean
 
 **Export prototype GLB** produces a binary glTF containing an articulated placeholder, named bones, rigid per-bone skin weights, and idle/walk animation clips. It can be inspected in Blender without purchasing a model-generator subscription. It is not a finished wolf, a Voltfang likeness, or a production-quality organic rig. Feet may slide during the simple walk cycle; no IK or foot locking is claimed.
 
-**Export rig contract** records the physical-plan ID and revision, meter units, +Y up, +Z forward, model-space rest-joint positions, parent hierarchy, and clip names. **Export reference brief** provides the creature identity and neutral-pose constraints. There are no automatically generated reference images yet; use the brief together with rendered views of the approved base body when generating art.
+**Export rig contract** records the procedural plan's ID and revision, meter units, +Y up, +Z forward, model-space rest-joint positions, parent hierarchy, and clip names. **Export reference brief** provides creature identity and neutral-pose constraints. The automated worker generates a reference from source art and requests a body-specific provider rig; it does not transfer these procedural prototype weights onto the detailed mesh.
 
 Production asset stages:
 
@@ -39,7 +80,7 @@ Production asset stages:
 3. Generate or model the detailed mesh, preserving the body plan and separating effects from anatomy.
 4. Fit geometry and transfer/paint weights. Check shoulders, hips, feet, jaw and tail under motion.
 5. Validate GLB scale, hierarchy, clips, skinning, materials, geometry/texture budgets, and behavior in a crowded scene.
-6. Add a reviewed asset manifest/loader with prototype fallback. This final-model import stage is future work; exported prototype files do not automatically become approved runtime assets.
+6. The automated worker now supplies the manifest/GLB loader with prototype fallback. Exported procedural prototype files do not automatically become production assets; the synthetic fixture used by tests is never shipped in the game library.
 
 Schema version and rig revision must change when their contracts change. Add explicit migrations before accepting old content with a new rig. A model or skeleton must never be serialized into a run save; retain creature definitions/asset IDs and recreate render objects.
 
@@ -80,14 +121,18 @@ Success: `{ "version": 1, "spec": CreatureSpec }`. The client independently vali
 
 ## Source map and checks
 
-| Location                         | Responsibility                                                                 |
-| -------------------------------- | ------------------------------------------------------------------------------ |
-| `lib/creatures/core.ts`          | Portable schema, taxonomy, validators, deterministic generator, service client |
-| `lib/creatures/actor.ts`         | Prototype bone hierarchy, proxy mesh, weights and clips                        |
-| `app/bastion/creature-forge.tsx` | In-app authoring, preview, collection and exports                              |
-| `game/creature-forge.js`         | Game bridge, custom species, enemy visuals and animation                       |
-| `scripts/creature-provider.mjs`  | Optional local AI adapter with server-side credentials                         |
-| `tests/creatures.test.mjs`       | Validation, determinism, rest-joint positions and mocked provider              |
-| `tests/browser-creatures.cjs`    | Actual UI, GLB export, spawning, save/reload and responsive behavior           |
+| Location                            | Responsibility                                                                           |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `lib/creatures/core.ts`             | Portable schema, taxonomy, validators, deterministic generator, service client           |
+| `lib/creatures/actor.ts`            | Prototype bone hierarchy, proxy mesh, weights and clips                                  |
+| `app/bastion/creature-forge.tsx`    | In-app authoring, preview, collection and exports                                        |
+| `game/creature-forge.js`            | Game bridge, custom species, enemy visuals and animation                                 |
+| `scripts/creature-provider.mjs`     | Optional local AI adapter with server-side credentials                                   |
+| `scripts/creature-pipeline/`        | Actual Chimera source adapter, Tripo tasks, durable jobs, GLB gate and local HTTP worker |
+| `lib/creatures/generated.ts`        | Generated asset manifest, checksum-verified GLB loading and independent runtime skins    |
+| `app/bastion/creature-pipeline.tsx` | Worker connection, job progress and automatic selection of installed models              |
+| `public/creatures/`                 | Installed generated models, portraits and deployment manifest                            |
+| `tests/creatures.test.mjs`          | Validation, determinism, rest-joint positions and mocked provider                        |
+| `tests/browser-creatures.cjs`       | Actual UI, GLB export, spawning, save/reload and responsive behavior                     |
 
 Run `npm run test:creatures` and the relevant game suites for schema/rig/runtime changes. Build with `npm run build:standalone`, then run `node tests/browser-creatures.cjs` for UI/GLB/game integration. Tests use a fake provider; they do not spend API credits. Update this document and the in-app wiki alongside changes.

@@ -5,6 +5,11 @@ import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createCreatureActor, rigJoints } from '@/lib/creatures/actor';
 import {
+  createRuntimeCreatureActor,
+  generatedAsset,
+} from '@/lib/creatures/generated';
+import CreaturePipeline from './creature-pipeline';
+import {
   ARCHETYPES,
   ATTUNEMENTS,
   BODY_PLANS,
@@ -47,7 +52,9 @@ function Preview({
   bones: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
-  const actorRef = useRef<ReturnType<typeof createCreatureActor> | null>(null);
+  const actorRef = useRef<ReturnType<typeof createRuntimeCreatureActor> | null>(
+    null,
+  );
   const helperRef = useRef<THREE.SkeletonHelper | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
@@ -79,10 +86,10 @@ function Preview({
     const light = new THREE.DirectionalLight(0xffffff, 3);
     light.position.set(3, 5, 4);
     scene.add(light);
-    const actor = createCreatureActor(creature);
+    const actor = createRuntimeCreatureActor(creature);
     actorRef.current = actor;
     scene.add(actor.group);
-    const helper = new THREE.SkeletonHelper(actor.group);
+    let helper = new THREE.SkeletonHelper(actor.group);
     helperRef.current = helper;
     helper.visible = false;
     scene.add(helper);
@@ -96,10 +103,26 @@ function Preview({
       camera.updateProjectionMatrix();
     });
     resize.observe(element);
+    let previousState = actor.state;
     let raf = 0,
       last = performance.now();
     const frame = (now: number) => {
       actor.update((now - last) / 1000);
+      element.dataset.assetState = actor.state;
+      if (actor.state !== previousState) {
+        previousState = actor.state;
+        const visible = helper.visible;
+        scene.remove(helper);
+        helper.dispose();
+        helper = new THREE.SkeletonHelper(actor.group);
+        helper.visible = visible;
+        helperRef.current = helper;
+        scene.add(helper);
+        if (actor.state === 'failed')
+          setError(
+            'Generated asset unavailable. Showing the procedural prototype fallback.',
+          );
+      }
       last = now;
       renderer.render(scene, camera);
       raf = requestAnimationFrame(frame);
@@ -301,6 +324,7 @@ export default function CreatureForge({
     }
   };
   const ready = creature.assets.model === 'prototype';
+  const generated = generatedAsset(creature.id);
   return (
     <main className="creature-forge">
       <header className="forge-header">
@@ -309,10 +333,40 @@ export default function CreatureForge({
           <h1 ref={heading} tabIndex={-1}>
             Creature forge
           </h1>
-          <p>Define a creature. Test its body plan. Build its identity.</p>
+          <p>
+            Generate meshes from Chimera art, inspect their rigs, and test them
+            in the game.
+          </p>
         </div>
         <button onClick={onClose}>Back to menu</button>
       </header>
+      <CreaturePipeline
+        onSelect={(next) => {
+          setCreature(next);
+          setStatus(
+            'Generated mesh selected. Inspect walk and skeleton before testing it in the run.',
+          );
+          if (storageReady) {
+            const collection = [
+              ...library.filter((c) => c.id !== next.id),
+              next,
+            ];
+            if (collection.length <= MAX_CREATURES) {
+              try {
+                localStorage.setItem(
+                  COLLECTION_KEY,
+                  JSON.stringify(collection),
+                );
+                setLibrary(collection);
+              } catch {
+                setStatus(
+                  'Mesh loaded, but this device could not save the creature library.',
+                );
+              }
+            }
+          }
+        }}
+      />
       <div className="forge-layout">
         <section className="forge-panel">
           <h2>Creature blueprint</h2>
@@ -442,7 +496,11 @@ export default function CreatureForge({
           <div className="forge-result-title">
             <div>
               <span className="forge-kicker">
-                {ready ? 'PROTOTYPE RIG' : 'CONCEPT ONLY'}
+                {generated
+                  ? 'GENERATED MESH · RIG NEEDS VISUAL REVIEW'
+                  : ready
+                    ? 'PROTOTYPE RIG'
+                    : 'CONCEPT ONLY'}
               </span>
               <h2>{creature.spec.name}</h2>
             </div>
@@ -485,14 +543,16 @@ export default function CreatureForge({
           </div>
           <p className="forge-note">
             Combat uses a basic melee enemy with role-based stats. Attunements,
-            archetypes and subtypes describe its identity; elemental powers,
-            companions and automatic encounter inclusion are future stages.
+            archetypes and subtypes describe its identity; elemental powers and
+            companions are future stages. Installed generated models
+            automatically enter ordinary wilderness grunt slots.
           </p>
           <div className="forge-fields">
             <label>
               Creature name
               <input
                 value={creature.spec.name}
+                disabled={Boolean(generated)}
                 maxLength={60}
                 onChange={(e) => {
                   const name = e.target.value;
@@ -505,6 +565,7 @@ export default function CreatureForge({
               Body color
               <input
                 type="color"
+                disabled={Boolean(generated)}
                 value={creature.spec.color}
                 onChange={(e) =>
                   setCreature(
@@ -542,15 +603,22 @@ export default function CreatureForge({
               <li>Definition: validated.</li>
               <li>
                 Rig:{' '}
-                {ready
-                  ? 'articulated prototype; rigid skin weights.'
-                  : 'not implemented for this plan.'}
+                {generated
+                  ? 'generated mesh and skin; technical validation passed, visual inspection required.'
+                  : ready
+                    ? 'articulated prototype; rigid skin weights.'
+                    : 'not implemented for this plan.'}
               </li>
               <li>
                 Reference art: generate from the exported brief and approved rig
                 views.
               </li>
-              <li>Mesh: external generation and cleanup required.</li>
+              <li>
+                Mesh:{' '}
+                {generated
+                  ? 'installed by the Chimera model pipeline.'
+                  : 'use the Chimera model pipeline above to generate a mesh.'}
+              </li>
               <li>
                 Production rig: weight, animation, and performance review
                 required.
@@ -579,7 +647,7 @@ export default function CreatureForge({
               >
                 Export reference brief
               </button>
-              {ready && (
+              {ready && !generated && (
                 <>
                   <button onClick={exportRig}>Export prototype GLB</button>
                   <button

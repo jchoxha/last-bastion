@@ -10,7 +10,11 @@ import {
   parseCreature,
   type Creature,
 } from '@/lib/creatures/core';
-import { createCreatureActor } from '@/lib/creatures/actor';
+import {
+  createRuntimeCreatureActor as createCreatureActor,
+  generatedCreatures,
+  initializeGeneratedAssets,
+} from '@/lib/creatures/generated';
 import { generateWorld, generateWorldSteps, type Settings } from '@/lib/world';
 import { bastionSource } from '@/lib/bastion-source';
 import { parseSave, SAVE_KEY, type SaveGame } from '@/lib/save-game';
@@ -129,9 +133,15 @@ export default function Bastion() {
   };
   useEffect(() => {
     if (!session) return;
+    void initializeGeneratedAssets();
     const bridge = {
       THREE,
-      creatures: { makeCreature, parseCreature, createCreatureActor },
+      creatures: {
+        makeCreature,
+        parseCreature,
+        createCreatureActor,
+        generatedCreatures,
+      },
       generateWorld,
       generateWorldSteps,
       settings: session.settings,

@@ -1,6 +1,8 @@
 # Current verification
 
 - `npm run test:creatures`: deterministic creature definitions, schema/import boundaries, body-plan compatibility, actual prototype rest joints, and an AI service with a mocked upstream (no API charges).
+- `npm run test:creature-pipeline`: real worker orchestration and Tripo adapter with simulated HTTP responses, a test-only textured skin, GLB validation, atomic installation, rig mismatch rejection, missing credentials, duplicate-charge prevention and local HTTP boundaries. No provider credits are used.
+- `node tests/browser-creature-pipeline.cjs` after the pipeline tests and standalone build: uses their synthetic fixture to verify textured GLB loading, independently animated skeletons, shared geometry/private hit materials, checksum rejection, UI/mobile, actual generated-model enemies and fresh save restoration. This is integration coverage, not a claim of AI mesh/rig quality.
 - `node tests/browser-creatures.cjs` after the standalone build: forge UI, library persistence, invalid imports, actual GLB export, enemy spawning, save/reload, mobile layout and offline generation.
 
 - `npm run test:wiki`: guide structure, generated-content freshness, source paths, current move cooldowns, building base prices, and settlement/structure recipes.
