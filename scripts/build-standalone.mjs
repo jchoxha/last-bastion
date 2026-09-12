@@ -12,6 +12,8 @@ const css=await postcss([tailwind()]).process(source,{from:path.join(root,'app/g
 const js=(await fs.readFile('work/standalone.js','utf8')).replaceAll('</script','<\\/script');
 const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Last Bastion — Endless Frontier</title><style>${css.css}</style></head><body><div id="root"></div><script>${js}</script></body></html>`;
 await fs.writeFile('../outputs/bonk-world-lab.html',html);
+await fs.mkdir('playable',{recursive:true});
+await fs.writeFile('playable/last-bastion-world-lab.html',html);
 console.log('Standalone build ready: '+Math.round(html.length/1024)+' KB');
 
 
