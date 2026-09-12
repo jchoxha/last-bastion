@@ -1,5 +1,9 @@
 # Current verification
 
+- `node tests/browser-lag-spikes.cjs` (after `npm run build:standalone`): runs the playable build in Chrome on a temporary localhost server, checks streaming across animation frames and actual DOM mutations, and saves diagnostics in `work/`.
+
+- `node tests/lag-spikes.test.cjs`: resumable terrain patches, hidden partial geometry, cancellation after teleporting, save isolation, and throttling across the complete HUD update chain. Logs streaming CPU time; timing is diagnostic rather than a machine-dependent pass/fail threshold.
+
 - `npm run test:game`: integrates the game and checks construction, staffing, training, wards, node regrowth, save/load, shared-edge walls/wire, manual work, follow continuity, talent prerequisites, portal teleportation, siege completion, trading, captured buildings and constructed ramps.
 - `npm run test:world`: 57 seeded terrain connectivity, ramp, expansion and preservation checks.
 - `node tests/geometry.test.cjs`: opaque ramp sides and third-person camera obstruction.

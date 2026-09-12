@@ -1,12 +1,38 @@
 /* Bound recurring exploration and AI work; retain finished geometry while jobs run. */
 const frameClock=()=>typeof performance==='undefined'?Date.now():performance.now();
+// Gate the complete HUD chain, including extensions outside combat.js's guard.
+// Input handlers can still request an immediate refresh by clearing G.uiNext.
+const pacedCombatUI=updateCombatUI;
+updateCombatUI=function(){if(!G||!combatUIReady||G.uiNext>G.time)return;return pacedCombatUI();};
 function disposeTerrain(mesh){if(!mesh)return;G.world.remove(mesh);mesh.traverse(o=>{o.geometry?.dispose();if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());});}
 const buildPlateauPatch=buildTerrainMesh;
 function makeTerrainRoot(){const root=new THREE.Mesh(new THREE.BufferGeometry(),[]);root.userData.chunks=new Map();G.world.add(root);G.terrain=root;return root;}
 function plateauChunk(root,x,z){const prior=G.terrain;G.terrainBuildBounds=[x*4+WORLD/2,x*4+WORLD/2+3,z*4+WORLD/2,z*4+WORLD/2+3];let mesh;try{mesh=buildPlateauPatch();}finally{delete G.terrainBuildBounds;G.terrain=prior;}root.add(mesh);root.userData.chunks.set(x+','+z,mesh);}
 function wantedTerrainChunks(){const [cx,cz]=worldToCell(G.player?.pos||V3()),x=cx-WORLD/2,z=cz-WORLD/2,result=[];for(let a=Math.floor((x-17)/4);a<=Math.floor((x+17)/4);a++)for(let b=Math.floor((z-17)/4);b<=Math.floor((z+17)/4);b++){if(a*4+WORLD/2+3<0||b*4+WORLD/2+3<0||a*4+WORLD/2>=WORLD||b*4+WORLD/2>=WORLD)continue;result.push([a,b]);}return result.sort((a,b)=>Math.hypot(a[0]*4-x,a[1]*4-z)-Math.hypot(b[0]*4-x,b[1]*4-z));}
 buildTerrainMesh=function(){if(!plateauMode())return buildPlateauPatch();const root=makeTerrainRoot();for(const [x,z]of wantedTerrainChunks())plateauChunk(root,x,z);G.groundCenter=(G.player?.pos||V3()).clone();return root;};
-function streamPlateauTerrain(){if(!G.terrain?.userData.chunks){disposeTerrain(G.terrain);buildTerrainMesh();return;}if(G.groundCenter&&G.groundCenter.distanceTo(G.player.pos)<CELL*2&&!G.terrainQueue?.length)return;const root=G.terrain,wanted=wantedTerrainChunks(),keys=new Set(wanted.map(c=>c.join(',')));G.terrainQueue=wanted.filter(c=>!root.userData.chunks.has(c.join(',')));const start=frameClock();while(G.terrainQueue.length){const [x,z]=G.terrainQueue.shift();plateauChunk(root,x,z);if(frameClock()-start>=2)break;}if(!G.terrainQueue.length){for(const [key,mesh]of root.userData.chunks)if(!keys.has(key)){root.remove(mesh);disposeTerrain(mesh);root.userData.chunks.delete(key);}G.groundCenter=G.player.pos.clone();}}
+function streamPlateauTerrain(budget=2){
+ if(!G.terrain?.userData.chunks){disposeTerrain(G.terrain);buildTerrainMesh();return;}
+ if(G.groundCenter&&G.groundCenter.distanceTo(G.player.pos)<CELL*2&&!G.terrainQueue?.length&&!G.terrainChunkJob)return;
+ const root=G.terrain,wanted=wantedTerrainChunks(),keys=new Set(wanted.map(c=>c.join(',')));
+ let job=G.terrainChunkJob;
+ // A rebuilt root or a teleport makes an unfinished patch obsolete.
+ if(job&&(job.root!==root||job.size!==WORLD||!keys.has(job.key)))G.terrainChunkJob=job=null;
+ G.terrainQueue=wanted.filter(c=>!root.userData.chunks.has(c.join(',')));
+ const start=frameClock();
+ while(G.terrainQueue.length){
+  if(!job){const [x,z]=G.terrainQueue[0];job=G.terrainChunkJob={root,size:WORLD,key:x+','+z,bounds:[x*4+WORLD/2,x*4+WORLD/2+3,z*4+WORLD/2,z*4+WORLD/2+3],steps:plateauPatchSteps()};}
+  let step;const center=G.groundCenter;
+  G.terrainBuildBounds=job.bounds;
+  try{step=job.steps.next();}finally{delete G.terrainBuildBounds;G.terrain=root;G.groundCenter=center;}
+  if(step.done){root.add(step.value);root.userData.chunks.set(job.key,step.value);G.terrainQueue=G.terrainQueue.filter(c=>c.join(',')!==job.key);G.terrainChunkJob=job=null;}
+  if(frameClock()-start>=budget)return;
+ }
+ for(const [key,mesh]of root.userData.chunks)if(!keys.has(key)){
+  root.remove(mesh);disposeTerrain(mesh);root.userData.chunks.delete(key);
+  if(frameClock()-start>=budget)return;
+ }
+ G.groundCenter=G.player.pos.clone();
+}
 function streamFoliage(){if(!G.foliageJob&&(!G.foliageCenter||G.foliageCenter.distanceTo(G.player.pos)>20)){G.foliageJob=foliageJob();G.foliageJobStart=G.player.pos.clone();}if(!G.foliageJob)return;const start=frameClock();do{if(G.foliageJob.next().done){G.foliageJob=null;break;}}while(frameClock()-start<1);}
 // Rebuilds requested by construction must dispose child chunks too.
 redrawTerrain=function(){disposeTerrain(G.terrain);buildTerrainMesh();rebuildCollision();if(G.site)refreshRoutes();};

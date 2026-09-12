@@ -42,8 +42,7 @@ function plateauClearing(pos,radius=2){
  for(let dx=-radius;dx<=radius;dx++)for(let dz=-radius;dz<=radius;dz++){const n=cellAt(cx+dx,cz+dz);if(!n||n.ramp||n.lvl!==c.lvl)return false;}return true;
 }
 const roundedTerrainFallback=buildTerrainMesh;
-buildTerrainMesh=function(){
- if(!plateauMode())return roundedTerrainFallback();
+function* plateauPatchSteps(){
  const p=G.player?.pos||V3(),[px,pz]=worldToCell(p),radius=17,half=CELL/2,rim=CELL*.075;
  const offsets=[-half,-half+rim/3,-half+rim,-CELL/4,0,CELL/4,half-rim,half-rim/3,half],n=offsets.length;
  const vertices=[],uv=[],colors=[],top=[],walls=[],tileCache=G.plateauTiles??=new Map();while(tileCache.size>4096)tileCache.delete(tileCache.keys().next().value);
@@ -51,6 +50,8 @@ buildTerrainMesh=function(){
  const vertex=(x,y,z,color,wall=false)=>{const i=vertices.length/3;vertices.push(x,y,z);colors.push(color.r,color.g,color.b);uv.push((x+z)*.2,(wall?y:z)*.2);return i;};
  const bounds=G.terrainBuildBounds||[px-radius,px+radius,pz-radius,pz+radius];
  for(let cx=Math.max(0,bounds[0]);cx<=Math.min(WORLD-1,bounds[1]);cx++)for(let cz=Math.max(0,bounds[2]);cz<=Math.min(WORLD-1,bounds[3]);cz++){
+  // Streaming callers can yield between tiles, before the next expensive patch.
+  yield;
   const start=vertices.length/3,topStart=top.length,wallStart=walls.length,neighborhood=[];
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const c=cellAt(cx+dx,cz+dz);neighborhood.push(c?c.lvl+':'+(c.ramp?.join(',')||''):'edge');}
   const tileKey=[cx-HALF,cz-HALF,G.sites?.length||0,...neighborhood].join('/'),cached=tileCache.get(tileKey);
@@ -74,6 +75,10 @@ buildTerrainMesh=function(){
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.setIndex([...top,...walls]);geometry.addGroup(0,top.length,0);geometry.addGroup(top.length,walls.length,1);geometry.computeVertexNormals();
  const material=kind=>new THREE.MeshStandardMaterial({map:terrainTexture(kind),bumpMap:terrainTexture(kind),bumpScale:.035,vertexColors:true,roughness:1,side:THREE.DoubleSide});
  G.terrain=new THREE.Mesh(geometry,[material('grass'),material('rock')]);G.terrain.receiveShadow=true;G.world.add(G.terrain);G.groundCenter=p.clone();return G.terrain;
+}
+buildTerrainMesh=function(){
+ if(!plateauMode())return roundedTerrainFallback();
+ const job=plateauPatchSteps();let step;do{step=job.next();}while(!step.done);return step.value;
 };
 // Initial landmarks also require a real plateau large enough for their footprint.
 const plateauWildPoint=randomWildPoint;let choosingPlateauLandmarks=false;

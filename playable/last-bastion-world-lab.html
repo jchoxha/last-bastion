@@ -24,6 +24,7 @@
     --leading-normal: 1.5;
     --leading-relaxed: 1.625;
     --radius-md: calc(var(--radius) * 0.8);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --animate-spin: spin 1s linear infinite;
     --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -194,6 +195,9 @@
     container-type: inline-size;
     container-name: field-group;
   }
+  .\@container {
+    container-type: inline-size;
+  }
   .pointer-events-auto {
     pointer-events: auto;
   }
@@ -205,6 +209,9 @@
   }
   .visible {
     visibility: visible;
+  }
+  .visible\! {
+    visibility: visible !important;
   }
   .sr-only {
     position: absolute;
@@ -229,6 +236,9 @@
   .static {
     position: static;
   }
+  .static\! {
+    position: static !important;
+  }
   .inset-0 {
     inset: calc(var(--spacing) * 0);
   }
@@ -240,6 +250,9 @@
   }
   .inset-y-0 {
     inset-block: calc(var(--spacing) * 0);
+  }
+  .inset-s-1 {
+    inset-inline-start: calc(var(--spacing) * 1);
   }
   .inset-s-1\/2 {
     inset-inline-start: calc(1 / 2 * 100%);
@@ -255,6 +268,9 @@
   }
   .top-0 {
     top: calc(var(--spacing) * 0);
+  }
+  .top-1 {
+    top: calc(var(--spacing) * 1);
   }
   .top-1\.5 {
     top: calc(var(--spacing) * 1.5);
@@ -313,6 +329,9 @@
   .-left-12 {
     left: calc(var(--spacing) * -12);
   }
+  .left-1 {
+    left: calc(var(--spacing) * 1);
+  }
   .left-1\.5 {
     left: calc(var(--spacing) * 1.5);
   }
@@ -358,6 +377,24 @@
   .row-start-1 {
     grid-row-start: 1;
   }
+  .container {
+    width: 100%;
+    @media (width >= 40rem) {
+      max-width: 40rem;
+    }
+    @media (width >= 48rem) {
+      max-width: 48rem;
+    }
+    @media (width >= 64rem) {
+      max-width: 64rem;
+    }
+    @media (width >= 80rem) {
+      max-width: 80rem;
+    }
+    @media (width >= 96rem) {
+      max-width: 96rem;
+    }
+  }
   .m-\(--drawer-inset\,0px\) {
     margin: var(--drawer-inset,0px);
   }
@@ -370,6 +407,9 @@
   .mx-2 {
     margin-inline: calc(var(--spacing) * 2);
   }
+  .mx-3 {
+    margin-inline: calc(var(--spacing) * 3);
+  }
   .mx-3\.5 {
     margin-inline: calc(var(--spacing) * 3.5);
   }
@@ -378,6 +418,9 @@
   }
   .-my-2 {
     margin-block: calc(var(--spacing) * -2);
+  }
+  .my-0 {
+    margin-block: calc(var(--spacing) * 0);
   }
   .my-0\.5 {
     margin-block: calc(var(--spacing) * 0.5);
@@ -394,6 +437,9 @@
   .-mt-4 {
     margin-top: calc(var(--spacing) * -4);
   }
+  .mt-0 {
+    margin-top: calc(var(--spacing) * 0);
+  }
   .mt-0\.5 {
     margin-top: calc(var(--spacing) * 0.5);
   }
@@ -408,6 +454,9 @@
   }
   .-mb-4 {
     margin-bottom: calc(var(--spacing) * -4);
+  }
+  .mb-1 {
+    margin-bottom: calc(var(--spacing) * 1);
   }
   .mb-1\.5 {
     margin-bottom: calc(var(--spacing) * 1.5);
@@ -452,6 +501,9 @@
   .block {
     display: block;
   }
+  .contents {
+    display: contents;
+  }
   .flex {
     display: flex;
   }
@@ -460,6 +512,9 @@
   }
   .hidden {
     display: none;
+  }
+  .hidden\! {
+    display: none !important;
   }
   .inline-flex {
     display: inline-flex;
@@ -777,8 +832,17 @@
   .flex-1 {
     flex: 1;
   }
+  .flex-shrink {
+    flex-shrink: 1;
+  }
+  .shrink {
+    flex-shrink: 1;
+  }
   .shrink-0 {
     flex-shrink: 0;
+  }
+  .flex-grow {
+    flex-grow: 1;
   }
   .grow {
     flex-grow: 1;
@@ -801,6 +865,10 @@
   .origin-bottom {
     transform-origin: bottom;
   }
+  .-translate-x-1 {
+    --tw-translate-x: calc(var(--spacing) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
   .-translate-x-1\/2 {
     --tw-translate-x: calc(calc(1 / 2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -813,8 +881,16 @@
     --tw-translate-x: 1px;
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
+  .-translate-y-1 {
+    --tw-translate-y: calc(var(--spacing) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
   .-translate-y-1\/2 {
     --tw-translate-y: calc(calc(1 / 2 * 100%) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .-translate-y-3 {
+    --tw-translate-y: calc(var(--spacing) * -3);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .-translate-y-3\/4 {
@@ -823,6 +899,10 @@
   }
   .translate-y-0 {
     --tw-translate-y: calc(var(--spacing) * 0);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .translate-y-3 {
+    --tw-translate-y: calc(var(--spacing) * 3);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .translate-y-3\/4 {
@@ -847,6 +927,34 @@
   }
   .transform-\[translate3d\(var\(--translate-x\,0px\)\,var\(--translate-y\,0px\)\,0\)_scale\(var\(--stack-scale\)\)\] {
     transform: translate3d(var(--translate-x,0px),var(--translate-y,0px),0) scale(var(--stack-scale));
+  }
+  .shimmer {
+    --_spread: var(--shimmer-spread, calc(3ch + 40px));
+    --_base: currentColor;
+    --_highlight: var(
+    --shimmer-color,
+    oklch(from currentColor l c h / calc(alpha* 0.2))
+  );
+    background-image: var( --shimmer-image, linear-gradient( calc(90deg + var(--shimmer-angle)), var(--_base) calc(50% - var(--_spread)), var(--_highlight) calc(50% - var(--_spread) * 0.5), var(--_highlight) 50%, var(--_highlight) calc(50% + var(--_spread) * 0.5), var(--_base) calc(50% + var(--_spread)) ) );
+    @supports (color: color-mix(in lab, red, red)) {
+      background-image: var( --shimmer-image, linear-gradient( calc(90deg + var(--shimmer-angle)), var(--_base) calc(50% - var(--_spread)), color-mix(in oklch, var(--_highlight), var(--_base) 50%) calc(50% - var(--_spread) * 0.5), var(--_highlight) 50%, color-mix(in oklch, var(--_highlight), var(--_base) 50%) calc(50% + var(--_spread) * 0.5), var(--_base) calc(50% + var(--_spread)) ) );
+    }
+    background-repeat: no-repeat;
+    background-size: calc(200% + var(--_spread) * 2) 100%;
+    background-position: 0 0;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: var(--shimmer-text-fill, transparent);
+    animation: tw-shimmer var(--shimmer-duration, 2s) linear infinite;
+    &:is(.dark *) {
+      --_highlight: var(
+      --shimmer-color,
+      oklch(from currentColor max(0.8, calc(l + 0.4)) c h / calc(alpha + 0.4))
+    );
+    }
+    &:where([dir="rtl"], [dir="rtl"] *) {
+      animation-direction: reverse;
+    }
   }
   .scroll-fade-x {
     --_scroll-fade-size-s: var(
@@ -1249,6 +1357,9 @@
   .bg-background {
     background-color: var(--background);
   }
+  .bg-black {
+    background-color: var(--color-black);
+  }
   .bg-black\/10 {
     background-color: color-mix(in srgb, #000 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1260,6 +1371,9 @@
   }
   .bg-card {
     background-color: var(--card);
+  }
+  .bg-destructive {
+    background-color: var(--destructive);
   }
   .bg-destructive\/10 {
     background-color: var(--destructive);
@@ -1314,6 +1428,9 @@
   }
   .bg-clip-padding {
     background-clip: padding-box;
+  }
+  .mask-repeat {
+    mask-repeat: repeat;
   }
   .fill-foreground {
     fill: var(--foreground);
@@ -1372,6 +1489,9 @@
   .py-\(--card-spacing\) {
     padding-block: var(--card-spacing);
   }
+  .py-0 {
+    padding-block: calc(var(--spacing) * 0);
+  }
   .py-0\.5 {
     padding-block: calc(var(--spacing) * 0.5);
   }
@@ -1405,6 +1525,9 @@
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
   }
+  .pr-1 {
+    padding-right: calc(var(--spacing) * 1);
+  }
   .pr-1\.5 {
     padding-right: calc(var(--spacing) * 1.5);
   }
@@ -1428,6 +1551,9 @@
   }
   .pb-3 {
     padding-bottom: calc(var(--spacing) * 3);
+  }
+  .pl-1 {
+    padding-left: calc(var(--spacing) * 1);
   }
   .pl-1\.5 {
     padding-left: calc(var(--spacing) * 1.5);
@@ -1523,6 +1649,9 @@
   .text-balance {
     text-wrap: balance;
   }
+  .text-wrap {
+    text-wrap: wrap;
+  }
   .wrap-break-word {
     overflow-wrap: break-word;
   }
@@ -1580,6 +1709,9 @@
   .tabular-nums {
     --tw-numeric-spacing: tabular-nums;
     font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
+  }
+  .underline {
+    text-decoration-line: underline;
   }
   .underline-offset-4 {
     text-underline-offset: 4px;
@@ -1657,11 +1789,17 @@
   .ring-card {
     --tw-ring-color: var(--card);
   }
+  .ring-foreground {
+    --tw-ring-color: var(--foreground);
+  }
   .ring-foreground\/10 {
     --tw-ring-color: var(--foreground);
     @supports (color: color-mix(in lab, red, red)) {
       --tw-ring-color: color-mix(in oklab, var(--foreground) 10%, transparent);
     }
+  }
+  .ring-ring {
+    --tw-ring-color: var(--ring);
   }
   .ring-ring\/50 {
     --tw-ring-color: var(--ring);
@@ -1693,6 +1831,13 @@
   }
   .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+  .filter\! {
+    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,) !important;
+  }
+  .backdrop-filter {
+    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
   }
   .transition {
     transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events;
@@ -1824,6 +1969,10 @@
     --tw-ease: linear;
     transition-timing-function: linear;
   }
+  .ease-out {
+    --tw-ease: var(--ease-out);
+    transition-timing-function: var(--ease-out);
+  }
   .will-change-transform {
     will-change: transform;
   }
@@ -1913,6 +2062,9 @@
   }
   .paused {
     animation-play-state: paused;
+  }
+  .running {
+    animation-play-state: running;
   }
   .\*\:w-full {
     :is(& > *) {
@@ -9123,34 +9275,6 @@ button:focus-visible,a:focus-visible,summary:focus-visible {
   syntax: "*";
   inherits: false;
 }
-@property --tw-duration {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-ease {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-content {
-  syntax: "*";
-  initial-value: "";
-  inherits: false;
-}
-@property --tw-scale-x {
-  syntax: "*";
-  inherits: false;
-  initial-value: 1;
-}
-@property --tw-scale-y {
-  syntax: "*";
-  inherits: false;
-  initial-value: 1;
-}
-@property --tw-scale-z {
-  syntax: "*";
-  inherits: false;
-  initial-value: 1;
-}
 @property --tw-backdrop-blur {
   syntax: "*";
   inherits: false;
@@ -9186,6 +9310,34 @@ button:focus-visible,a:focus-visible,summary:focus-visible {
 @property --tw-backdrop-sepia {
   syntax: "*";
   inherits: false;
+}
+@property --tw-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-ease {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-content {
+  syntax: "*";
+  initial-value: "";
+  inherits: false;
+}
+@property --tw-scale-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
 }
 @keyframes spin {
   to {
@@ -9336,12 +9488,6 @@ button:focus-visible,a:focus-visible,summary:focus-visible {
       --tw-drop-shadow-color: initial;
       --tw-drop-shadow-alpha: 100%;
       --tw-drop-shadow-size: initial;
-      --tw-duration: initial;
-      --tw-ease: initial;
-      --tw-content: "";
-      --tw-scale-x: 1;
-      --tw-scale-y: 1;
-      --tw-scale-z: 1;
       --tw-backdrop-blur: initial;
       --tw-backdrop-brightness: initial;
       --tw-backdrop-contrast: initial;
@@ -9351,6 +9497,12 @@ button:focus-visible,a:focus-visible,summary:focus-visible {
       --tw-backdrop-opacity: initial;
       --tw-backdrop-saturate: initial;
       --tw-backdrop-sepia: initial;
+      --tw-duration: initial;
+      --tw-ease: initial;
+      --tw-content: "";
+      --tw-scale-x: 1;
+      --tw-scale-y: 1;
+      --tw-scale-z: 1;
       --tw-animation-delay: 0s;
       --tw-animation-direction: normal;
       --tw-animation-duration: initial;
@@ -15624,15 +15776,16 @@ function plateauClearing(pos,radius=2){\r
  for(let dx=-radius;dx<=radius;dx++)for(let dz=-radius;dz<=radius;dz++){const n=cellAt(cx+dx,cz+dz);if(!n||n.ramp||n.lvl!==c.lvl)return false;}return true;\r
 }\r
 const roundedTerrainFallback=buildTerrainMesh;\r
-buildTerrainMesh=function(){\r
- if(!plateauMode())return roundedTerrainFallback();\r
+function* plateauPatchSteps(){
  const p=G.player?.pos||V3(),[px,pz]=worldToCell(p),radius=17,half=CELL/2,rim=CELL*.075;\r
  const offsets=[-half,-half+rim/3,-half+rim,-CELL/4,0,CELL/4,half-rim,half-rim/3,half],n=offsets.length;\r
  const vertices=[],uv=[],colors=[],top=[],walls=[],tileCache=G.plateauTiles??=new Map();while(tileCache.size>4096)tileCache.delete(tileCache.keys().next().value);\r
  const colorFor=(x,z)=>new THREE.Color(({meadow:0x839861,wetland:0x647e57,desert:0xb8a075,frost:0xb9c7bf})[biomeAt(x,z)]);\r
  const vertex=(x,y,z,color,wall=false)=>{const i=vertices.length/3;vertices.push(x,y,z);colors.push(color.r,color.g,color.b);uv.push((x+z)*.2,(wall?y:z)*.2);return i;};\r
  const bounds=G.terrainBuildBounds||[px-radius,px+radius,pz-radius,pz+radius];\r
- for(let cx=Math.max(0,bounds[0]);cx<=Math.min(WORLD-1,bounds[1]);cx++)for(let cz=Math.max(0,bounds[2]);cz<=Math.min(WORLD-1,bounds[3]);cz++){\r
+ for(let cx=Math.max(0,bounds[0]);cx<=Math.min(WORLD-1,bounds[1]);cx++)for(let cz=Math.max(0,bounds[2]);cz<=Math.min(WORLD-1,bounds[3]);cz++){
+  // Streaming callers can yield between tiles, before the next expensive patch.
+  yield;
   const start=vertices.length/3,topStart=top.length,wallStart=walls.length,neighborhood=[];\r
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const c=cellAt(cx+dx,cz+dz);neighborhood.push(c?c.lvl+':'+(c.ramp?.join(',')||''):'edge');}\r
   const tileKey=[cx-HALF,cz-HALF,G.sites?.length||0,...neighborhood].join('/'),cached=tileCache.get(tileKey);\r
@@ -15656,7 +15809,11 @@ buildTerrainMesh=function(){\r
  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geometry.setIndex([...top,...walls]);geometry.addGroup(0,top.length,0);geometry.addGroup(top.length,walls.length,1);geometry.computeVertexNormals();\r
  const material=kind=>new THREE.MeshStandardMaterial({map:terrainTexture(kind),bumpMap:terrainTexture(kind),bumpScale:.035,vertexColors:true,roughness:1,side:THREE.DoubleSide});\r
  G.terrain=new THREE.Mesh(geometry,[material('grass'),material('rock')]);G.terrain.receiveShadow=true;G.world.add(G.terrain);G.groundCenter=p.clone();return G.terrain;\r
-};\r
+}
+buildTerrainMesh=function(){
+ if(!plateauMode())return roundedTerrainFallback();
+ const job=plateauPatchSteps();let step;do{step=job.next();}while(!step.done);return step.value;
+};
 // Initial landmarks also require a real plateau large enough for their footprint.\r
 const plateauWildPoint=randomWildPoint;let choosingPlateauLandmarks=false;\r
 randomWildPoint=function(near=false){if(!plateauMode()||!choosingPlateauLandmarks)return plateauWildPoint(near);for(let i=0;i<20;i++){const p=plateauWildPoint(near);if(p&&plateauClearing(p,2))return p;}return null;};\r
@@ -15777,14 +15934,40 @@ const rockyCapsule=blockedAt;blockedAt=function(x,z,y,r=.35,h=1.65,...args){if(r
 const climbingInput=bindInput;bindInput=function(){climbingInput();addEventListener('keyup',e=>{if(e.code==='Space'&&G?.player?.climbing)endClimb();});addEventListener('keydown',e=>{if(e.code==='Escape'&&G?.player?.climbing)endClimb();});};\r
 
 /* Bound recurring exploration and AI work; retain finished geometry while jobs run. */\r
-const frameClock=()=>typeof performance==='undefined'?Date.now():performance.now();\r
+const frameClock=()=>typeof performance==='undefined'?Date.now():performance.now();
+// Gate the complete HUD chain, including extensions outside combat.js's guard.
+// Input handlers can still request an immediate refresh by clearing G.uiNext.
+const pacedCombatUI=updateCombatUI;
+updateCombatUI=function(){if(!G||!combatUIReady||G.uiNext>G.time)return;return pacedCombatUI();};
 function disposeTerrain(mesh){if(!mesh)return;G.world.remove(mesh);mesh.traverse(o=>{o.geometry?.dispose();if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>m.dispose());});}\r
 const buildPlateauPatch=buildTerrainMesh;\r
 function makeTerrainRoot(){const root=new THREE.Mesh(new THREE.BufferGeometry(),[]);root.userData.chunks=new Map();G.world.add(root);G.terrain=root;return root;}\r
 function plateauChunk(root,x,z){const prior=G.terrain;G.terrainBuildBounds=[x*4+WORLD/2,x*4+WORLD/2+3,z*4+WORLD/2,z*4+WORLD/2+3];let mesh;try{mesh=buildPlateauPatch();}finally{delete G.terrainBuildBounds;G.terrain=prior;}root.add(mesh);root.userData.chunks.set(x+','+z,mesh);}\r
 function wantedTerrainChunks(){const [cx,cz]=worldToCell(G.player?.pos||V3()),x=cx-WORLD/2,z=cz-WORLD/2,result=[];for(let a=Math.floor((x-17)/4);a<=Math.floor((x+17)/4);a++)for(let b=Math.floor((z-17)/4);b<=Math.floor((z+17)/4);b++){if(a*4+WORLD/2+3<0||b*4+WORLD/2+3<0||a*4+WORLD/2>=WORLD||b*4+WORLD/2>=WORLD)continue;result.push([a,b]);}return result.sort((a,b)=>Math.hypot(a[0]*4-x,a[1]*4-z)-Math.hypot(b[0]*4-x,b[1]*4-z));}\r
 buildTerrainMesh=function(){if(!plateauMode())return buildPlateauPatch();const root=makeTerrainRoot();for(const [x,z]of wantedTerrainChunks())plateauChunk(root,x,z);G.groundCenter=(G.player?.pos||V3()).clone();return root;};\r
-function streamPlateauTerrain(){if(!G.terrain?.userData.chunks){disposeTerrain(G.terrain);buildTerrainMesh();return;}if(G.groundCenter&&G.groundCenter.distanceTo(G.player.pos)<CELL*2&&!G.terrainQueue?.length)return;const root=G.terrain,wanted=wantedTerrainChunks(),keys=new Set(wanted.map(c=>c.join(',')));G.terrainQueue=wanted.filter(c=>!root.userData.chunks.has(c.join(',')));const start=frameClock();while(G.terrainQueue.length){const [x,z]=G.terrainQueue.shift();plateauChunk(root,x,z);if(frameClock()-start>=2)break;}if(!G.terrainQueue.length){for(const [key,mesh]of root.userData.chunks)if(!keys.has(key)){root.remove(mesh);disposeTerrain(mesh);root.userData.chunks.delete(key);}G.groundCenter=G.player.pos.clone();}}\r
+function streamPlateauTerrain(budget=2){
+ if(!G.terrain?.userData.chunks){disposeTerrain(G.terrain);buildTerrainMesh();return;}
+ if(G.groundCenter&&G.groundCenter.distanceTo(G.player.pos)<CELL*2&&!G.terrainQueue?.length&&!G.terrainChunkJob)return;
+ const root=G.terrain,wanted=wantedTerrainChunks(),keys=new Set(wanted.map(c=>c.join(',')));
+ let job=G.terrainChunkJob;
+ // A rebuilt root or a teleport makes an unfinished patch obsolete.
+ if(job&&(job.root!==root||job.size!==WORLD||!keys.has(job.key)))G.terrainChunkJob=job=null;
+ G.terrainQueue=wanted.filter(c=>!root.userData.chunks.has(c.join(',')));
+ const start=frameClock();
+ while(G.terrainQueue.length){
+  if(!job){const [x,z]=G.terrainQueue[0];job=G.terrainChunkJob={root,size:WORLD,key:x+','+z,bounds:[x*4+WORLD/2,x*4+WORLD/2+3,z*4+WORLD/2,z*4+WORLD/2+3],steps:plateauPatchSteps()};}
+  let step;const center=G.groundCenter;
+  G.terrainBuildBounds=job.bounds;
+  try{step=job.steps.next();}finally{delete G.terrainBuildBounds;G.terrain=root;G.groundCenter=center;}
+  if(step.done){root.add(step.value);root.userData.chunks.set(job.key,step.value);G.terrainQueue=G.terrainQueue.filter(c=>c.join(',')!==job.key);G.terrainChunkJob=job=null;}
+  if(frameClock()-start>=budget)return;
+ }
+ for(const [key,mesh]of root.userData.chunks)if(!keys.has(key)){
+  root.remove(mesh);disposeTerrain(mesh);root.userData.chunks.delete(key);
+  if(frameClock()-start>=budget)return;
+ }
+ G.groundCenter=G.player.pos.clone();
+}
 function streamFoliage(){if(!G.foliageJob&&(!G.foliageCenter||G.foliageCenter.distanceTo(G.player.pos)>20)){G.foliageJob=foliageJob();G.foliageJobStart=G.player.pos.clone();}if(!G.foliageJob)return;const start=frameClock();do{if(G.foliageJob.next().done){G.foliageJob=null;break;}}while(frameClock()-start<1);}\r
 // Rebuilds requested by construction must dispose child chunks too.\r
 redrawTerrain=function(){disposeTerrain(G.terrain);buildTerrainMesh();rebuildCollision();if(G.site)refreshRoutes();};\r
