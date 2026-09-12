@@ -12,6 +12,12 @@ Download this repository and open [playable/last-bastion-world-lab.html](playabl
 
 Saves live in browser storage. Export an important save from the game menu before switching browsers or moving the HTML file.
 
+## Game wiki
+
+Choose **Game wiki** on the main menu, or open the [online field guide](https://jchoxha.github.io/last-bastion/#wiki/start-here). It covers controls, classes and all abilities, talents, construction prices, resident staffing, sieges, enemies, landmarks, saves, and the source architecture. Search works across all chapters, and the wiki is bundled into the standalone game for offline reading.
+
+The editable source is [docs/GAME-WIKI.md](docs/GAME-WIKI.md). Run `npm run build:wiki` after editing it; normal development and build commands also regenerate the bundle. `npm run test:wiki` checks the generated content, source paths, and current ability/building catalog values. Update the guide with mechanics changes. Earlier update guides at the repository root are historical and can describe superseded behavior.
+
 ## Development
 
 Use Node.js 24 LTS and npm.

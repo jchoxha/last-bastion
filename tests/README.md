@@ -1,5 +1,8 @@
 # Current verification
 
+- `npm run test:wiki`: guide structure, generated-content freshness, source paths, current move cooldowns, building base prices, and settlement/structure recipes.
+- `node tests/browser-wiki.cjs` after `npm run build:standalone`: main-menu access without a run, search/no-results, chapter deep links and history, responsive tables, focus restoration, and preserving the same paused game through a wiki visit. Uses a temporary localhost port and saves screenshots under `work/`.
+
 - `node tests/browser-lag-spikes.cjs` (after `npm run build:standalone`): runs the playable build in Chrome on a temporary localhost server, checks streaming across animation frames and actual DOM mutations, and saves diagnostics in `work/`.
 
 - `node tests/lag-spikes.test.cjs`: resumable terrain patches, hidden partial geometry, cancellation after teleporting, save isolation, and throttling across the complete HUD update chain. Logs streaming CPU time; timing is diagnostic rather than a machine-dependent pass/fail threshold.

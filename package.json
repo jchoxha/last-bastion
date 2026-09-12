@@ -6,15 +6,17 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "vinext dev",
-    "build": "vinext build",
+    "dev": "npm run build:wiki && vinext dev",
+    "build": "npm run build:wiki && vinext build",
     "start": "wrangler dev --config dist/server/wrangler.json",
     "lint": "oxlint",
     "format": "oxfmt",
     "build:pages": "npm run build:standalone && node scripts/stage-pages.mjs",
-    "build:standalone": "node scripts/integrate-bastion.cjs && node scripts/build-standalone.mjs",
+    "build:standalone": "node scripts/integrate-bastion.cjs && npm run build:wiki && node scripts/build-standalone.mjs",
     "test:world": "node --experimental-strip-types tests/world.test.cjs",
-    "test:game": "node scripts/integrate-bastion.cjs && node --experimental-strip-types tests/settlement.test.cjs && node --experimental-strip-types tests/campaign.test.cjs && node --experimental-strip-types tests/expedition.test.cjs && node --experimental-strip-types tests/rolling-world.test.cjs && node --experimental-strip-types tests/rounded-plateaus.test.cjs && node --experimental-strip-types tests/traversal-performance.test.cjs && node --experimental-strip-types tests/frame-pacing.test.cjs && node --experimental-strip-types tests/lag-spikes.test.cjs"
+    "test:game": "node scripts/integrate-bastion.cjs && node --experimental-strip-types tests/settlement.test.cjs && node --experimental-strip-types tests/campaign.test.cjs && node --experimental-strip-types tests/expedition.test.cjs && node --experimental-strip-types tests/rolling-world.test.cjs && node --experimental-strip-types tests/rounded-plateaus.test.cjs && node --experimental-strip-types tests/traversal-performance.test.cjs && node --experimental-strip-types tests/frame-pacing.test.cjs && node --experimental-strip-types tests/lag-spikes.test.cjs",
+    "build:wiki": "node scripts/build-wiki.mjs",
+    "test:wiki": "node scripts/integrate-bastion.cjs && node tests/wiki.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",
