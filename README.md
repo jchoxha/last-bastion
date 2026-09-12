@@ -18,7 +18,11 @@ Choose **Game wiki** on the main menu, or open the [online field guide](https://
 
 The editable source is [docs/GAME-WIKI.md](docs/GAME-WIKI.md). Run `npm run build:wiki` after editing it; normal development and build commands also regenerate the bundle. `npm run test:wiki` checks the generated content, source paths, and current ability/building catalog values. Update the guide with mechanics changes. Earlier update guides at the repository root are historical and can describe superseded behavior.
 
-## Development
+## Creature generation
+
+Open **Creature forge** on the main menu to author and save creature definitions, inspect canine/humanoid prototype rigs, export GLB templates, and spawn test enemies in a running game. Local generation works offline. Optional AI authoring uses a separately configured local service; no paid provider is enabled by default. See [docs/CREATURE-PIPELINE.md](docs/CREATURE-PIPELINE.md) for setup, contracts, supported body plans, and remaining production-asset stages.
+
+## Development setup
 
 Use Node.js 24 LTS and npm.
 
@@ -39,18 +43,18 @@ The repository retains its original React/Vinext/Sites scaffold. GitHub Pages bu
 
 ## Source map
 
-| Location | Purpose |
-| --- | --- |
-| `game/last-bastion-original.html` | Original game prototype used by the integration script |
-| `game/*.js`, `game/*.css` | Gameplay systems, UI, collision, NPCs, terrain rendering and later overrides |
-| `lib/world.ts` | Seeded terrain generation and incremental generation |
-| `lib/save-game.ts` | Save format and validation |
-| `app/bastion.tsx` | Main menu, game iframe, storage and game bridge |
-| `scripts/integrate-bastion.cjs` | Combines the prototype and ordered gameplay modules |
-| `lib/bastion-source.ts` | Generated game source; edit its inputs instead |
-| `scripts/build-standalone.mjs` | Produces the standalone HTML |
-| `tests/` | Simulation, generation, regression and browser checks |
-| `playable/` | Committed playable baseline |
+| Location                          | Purpose                                                                      |
+| --------------------------------- | ---------------------------------------------------------------------------- |
+| `game/last-bastion-original.html` | Original game prototype used by the integration script                       |
+| `game/*.js`, `game/*.css`         | Gameplay systems, UI, collision, NPCs, terrain rendering and later overrides |
+| `lib/world.ts`                    | Seeded terrain generation and incremental generation                         |
+| `lib/save-game.ts`                | Save format and validation                                                   |
+| `app/bastion.tsx`                 | Main menu, game iframe, storage and game bridge                              |
+| `scripts/integrate-bastion.cjs`   | Combines the prototype and ordered gameplay modules                          |
+| `lib/bastion-source.ts`           | Generated game source; edit its inputs instead                               |
+| `scripts/build-standalone.mjs`    | Produces the standalone HTML                                                 |
+| `tests/`                          | Simulation, generation, regression and browser checks                        |
+| `playable/`                       | Committed playable baseline                                                  |
 
 ## Checks
 

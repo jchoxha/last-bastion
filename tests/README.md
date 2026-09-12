@@ -1,5 +1,8 @@
 # Current verification
 
+- `npm run test:creatures`: deterministic creature definitions, schema/import boundaries, body-plan compatibility, actual prototype rest joints, and an AI service with a mocked upstream (no API charges).
+- `node tests/browser-creatures.cjs` after the standalone build: forge UI, library persistence, invalid imports, actual GLB export, enemy spawning, save/reload, mobile layout and offline generation.
+
 - `npm run test:wiki`: guide structure, generated-content freshness, source paths, current move cooldowns, building base prices, and settlement/structure recipes.
 - `node tests/browser-wiki.cjs` after `npm run build:standalone`: main-menu access without a run, search/no-results, chapter deep links and history, responsive tables, focus restoration, and preserving the same paused game through a wiki visit. Uses a temporary localhost port and saves screenshots under `work/`.
 

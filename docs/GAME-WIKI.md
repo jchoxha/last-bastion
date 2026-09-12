@@ -29,26 +29,26 @@ The game is designed for keyboard and mouse. This wiki adapts to a phone-sized s
 
 ### Essential controls
 
-| Input | Current action |
-| --- | --- |
-| W / A / S / D | Move; third-person A / D turn unless right mouse is held |
-| Shift | Sprint; climb faster while attached to a wall |
-| Mouse / hold right mouse | Look in first person; hold right mouse to turn the camera in other views |
-| Mouse wheel | Adjust camera distance |
-| V | Cycle overhead, third person, and first person |
-| Space | Jump; hold Space + W against a climbable wall to climb |
-| E | Interact with the nearest or aimed eligible object; close the interaction menu |
-| 1–6 | Select an unlocked ability; press the selected slot again to cast |
-| Left mouse | Cast the selected move, confirm an area, or place/help build according to context |
-| Right-click an ability button | Toggle automatic use for that ability |
-| Tab | Cycle targets |
-| B | Enter or leave build mode |
-| F | Place a blueprint in build mode; help a nearby aimed construction plan |
-| R / T | With wall stairs selected: rotate wall side / reverse ascent |
-| N | Open talents |
-| Alt, held | Release first-person mouse capture to use the interface |
-| Escape | Cancel building/targeting and close interaction UI; use Menu or Pause to pause the run |
-| F2 | Open testing tools |
+| Input                         | Current action                                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------------- |
+| W / A / S / D                 | Move; third-person A / D turn unless right mouse is held                               |
+| Shift                         | Sprint; climb faster while attached to a wall                                          |
+| Mouse / hold right mouse      | Look in first person; hold right mouse to turn the camera in other views               |
+| Mouse wheel                   | Adjust camera distance                                                                 |
+| V                             | Cycle overhead, third person, and first person                                         |
+| Space                         | Jump; hold Space + W against a climbable wall to climb                                 |
+| E                             | Interact with the nearest or aimed eligible object; close the interaction menu         |
+| 1–6                           | Select an unlocked ability; press the selected slot again to cast                      |
+| Left mouse                    | Cast the selected move, confirm an area, or place/help build according to context      |
+| Right-click an ability button | Toggle automatic use for that ability                                                  |
+| Tab                           | Cycle targets                                                                          |
+| B                             | Enter or leave build mode                                                              |
+| F                             | Place a blueprint in build mode; help a nearby aimed construction plan                 |
+| R / T                         | With wall stairs selected: rotate wall side / reverse ascent                           |
+| N                             | Open talents                                                                           |
+| Alt, held                     | Release first-person mouse capture to use the interface                                |
+| Escape                        | Cancel building/targeting and close interaction UI; use Menu or Pause to pause the run |
+| F2                            | Open testing tools                                                                     |
 
 ### Aiming and interaction
 
@@ -91,44 +91,44 @@ Each class has six action-bar slots. Slot 1 is available immediately; the remain
 
 ### Starting class statistics
 
-| Class | Health | Melee stat | Ranged stat | Movement speed | Role |
-| --- | --- | --- | --- | --- | --- |
-| Knight | 130 | 20 | 6 | 6.6 | Close-range control and protection |
-| Ranger | 85 | 9 | 15 | 7.8 | Mobile ranged attacks and positioning |
-| Pyromancer | 95 | 8 | 12 | 6.8 | Burning areas and grouped enemies |
+| Class      | Health | Melee stat | Ranged stat | Movement speed | Role                                  |
+| ---------- | ------ | ---------- | ----------- | -------------- | ------------------------------------- |
+| Knight     | 130    | 20         | 6           | 6.6            | Close-range control and protection    |
+| Ranger     | 85     | 9          | 15          | 7.8            | Mobile ranged attacks and positioning |
+| Pyromancer | 95     | 8          | 12          | 6.8            | Burning areas and grouped enemies     |
 
 ### Knight moves
 
-| Slot | Move | Cooldown | Range / area | Behavior |
-| --- | --- | --- | --- | --- |
-| 1 | Cleave | 0.55 | 3 | Frontal melee sweep with knockback |
-| 2 | Shield guard | 8 | Self | Reduce incoming damage by 80% for 3 seconds |
-| 3 | Shield bash | 5 | 4 | Wide strike with strong knockback |
-| 4 | Whirlwind | 8 | 4.5 radius | Strike the surrounding pack and push it outward |
-| 5 | Rally | 18 | Self | Restore 35 health, capped at maximum |
-| 6 | Charging strike | 7 | Up to 8 | Move over 0.4 seconds and hit enemies crossed; terrain stops the charge |
+| Slot | Move            | Cooldown | Range / area | Behavior                                                                |
+| ---- | --------------- | -------- | ------------ | ----------------------------------------------------------------------- |
+| 1    | Cleave          | 0.55     | 3            | Frontal melee sweep with knockback                                      |
+| 2    | Shield guard    | 8        | Self         | Reduce incoming damage by 80% for 3 seconds                             |
+| 3    | Shield bash     | 5        | 4            | Wide strike with strong knockback                                       |
+| 4    | Whirlwind       | 8        | 4.5 radius   | Strike the surrounding pack and push it outward                         |
+| 5    | Rally           | 18       | Self         | Restore 35 health, capped at maximum                                    |
+| 6    | Charging strike | 7        | Up to 8      | Move over 0.4 seconds and hit enemies crossed; terrain stops the charge |
 
 ### Ranger moves
 
-| Slot | Move | Cooldown | Range / area | Behavior |
-| --- | --- | --- | --- | --- |
-| 1 | Piercing arrow | 0.65 | 38 | Arrow can hit multiple aligned enemies |
-| 2 | Split shot | 3 | 30 | Five arrows in a fan |
-| 3 | Gust arrow | 4 | 30 | Heavy projectile knockback |
-| 4 | Snare field | 9 | 26 cast; 4.5 radius | Seven-second field slows enemies by 70% |
-| 5 | Steady focus | 14 | Self | Piercing arrow and Split shot gain 75% damage for 6 seconds |
-| 6 | Evasive roll | 5 | Up to 6 | Brief evade window; solid terrain blocks travel |
+| Slot | Move           | Cooldown | Range / area        | Behavior                                                    |
+| ---- | -------------- | -------- | ------------------- | ----------------------------------------------------------- |
+| 1    | Piercing arrow | 0.65     | 38                  | Arrow can hit multiple aligned enemies                      |
+| 2    | Split shot     | 3        | 30                  | Five arrows in a fan                                        |
+| 3    | Gust arrow     | 4        | 30                  | Heavy projectile knockback                                  |
+| 4    | Snare field    | 9        | 26 cast; 4.5 radius | Seven-second field slows enemies by 70%                     |
+| 5    | Steady focus   | 14       | Self                | Piercing arrow and Split shot gain 75% damage for 6 seconds |
+| 6    | Evasive roll   | 5        | Up to 6             | Brief evade window; solid terrain blocks travel             |
 
 ### Pyromancer moves
 
-| Slot | Move | Cooldown | Range / area | Behavior |
-| --- | --- | --- | --- | --- |
-| 1 | Firebolt | 0.8 | 28 | Explosive fire projectile |
-| 2 | Flamethrower | 5 | 7 | Two-second channel with repeated flame hits and burning |
-| 3 | Blast wave | 6 | 5 radius | Outward blast with heavy knockback |
-| 4 | Meteor storm | 10 | 28 cast; 4.5 radius | Impact after 1.1 seconds, followed by four seconds of burning ground |
-| 5 | Combustion | 12 | 16 radius | Detonate remaining burn on nearby burning enemies |
-| 6 | Cinder blink | 7 | Up to 7 | Move to clear terrain and leave burning ground behind |
+| Slot | Move         | Cooldown | Range / area        | Behavior                                                             |
+| ---- | ------------ | -------- | ------------------- | -------------------------------------------------------------------- |
+| 1    | Firebolt     | 0.8      | 28                  | Explosive fire projectile                                            |
+| 2    | Flamethrower | 5        | 7                   | Two-second channel with repeated flame hits and burning              |
+| 3    | Blast wave   | 6        | 5 radius            | Outward blast with heavy knockback                                   |
+| 4    | Meteor storm | 10       | 28 cast; 4.5 radius | Impact after 1.1 seconds, followed by four seconds of burning ground |
+| 5    | Combustion   | 12       | 16 radius           | Detonate remaining burn on nearby burning enemies                    |
+| 6    | Cinder blink | 7        | Up to 7             | Move to clear terrain and leave burning ground behind                |
 
 ### Combat rules worth knowing
 
@@ -144,11 +144,11 @@ Character experience, talent choices, and draft rewards are separate progression
 
 The next level costs current level × 35 XP; excess XP carries forward. Each level gives one talent point, adds 5 maximum health, and heals up to 20 health. A choice costs one point. Branch tiers require levels 2, 4, and 6 and the previous node in that branch. You can mix branches.
 
-| Class | First branch: tiers 1 / 2 / 3 | Second branch: tiers 1 / 2 / 3 |
-| --- | --- | --- |
-| Knight | Vanguard: Shield guard / Whirlwind / Rally | Battle captain: Shield bash / Charging strike / Unyielding |
-| Ranger | Sharpshooter: Split shot / Snare field / Steady focus | Pathfinder: Gust arrow / Evasive roll / Quickdraw |
-| Pyromancer | Inferno: Flamethrower / Meteor storm / Combustion | Spellweaver: Blast wave / Cinder blink / Kindled |
+| Class      | First branch: tiers 1 / 2 / 3                         | Second branch: tiers 1 / 2 / 3                             |
+| ---------- | ----------------------------------------------------- | ---------------------------------------------------------- |
+| Knight     | Vanguard: Shield guard / Whirlwind / Rally            | Battle captain: Shield bash / Charging strike / Unyielding |
+| Ranger     | Sharpshooter: Split shot / Snare field / Steady focus | Pathfinder: Gust arrow / Evasive roll / Quickdraw          |
+| Pyromancer | Inferno: Flamethrower / Meteor storm / Combustion     | Spellweaver: Blast wave / Cinder blink / Kindled           |
 
 Unyielding adds 30 maximum and current health. Quickdraw multiplies successful ability cooldowns by 0.8. Kindled increases the ranged statistic used while casting by 20%; its label says spell damage, but it is not a blanket multiplier on every damage path.
 
@@ -158,44 +158,44 @@ Typical kill XP is 8; Stonehide Brutes give 18 and Siege Lords give 80. Securing
 
 Draft screens offer choices and a skip action; rerolling costs 15 gold. These upgrades are distinct from spending talent points. The prototype upgrade pool still contains some legacy entries, so consult Maintenance notes for effects that no longer reach the current combat path.
 
-| Upgrade | Effect represented in the upgrade data |
-| --- | --- |
-| Sharper Arrows | Arrow tower damage multiplier × 1.25 |
-| Hotter Coals | Brazier multiplier × 1.3 |
-| Deeper Frost | Add 0.12 to the frost modifier |
-| Heavy Bolts | Ballista multiplier × 1.3 |
-| Veteran Guards | Legacy guard multiplier × 1.3; not trained resident damage |
-| Barbed Spikes | Legacy spike multiplier × 1.35; current resettable trap bypasses it |
-| Vigor | +30 maximum health and a full heal |
-| Swift Blade | +6 melee statistic |
-| Steady Aim | +5 ranged statistic |
-| Haste | Movement × 1.15; basic attack cooldown statistics × 0.85 |
-| Treasury | +60 gold immediately |
+| Upgrade        | Effect represented in the upgrade data                              |
+| -------------- | ------------------------------------------------------------------- |
+| Sharper Arrows | Arrow tower damage multiplier × 1.25                                |
+| Hotter Coals   | Brazier multiplier × 1.3                                            |
+| Deeper Frost   | Add 0.12 to the frost modifier                                      |
+| Heavy Bolts    | Ballista multiplier × 1.3                                           |
+| Veteran Guards | Legacy guard multiplier × 1.3; not trained resident damage          |
+| Barbed Spikes  | Legacy spike multiplier × 1.35; current resettable trap bypasses it |
+| Vigor          | +30 maximum health and a full heal                                  |
+| Swift Blade    | +6 melee statistic                                                  |
+| Steady Aim     | +5 ranged statistic                                                 |
+| Haste          | Movement × 1.15; basic attack cooldown statistics × 0.85            |
+| Treasury       | +60 gold immediately                                                |
 
 ### Relic reference
 
 Relics are named run modifiers in the draft pool. The following table distinguishes useful current hooks from descriptions inherited from older systems; it does not promise every legacy description works unchanged.
 
-| Relic | Rule or current caveat |
-| --- | --- |
-| Ember Heart | Brazier synergy: each brazier adds 30% to the brazier heat factor |
-| Miser's Ledger | Wave reward interest: 10% of gold, capped at 60 |
-| Twin Springs | Legacy double-spike effect; current resettable spike path bypasses it |
-| Frostbite | Slowed enemies take 45% more damage through the shared damage function |
-| Bloodlust | Melee hits handled by the basic melee path heal 3 per hit |
-| Marksman | Arrow towers gain 2 range and 20% damage |
-| Bounty Board | +2 gold per kill |
-| Iron Core | Legacy portal health/healing hooks; later portal creation resets base health to 400 |
-| Overclock | Legacy tower firing cadence × 0.75; resettable traps do not use that timer |
-| Wind Bolts | Ballista projectile piercing |
-| Warcry | Legacy guard-tower bonus; not a trained-resident aura |
-| Glass Cannon | Player damage modifier and a 30-health maximum penalty |
-| Echo Stone | Legacy tower firing path has a 20% repeat-fire chance |
-| Pitch Kindling | Legacy tar/burn interaction; current resettable tar does not create the old tar marker |
-| Guild Discount | Gold construction cost × 0.8; material recipes are unchanged |
-| Second Wind | Immediate player revival rather than the usual death delay and penalty |
-| Surveyor's Chain | New portal claim radius gains two tiles |
-| Salvage Rights | Old secure-claim refund is bypassed by the current settlement secure function |
+| Relic            | Rule or current caveat                                                                 |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Ember Heart      | Brazier synergy: each brazier adds 30% to the brazier heat factor                      |
+| Miser's Ledger   | Wave reward interest: 10% of gold, capped at 60                                        |
+| Twin Springs     | Legacy double-spike effect; current resettable spike path bypasses it                  |
+| Frostbite        | Slowed enemies take 45% more damage through the shared damage function                 |
+| Bloodlust        | Melee hits handled by the basic melee path heal 3 per hit                              |
+| Marksman         | Arrow towers gain 2 range and 20% damage                                               |
+| Bounty Board     | +2 gold per kill                                                                       |
+| Iron Core        | Legacy portal health/healing hooks; later portal creation resets base health to 400    |
+| Overclock        | Legacy tower firing cadence × 0.75; resettable traps do not use that timer             |
+| Wind Bolts       | Ballista projectile piercing                                                           |
+| Warcry           | Legacy guard-tower bonus; not a trained-resident aura                                  |
+| Glass Cannon     | Player damage modifier and a 30-health maximum penalty                                 |
+| Echo Stone       | Legacy tower firing path has a 20% repeat-fire chance                                  |
+| Pitch Kindling   | Legacy tar/burn interaction; current resettable tar does not create the old tar marker |
+| Guild Discount   | Gold construction cost × 0.8; material recipes are unchanged                           |
+| Second Wind      | Immediate player revival rather than the usual death delay and penalty                 |
+| Surveyor's Chain | New portal claim radius gains two tiles                                                |
+| Salvage Rights   | Old secure-claim refund is bypassed by the current settlement secure function          |
 
 Sources: [Talents and XP](https://github.com/jchoxha/last-bastion/blob/main/game/frontier-ui.js), [Draft and relic hooks](https://github.com/jchoxha/last-bastion/blob/main/game/last-bastion-original.html), [Current trap path](https://github.com/jchoxha/last-bastion/blob/main/game/expedition-ai.js), [Current securing reward](https://github.com/jchoxha/last-bastion/blob/main/game/settlement.js).
 
@@ -209,10 +209,10 @@ Environmental trees supply wood; rocks become stone or ore nodes. Claiming terra
 
 Hand harvesting takes up to 2 units per click with a one-second cooldown. Laborers harvest up to 4 units after 3 seconds of work, then deliver to their portal. Travel, obstacles, duty priorities, and returning with cargo affect actual throughput.
 
-| Production building | Required worker | Base yield after 10 seconds of on-site work |
-| --- | --- | --- |
-| Tree farm | Laborer with wood duty enabled | 3 wood |
-| Mine | Laborer with mining duty enabled | 1 ore and 2 stone |
+| Production building | Required worker                  | Base yield after 10 seconds of on-site work |
+| ------------------- | -------------------------------- | ------------------------------------------- |
+| Tree farm           | Laborer with wood duty enabled   | 3 wood                                      |
+| Mine                | Laborer with mining duty enabled | 1 ore and 2 stone                           |
 
 Staffed production does not consume natural nodes. Assigning a worker does not teleport them to the building: they must reach it. Saved tool upgrades accelerate gathering/production work by a factor of 1 + 0.3 × tool level. The current settlement browser no longer exposes the older research controls; see Maintenance notes.
 
@@ -221,11 +221,11 @@ Staffed production does not consume natural nodes. Assigning a worker does not t
 Crafting a portal kit costs 80 gold, 40 wood, 30 stone, and 20 ore. Use a friendly portal's interaction menu to craft. Placing a portal consumes one kit. Kits can also be bought from merchants or found through exploration rewards.
 
 | Merchant item | Buy price | Sell return per unit |
-| --- | --- | --- |
-| Wood | 2 gold | 1 gold |
-| Stone | 3 gold | 1 gold |
-| Ore | 6 gold | 3 gold |
-| Portal kit | 180 gold | 90 gold |
+| ------------- | --------- | -------------------- |
+| Wood          | 2 gold    | 1 gold               |
+| Stone         | 3 gold    | 1 gold               |
+| Ore           | 6 gold    | 3 gold               |
+| Portal kit    | 180 gold  | 90 gold              |
 
 Trades require a living merchant within 8 metres, enough stock, and enough gold or resources. Merchants carry finite stock; selling replenishes that stock. Traveling caravans have escorts and a gold banner. Independent villages also have settled merchants.
 
@@ -243,31 +243,31 @@ Laborers with building enabled walk to plans and contribute work. Several worker
 
 ### Defenses
 
-| Building | Base gold | Wood | Stone | Ore | Work | Operation |
-| --- | --- | --- | --- | --- | --- | --- |
-| Arrow tower | 40 | 8 | 2 | 0 | 18 | Stationed ranger; 7m base range |
-| Brazier | 55 | 0 | 8 | 2 | 18 | Stationed pyromancer; 4.2m base range |
-| Frost shrine | 50 | 0 | 8 | 3 | 18 | Stationed pyromancer; 4.5m base range |
-| Ballista | 95 | 14 | 0 | 4 | 18 | Stationed ranger; 11m base range |
-| Gale pylon | 90 | 0 | 10 | 5 | 18 | Stationed pyromancer; 9m base range |
-| Spike trap | 30 | 6 | 0 | 0 | 18 | One trigger, then reset; 7 base damage per affected enemy |
-| Tar pit | 35 | 0 | 5 | 0 | 18 | One trigger, then reset; 75% slow for 6 seconds |
-| Barbed wire | 25 | 2 | 0 | 5 | 12 | Passive edge hazard; no operator |
+| Building     | Base gold | Wood | Stone | Ore | Work | Operation                                                 |
+| ------------ | --------- | ---- | ----- | --- | ---- | --------------------------------------------------------- |
+| Arrow tower  | 40        | 8    | 2     | 0   | 18   | Stationed ranger; 7m base range                           |
+| Brazier      | 55        | 0    | 8     | 2   | 18   | Stationed pyromancer; 4.2m base range                     |
+| Frost shrine | 50        | 0    | 8     | 3   | 18   | Stationed pyromancer; 4.5m base range                     |
+| Ballista     | 95        | 14   | 0     | 4   | 18   | Stationed ranger; 11m base range                          |
+| Gale pylon   | 90        | 0    | 10    | 5   | 18   | Stationed pyromancer; 9m base range                       |
+| Spike trap   | 30        | 6    | 0     | 0   | 18   | One trigger, then reset; 7 base damage per affected enemy |
+| Tar pit      | 35        | 0    | 5     | 0   | 18   | One trigger, then reset; 75% slow for 6 seconds           |
+| Barbed wire  | 25        | 2    | 0     | 5   | 12   | Passive edge hazard; no operator                          |
 
 ### Structures, housing, and work buildings
 
-| Building | Base gold | Wood | Stone | Ore | Work | Purpose |
-| --- | --- | --- | --- | --- | --- | --- |
-| Wall | 20 | 4 | 1 | 0 | 10 | Blocks a shared tile edge |
-| Courtyard gate | 35 | 8 | 3 | 2 | 16 | Friendly proximity opens a passage |
-| Wall stairs | 30 | 10 | 6 | 0 | 30 | Connect a lower tile to a level above |
-| Homestead | 65 | 24 | 10 | 0 | 24 | Six additional beds and laborer recruitment |
-| Warrior lodge | 90 | 25 | 20 | 8 | 35 | Train a knight |
-| Ranger school | 90 | 35 | 10 | 5 | 35 | Train a ranger |
-| Ember academy | 120 | 15 | 30 | 15 | 45 | Train a pyromancer |
-| Mine | 85 | 20 | 15 | 5 | 30 | Staffed ore and stone production |
-| Tree farm | 75 | 20 | 8 | 0 | 28 | Staffed wood production |
-| Portal gate | 1 kit | — | — | — | Instant | New claim, travel connection, and defense objective |
+| Building       | Base gold | Wood | Stone | Ore | Work    | Purpose                                             |
+| -------------- | --------- | ---- | ----- | --- | ------- | --------------------------------------------------- |
+| Wall           | 20        | 4    | 1     | 0   | 10      | Blocks a shared tile edge                           |
+| Courtyard gate | 35        | 8    | 3     | 2   | 16      | Friendly proximity opens a passage                  |
+| Wall stairs    | 30        | 10   | 6     | 0   | 30      | Connect a lower tile to a level above               |
+| Homestead      | 65        | 24   | 10    | 0   | 24      | Six additional beds and laborer recruitment         |
+| Warrior lodge  | 90        | 25   | 20    | 8   | 35      | Train a knight                                      |
+| Ranger school  | 90        | 35   | 10    | 5   | 35      | Train a ranger                                      |
+| Ember academy  | 120       | 15   | 30    | 15  | 45      | Train a pyromancer                                  |
+| Mine           | 85        | 20   | 15    | 5   | 30      | Staffed ore and stone production                    |
+| Tree farm      | 75        | 20   | 8     | 0   | 28      | Staffed wood production                             |
+| Portal gate    | 1 kit     | —    | —     | —   | Instant | New claim, travel connection, and defense objective |
 
 ### Placement and refunds
 
@@ -341,20 +341,20 @@ The wilderness has roaming monsters, hostile portal reinforcements, and settleme
 
 ### Bestiary
 
-| Enemy | Base health | Base speed | Base hit damage | Base gold | Distinct behavior |
-| --- | --- | --- | --- | --- | --- |
-| Ashborn Grunt | 32 | 2.3 | 6 | 4 | Basic melee pressure |
-| Briar Runner | 18 | 4.3 | 4 | 3 | Fast, fragile attacker |
-| Stonehide Brute | 130 | 1.45 | 14 | 13 | Heavy melee; resists knockback |
-| Hollow Shaman | 55 | 2.1 | 5 | 11 | Heals nearby mobile allies within 5m |
-| The Siege Lord | 950 | 1.15 | 25 | 90 | Large, durable elite; strongly resists knockback |
-| Dusk Stalker | 40 | 4.1 | 9 | 6 | Rushes faster when close to its goal |
-| Venom Spitter | 50 | 2 | 7 | 8 | Ranged attacks apply poison |
-| Ironhide Bulwark | 210 | 1.2 | 16 | 18 | Receives 60% of incoming damage |
-| Cinder Bomber | 28 | 3.4 | 24 | 7 | Detonates near a target, adding an area hit |
-| Rime Wraith | 60 | 2.5 | 6 | 9 | Ranged chill reduces player movement |
-| Monster Portal Gate | 450 | 0 | 0 | 60 | Anchored reinforcement source |
-| Settlement Watchtower | 180 | 0 | 12 | 25 | Anchored ranged hostile structure |
+| Enemy                 | Base health | Base speed | Base hit damage | Base gold | Distinct behavior                                |
+| --------------------- | ----------- | ---------- | --------------- | --------- | ------------------------------------------------ |
+| Ashborn Grunt         | 32          | 2.3        | 6               | 4         | Basic melee pressure                             |
+| Briar Runner          | 18          | 4.3        | 4               | 3         | Fast, fragile attacker                           |
+| Stonehide Brute       | 130         | 1.45       | 14              | 13        | Heavy melee; resists knockback                   |
+| Hollow Shaman         | 55          | 2.1        | 5               | 11        | Heals nearby mobile allies within 5m             |
+| The Siege Lord        | 950         | 1.15       | 25              | 90        | Large, durable elite; strongly resists knockback |
+| Dusk Stalker          | 40          | 4.1        | 9               | 6         | Rushes faster when close to its goal             |
+| Venom Spitter         | 50          | 2          | 7               | 8         | Ranged attacks apply poison                      |
+| Ironhide Bulwark      | 210         | 1.2        | 16              | 18        | Receives 60% of incoming damage                  |
+| Cinder Bomber         | 28          | 3.4        | 24              | 7         | Detonates near a target, adding an area hit      |
+| Rime Wraith           | 60          | 2.5        | 6               | 9         | Ranged chill reduces player movement             |
+| Monster Portal Gate   | 450         | 0          | 0               | 60        | Anchored reinforcement source                    |
+| Settlement Watchtower | 180         | 0          | 12              | 25        | Anchored ranged hostile structure                |
 
 ### Threat and positioning
 
@@ -368,18 +368,30 @@ Destroy the settlement's hostile portal and all its mobile defenders, then inter
 
 Sources: [Baseline species](https://github.com/jchoxha/last-bastion/blob/main/game/last-bastion-original.html), [Campaign species and encounters](https://github.com/jchoxha/last-bastion/blob/main/game/frontier-war.js), [Threat retention](https://github.com/jchoxha/last-bastion/blob/main/game/expedition-ai.js).
 
+### Creature forge
+
+Open Creature forge from the main menu to create Chimera-style creature definitions. Choose body types, a family or manifestation, attunements, descriptive subtypes, a size form, combat role and physical body plan. Generate locally works offline; identical inputs produce the same result. Concept text is kept as the description, not interpreted into a detailed mesh. Optional AI authoring requires a separately configured service and authors names, descriptions and colors only.
+
+Canine and humanoid body plans have animated procedural prototypes. Inspect rest, idle and walk poses, toggle the skeleton, or export a prototype GLB, rig contract and reference brief. Other plans are clearly marked as concepts and cannot be spawned. These are initial rigs with rigid weights, not finished AI models or production-quality animations. Image generation, detailed mesh import and organic skinning remain future stages.
+
+Save definitions in the separate device library (48 creatures), or export/import individual creature JSON files. The library does not travel with a game save. To test an enemy, first start a run, select a class, move outside the protected settlement, return to the menu and open the forge. Spawn test enemy places a hostile creature near you while the run remains paused. Resume to fight it. The normal enemy cap applies; a run can hold 64 custom species including the older creature lab. Spawned creatures and their definitions are included when you save that run.
+
+Generated enemies currently use basic melee behavior and role-based health, damage and speed; form affects health, damage and physical scale. They award no gold. Attunements, subtypes and archetypes are identity metadata in this prototype, not additional spells or resistances. Companions and automatic inclusion in encounters are not implemented. Removing an entry from the library does not remove an enemy already in a run.
+
+Sources: [Creature pipeline and service setup](https://github.com/jchoxha/last-bastion/blob/main/docs/CREATURE-PIPELINE.md), [Creature definitions](https://github.com/jchoxha/last-bastion/blob/main/lib/creatures/core.ts), [Prototype rigs](https://github.com/jchoxha/last-bastion/blob/main/lib/creatures/actor.ts).
+
 ## Landmarks and exploration rewards
 
 Landmarks persist in the save. Interact near their central point; discovering a location and claiming its reward are separate actions.
 
 ### Pools, ruins, and villages
 
-| Landmark | Minimap color | Current interaction |
-| --- | --- | --- |
-| Springwater pool | Blue | Wading slows movement to 65%; a safe drink restores 25 health with a 30-second cooldown |
-| Old-world ruins | Pale stone | One-time 45 gold, 15 stone, 40 XP, and a shrine draft |
-| Wayfarer settlement | Gold | Trade with the market merchant or hire a ranger for 100 gold if a friendly home has space |
-| Ashvault dungeon | Purple | Three chamber encounters followed by a one-time vault cache |
+| Landmark            | Minimap color | Current interaction                                                                       |
+| ------------------- | ------------- | ----------------------------------------------------------------------------------------- |
+| Springwater pool    | Blue          | Wading slows movement to 65%; a safe drink restores 25 health with a 30-second cooldown   |
+| Old-world ruins     | Pale stone    | One-time 45 gold, 15 stone, 40 XP, and a shrine draft                                     |
+| Wayfarer settlement | Gold          | Trade with the market merchant or hire a ranger for 100 gold if a friendly home has space |
+| Ashvault dungeon    | Purple        | Three chamber encounters followed by a one-time vault cache                               |
 
 A safe drink requires no living enemy within 12 metres. A village hire joins through the receiving friendly portal's arrival logic; it is not a new controllable player character. Biome color alone does not grant a resource bonus.
 
@@ -458,34 +470,34 @@ Keep these dependencies in mind when balancing. Reducing a tower price alone may
 
 The React application owns the menu, wiki, save storage, and iframe lifecycle. The Three.js game runs in an iframe whose source is assembled from the original prototype and a specific sequence of gameplay scripts. Many later scripts wrap or replace functions declared earlier. To identify the live rule, follow that load order through the last assignment instead of reading the first matching definition.
 
-| Source | Responsibility |
-| --- | --- |
-| app/bastion.tsx | Menu, session controller, pause/resume, storage bridge |
-| app/bastion/game-wiki.tsx | Wiki navigation, search, and readable presentation |
-| docs/GAME-WIKI.md | Editable single source for this guide |
-| scripts/build-wiki.mjs | Compile guide content into the bundled wiki data |
-| lib/world.ts | Seeded connected terrain and incremental world generation |
-| lib/save-game.ts | Outer save types and validation |
-| game/last-bastion-original.html | Prototype constants, base combat, renderer, draft pools |
-| game/integration.js | Save/load, bridge, initial terrain integration, movement hooks |
-| game/spatial.js and game/navigation.js | Physical footprints, flow fields, strategic routes |
-| game/combat.js and game/portals.js | Abilities, effects, economy and portal foundations |
-| game/controls.js | Current input, targeting, interaction, sales |
-| game/settlement.js | Buildings, residents, natural resources, starting settlement |
-| game/frontier-structures.js | Edges, gates, wire, construction help, destruction |
-| game/frontier-npcs.js | Duties, orders, production, training, resident movement |
-| game/frontier-war.js | Campaign enemies, sieges, merchants, outpost capture |
-| game/frontier-ui.js | Build categories, settlement browser, talent branches |
-| game/expedition-geometry.js | Wall stairs and physical terrain clearance |
-| game/expedition-ai.js | Reachability recovery, threat, staffing and trap reset |
-| game/voxel-models.js | Articulated actor recipes and animations |
-| game/expedition-world.js | Biomes, sky, landmarks and dungeon rewards |
-| game/rolling-world.js and game/rounded-plateaus.js | Terrain modes, foliage, regional discoveries, cliff surfaces |
-| game/traversal-performance.js | Climbing, physical rays, actor level of detail |
-| game/frame-pacing.js | Resumable terrain, route scheduling, expansion, HUD throttling |
-| scripts/integrate-bastion.cjs | Exact script order and prototype substitutions |
-| lib/bastion-source.ts | Generated iframe source; edit the inputs instead |
-| playable/last-bastion-world-lab.html | Generated self-contained playable build |
+| Source                                             | Responsibility                                                 |
+| -------------------------------------------------- | -------------------------------------------------------------- |
+| app/bastion.tsx                                    | Menu, session controller, pause/resume, storage bridge         |
+| app/bastion/game-wiki.tsx                          | Wiki navigation, search, and readable presentation             |
+| docs/GAME-WIKI.md                                  | Editable single source for this guide                          |
+| scripts/build-wiki.mjs                             | Compile guide content into the bundled wiki data               |
+| lib/world.ts                                       | Seeded connected terrain and incremental world generation      |
+| lib/save-game.ts                                   | Outer save types and validation                                |
+| game/last-bastion-original.html                    | Prototype constants, base combat, renderer, draft pools        |
+| game/integration.js                                | Save/load, bridge, initial terrain integration, movement hooks |
+| game/spatial.js and game/navigation.js             | Physical footprints, flow fields, strategic routes             |
+| game/combat.js and game/portals.js                 | Abilities, effects, economy and portal foundations             |
+| game/controls.js                                   | Current input, targeting, interaction, sales                   |
+| game/settlement.js                                 | Buildings, residents, natural resources, starting settlement   |
+| game/frontier-structures.js                        | Edges, gates, wire, construction help, destruction             |
+| game/frontier-npcs.js                              | Duties, orders, production, training, resident movement        |
+| game/frontier-war.js                               | Campaign enemies, sieges, merchants, outpost capture           |
+| game/frontier-ui.js                                | Build categories, settlement browser, talent branches          |
+| game/expedition-geometry.js                        | Wall stairs and physical terrain clearance                     |
+| game/expedition-ai.js                              | Reachability recovery, threat, staffing and trap reset         |
+| game/voxel-models.js                               | Articulated actor recipes and animations                       |
+| game/expedition-world.js                           | Biomes, sky, landmarks and dungeon rewards                     |
+| game/rolling-world.js and game/rounded-plateaus.js | Terrain modes, foliage, regional discoveries, cliff surfaces   |
+| game/traversal-performance.js                      | Climbing, physical rays, actor level of detail                 |
+| game/frame-pacing.js                               | Resumable terrain, route scheduling, expansion, HUD throttling |
+| scripts/integrate-bastion.cjs                      | Exact script order and prototype substitutions                 |
+| lib/bastion-source.ts                              | Generated iframe source; edit the inputs instead               |
+| playable/last-bastion-world-lab.html               | Generated self-contained playable build                        |
 
 ### Save and simulation boundaries
 
@@ -534,16 +546,16 @@ Navigation jobs are resumable and shared through a revision-aware cache; collisi
 
 Use Node.js 22.13 or newer; GitHub Pages currently builds on Node.js 24. Install dependencies with npm ci. Build the menu, wiki, and game together with npm run build:standalone. The wiki compiler also runs during the normal build/development commands; its source is this Markdown file.
 
-| Command | Purpose |
-| --- | --- |
-| npm run build:wiki | Regenerate the bundled wiki from docs/GAME-WIKI.md |
-| npm run build:standalone | Rebuild the integrated game and self-contained playable HTML |
-| npm run test:world | Seeded connectivity, ramp, growth, and preservation checks |
-| npm run test:game | Current simulation regressions, including frame pacing |
-| npm run test:wiki | Guide structure and live catalog consistency checks |
+| Command                     | Purpose                                                                                       |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| npm run build:wiki          | Regenerate the bundled wiki from docs/GAME-WIKI.md                                            |
+| npm run build:standalone    | Rebuild the integrated game and self-contained playable HTML                                  |
+| npm run test:world          | Seeded connectivity, ramp, growth, and preservation checks                                    |
+| npm run test:game           | Current simulation regressions, including frame pacing                                        |
+| npm run test:wiki           | Guide structure and live catalog consistency checks                                           |
 | node tests/browser-wiki.cjs | Browser checks for menu access, search, links, mobile layout, and paused-session preservation |
-| npx tsc --noEmit | Type-check the application |
-| npm run build:pages | Stage the standalone game and deployment metadata |
+| npx tsc --noEmit            | Type-check the application                                                                    |
+| npm run build:pages         | Stage the standalone game and deployment metadata                                             |
 
 Every push to main triggers the GitHub Pages workflow. The wiki ships inside the app and the downloaded standalone file, so reading it does not require a separate wiki server. Source links point to GitHub and need a connection.
 

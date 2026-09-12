@@ -10,6 +10,8 @@
 
 ## Efficient development
 
+- Creature generation lives in `lib/creatures/` and `game/creature-forge.js`; read `docs/CREATURE-PIPELINE.md` before changing schemas, rigs, providers or save behavior. Keep prototype/planned asset status explicit and provider keys server-side.
+
 - Keep changes focused on the requested outcome; avoid unrelated refactors, formatting, and optional features.
 - Use the README and wiki source maps, targeted `rg` searches, and bounded source reads. Avoid dumping generated bundles or rereading unchanged files.
 - Choose meaningful checks for the affected behavior using `tests/README.md`. Broaden validation for shared simulation, terrain, or save changes; use browser checks for changed UI interactions. Instructions-only edits need content review and `git diff --check`, not an app rebuild.

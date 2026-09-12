@@ -1288,6 +1288,32 @@ export const wikiChapters: WikiChapter[] = [
             "text": "Sources: [Baseline species](https://github.com/jchoxha/last-bastion/blob/main/game/last-bastion-original.html), [Campaign species and encounters](https://github.com/jchoxha/last-bastion/blob/main/game/frontier-war.js), [Threat retention](https://github.com/jchoxha/last-bastion/blob/main/game/expedition-ai.js)."
           }
         ]
+      },
+      {
+        "id": "creature-forge",
+        "title": "Creature forge",
+        "blocks": [
+          {
+            "type": "paragraph",
+            "text": "Open Creature forge from the main menu to create Chimera-style creature definitions. Choose body types, a family or manifestation, attunements, descriptive subtypes, a size form, combat role and physical body plan. Generate locally works offline; identical inputs produce the same result. Concept text is kept as the description, not interpreted into a detailed mesh. Optional AI authoring requires a separately configured service and authors names, descriptions and colors only."
+          },
+          {
+            "type": "paragraph",
+            "text": "Canine and humanoid body plans have animated procedural prototypes. Inspect rest, idle and walk poses, toggle the skeleton, or export a prototype GLB, rig contract and reference brief. Other plans are clearly marked as concepts and cannot be spawned. These are initial rigs with rigid weights, not finished AI models or production-quality animations. Image generation, detailed mesh import and organic skinning remain future stages."
+          },
+          {
+            "type": "paragraph",
+            "text": "Save definitions in the separate device library (48 creatures), or export/import individual creature JSON files. The library does not travel with a game save. To test an enemy, first start a run, select a class, move outside the protected settlement, return to the menu and open the forge. Spawn test enemy places a hostile creature near you while the run remains paused. Resume to fight it. The normal enemy cap applies; a run can hold 64 custom species including the older creature lab. Spawned creatures and their definitions are included when you save that run."
+          },
+          {
+            "type": "paragraph",
+            "text": "Generated enemies currently use basic melee behavior and role-based health, damage and speed; form affects health, damage and physical scale. They award no gold. Attunements, subtypes and archetypes are identity metadata in this prototype, not additional spells or resistances. Companions and automatic inclusion in encounters are not implemented. Removing an entry from the library does not remove an enemy already in a run."
+          },
+          {
+            "type": "paragraph",
+            "text": "Sources: [Creature pipeline and service setup](https://github.com/jchoxha/last-bastion/blob/main/docs/CREATURE-PIPELINE.md), [Creature definitions](https://github.com/jchoxha/last-bastion/blob/main/lib/creatures/core.ts), [Prototype rigs](https://github.com/jchoxha/last-bastion/blob/main/lib/creatures/actor.ts)."
+          }
+        ]
       }
     ]
   },

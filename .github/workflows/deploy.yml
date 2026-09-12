@@ -26,6 +26,7 @@ jobs:
       - run: npm ci
       - run: npm run build:pages
       - run: npm run test:wiki
+      - run: npm run test:creatures
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

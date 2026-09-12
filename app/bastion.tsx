@@ -4,6 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Mountain, Play, FolderOpen, Shield, BookOpen } from 'lucide-react';
 import GameWiki from './bastion/game-wiki';
+import CreatureForge from './bastion/creature-forge';
+import {
+  makeCreature,
+  parseCreature,
+  type Creature,
+} from '@/lib/creatures/core';
+import { createCreatureActor } from '@/lib/creatures/actor';
 import { generateWorld, generateWorldSteps, type Settings } from '@/lib/world';
 import { bastionSource } from '@/lib/bastion-source';
 import { parseSave, SAVE_KEY, type SaveGame } from '@/lib/save-game';
@@ -18,7 +25,11 @@ const DEFAULT: Settings = {
 };
 type Session = { id: number; settings: Settings; saved: SaveGame | null };
 type GameWindow = Window & {
-  bastion?: { pause: (paused: boolean) => void; save: () => boolean };
+  bastion?: {
+    pause: (paused: boolean) => void;
+    save: () => boolean;
+    spawnForgedCreature?: (creature: Creature) => string;
+  };
 };
 export default function Bastion() {
   const [screen, setScreen] = useState<'menu' | 'game'>('menu'),
@@ -31,12 +42,16 @@ export default function Bastion() {
   const iframe = useRef<HTMLIFrameElement>(null),
     timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [wikiOpen, setWikiOpen] = useState(false);
+  const [forgeOpen, setForgeOpen] = useState(false);
+  const forgeButton = useRef<HTMLButtonElement>(null);
   const wikiButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const sync = () => {
       const open = window.location.hash.startsWith('#wiki/');
+      const forge = window.location.hash === '#forge';
       setWikiOpen(open);
-      if (open) {
+      setForgeOpen(forge);
+      if (open || forge) {
         (iframe.current?.contentWindow as GameWindow | null)?.bastion?.pause(
           true,
         );
@@ -57,6 +72,18 @@ export default function Bastion() {
     setWikiOpen(false);
     window.location.assign('#');
     requestAnimationFrame(() => wikiButton.current?.focus());
+  };
+  const openForge = () => {
+    (iframe.current?.contentWindow as GameWindow | null)?.bastion?.pause(true);
+    setScreen('menu');
+    setForgeOpen(true);
+    setWikiOpen(false);
+    window.location.assign('#forge');
+  };
+  const closeForge = () => {
+    setForgeOpen(false);
+    window.location.assign('#');
+    requestAnimationFrame(() => forgeButton.current?.focus());
   };
   const notify = (message: string) => {
     setNotice(message);
@@ -104,6 +131,7 @@ export default function Bastion() {
     if (!session) return;
     const bridge = {
       THREE,
+      creatures: { makeCreature, parseCreature, createCreatureActor },
       generateWorld,
       generateWorldSteps,
       settings: session.settings,
@@ -167,6 +195,19 @@ export default function Bastion() {
   return (
     <div className="bastion-shell">
       {wikiOpen && <GameWiki onClose={closeWiki} />}
+      {forgeOpen && (
+        <CreatureForge
+          onClose={closeForge}
+          canSpawn={started && !!session}
+          onSpawn={(creature) => {
+            const game = (iframe.current?.contentWindow as GameWindow | null)
+              ?.bastion;
+            if (!game?.spawnForgedCreature)
+              return 'Start a game and select a class before spawning a creature.';
+            return game.spawnForgedCreature(creature);
+          }}
+        />
+      )}
       {session && (
         <iframe
           key={session.id}
@@ -176,7 +217,7 @@ export default function Bastion() {
           allow="fullscreen; pointer-lock"
         />
       )}
-      {screen === 'menu' && !wikiOpen && (
+      {screen === 'menu' && !wikiOpen && !forgeOpen && (
         <>
           <div className="menu-backdrop wilderness-backdrop">
             <div className="distant-ridge" />
@@ -245,6 +286,18 @@ export default function Bastion() {
                 <span>
                   Game wiki
                   <small>Mechanics, building costs & design reference</small>
+                </span>
+                <b>↗</b>
+              </button>
+              <button
+                ref={forgeButton}
+                className="menu-choice"
+                onClick={openForge}
+              >
+                <Shield />
+                <span>
+                  Creature forge
+                  <small>Create, preview & test Chimera creatures</small>
                 </span>
                 <b>↗</b>
               </button>
