@@ -2,7 +2,7 @@
 import {useEffect,useRef,useState} from 'react';
 import * as THREE from 'three';
 import {Mountain,Play,FolderOpen,Shield} from 'lucide-react';
-import {generateWorld,type Settings} from '@/lib/world';
+import {generateWorld,generateWorldSteps,type Settings} from '@/lib/world';
 import {bastionSource} from '@/lib/bastion-source';
 import {parseSave,SAVE_KEY,type SaveGame} from '@/lib/save-game';
 const DEFAULT:Settings={seed:'',size:64,hilliness:.15,trees:.22,scale:2,dynamic:true,terrainMode:'plateaus'};
@@ -14,7 +14,7 @@ export default function Bastion(){
  useEffect(()=>{try{const raw=localStorage.getItem(SAVE_KEY);if(raw)setSaved(parseSave(raw));}catch{notify('The saved game could not be read. You can still start a new run.');}return()=>{if(timeout.current)clearTimeout(timeout.current);};},[]);
  const menu=()=>{(iframe.current?.contentWindow as GameWindow|null)?.bastion?.pause(true);setScreen('menu');};
  const start=(load:SaveGame|null)=>{if(started)(iframe.current?.contentWindow as GameWindow|null)?.bastion?.save();const config=load?load.config:{...DEFAULT,seed:settings.seed.trim()||Array.from(crypto.getRandomValues(new Uint32Array(2)),n=>n.toString(36)).join('-')};setSetup(false);setSession({id:Date.now(),settings:config,saved:load});setStarted(false);setScreen('game');};
- useEffect(()=>{if(!session)return;const bridge={THREE,generateWorld,settings:session.settings,saved:session.saved,notify,started:()=>setStarted(true),menu,save:(value:SaveGame,silent=false)=>{try{const raw=JSON.stringify(value);const checked=parseSave(raw);localStorage.setItem(SAVE_KEY,raw);setSaved(checked);if(!silent)notify('Game saved on this device.');return true;}catch{notify('Saving failed. Browser storage may be full or unavailable; keep this run open.');return false;}}};(window as Window & {__lastBastionBridge?:unknown}).__lastBastionBridge=bridge;if(iframe.current)iframe.current.srcdoc=bastionSource;return()=>{delete (window as Window & {__lastBastionBridge?:unknown}).__lastBastionBridge;};},[session]);
+ useEffect(()=>{if(!session)return;const bridge={THREE,generateWorld,generateWorldSteps,settings:session.settings,saved:session.saved,notify,started:()=>setStarted(true),menu,save:(value:SaveGame,silent=false)=>{try{const raw=JSON.stringify(value);localStorage.setItem(SAVE_KEY,raw);setSaved(value);if(!silent)notify('Game saved on this device.');return true;}catch{notify('Saving failed. Browser storage may be full or unavailable; keep this run open.');return false;}}};(window as Window & {__lastBastionBridge?:unknown}).__lastBastionBridge=bridge;if(iframe.current)iframe.current.srcdoc=bastionSource;return()=>{delete (window as Window & {__lastBastionBridge?:unknown}).__lastBastionBridge;};},[session]);
  const resume=()=>{setScreen('game');(iframe.current?.contentWindow as GameWindow|null)?.bastion?.pause(false);iframe.current?.focus();};
  const exportSave=()=>{if(!saved)return;const blob=new Blob([JSON.stringify(saved)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='last-bastion-save.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
  const importSave=async(file:File|undefined)=>{if(!file)return;try{if(file.size>12000000)throw new Error('Save file is too large.');const value=parseSave(await file.text());setSaved(value);notify('Save imported. Choose Load saved game to continue.');}catch(error){notify(error instanceof Error?error.message:'Could not import this save.');}};

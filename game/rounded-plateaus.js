@@ -46,10 +46,11 @@ buildTerrainMesh=function(){
  if(!plateauMode())return roundedTerrainFallback();
  const p=G.player?.pos||V3(),[px,pz]=worldToCell(p),radius=17,half=CELL/2,rim=CELL*.075;
  const offsets=[-half,-half+rim/3,-half+rim,-CELL/4,0,CELL/4,half-rim,half-rim/3,half],n=offsets.length;
- const vertices=[],uv=[],colors=[],top=[],walls=[],tileCache=G.plateauTiles??=new Map();if(tileCache.size>4096)tileCache.clear();
+ const vertices=[],uv=[],colors=[],top=[],walls=[],tileCache=G.plateauTiles??=new Map();while(tileCache.size>4096)tileCache.delete(tileCache.keys().next().value);
  const colorFor=(x,z)=>new THREE.Color(({meadow:0x839861,wetland:0x647e57,desert:0xb8a075,frost:0xb9c7bf})[biomeAt(x,z)]);
  const vertex=(x,y,z,color,wall=false)=>{const i=vertices.length/3;vertices.push(x,y,z);colors.push(color.r,color.g,color.b);uv.push((x+z)*.2,(wall?y:z)*.2);return i;};
- for(let cx=Math.max(0,px-radius);cx<=Math.min(WORLD-1,px+radius);cx++)for(let cz=Math.max(0,pz-radius);cz<=Math.min(WORLD-1,pz+radius);cz++){
+ const bounds=G.terrainBuildBounds||[px-radius,px+radius,pz-radius,pz+radius];
+ for(let cx=Math.max(0,bounds[0]);cx<=Math.min(WORLD-1,bounds[1]);cx++)for(let cz=Math.max(0,bounds[2]);cz<=Math.min(WORLD-1,bounds[3]);cz++){
   const start=vertices.length/3,topStart=top.length,wallStart=walls.length,neighborhood=[];
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++){const c=cellAt(cx+dx,cz+dz);neighborhood.push(c?c.lvl+':'+(c.ramp?.join(',')||''):'edge');}
   const tileKey=[cx-HALF,cz-HALF,G.sites?.length||0,...neighborhood].join('/'),cached=tileCache.get(tileKey);
