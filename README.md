@@ -4,6 +4,10 @@ A browser roguelike combining connected plateaus and ramps, infinite terrain exp
 
 ## Play the current version
 
+**Live game:** https://jchoxha.github.io/last-bastion/
+
+**Project directory:** https://jchoxha.github.io/project.html?p=last-bastion
+
 Download this repository and open [playable/last-bastion-world-lab.html](playable/last-bastion-world-lab.html) in Chrome or Edge. The file includes the game and its runtime dependencies; no server is required. GitHub displays the file as source, so download it before opening it.
 
 Saves live in browser storage. Export an important save from the game menu before switching browsers or moving the HTML file.
@@ -71,3 +75,18 @@ Preserve this playable baseline and the existing commit history. Refactor one sy
 6. Remove obsolete world-editor code and unused scaffold after checking dependencies.
 
 The implementation has not been refactored as part of repository setup. The latest performance work and limitations are documented in [FRAME-PACING-NOTES.md](FRAME-PACING-NOTES.md).
+
+## GitHub Pages publishing
+
+The source repository is private. Its current GitHub plan does not allow Pages from private repositories, so the standalone build is hosted in the public `jchoxha/jchoxha.github.io` repository under `last-bastion/`. Only the playable bundle and public metadata are copied; the source history remains here. Browser-delivered game code is necessarily public.
+
+To publish an update with a local clone of that repository:
+
+```sh
+npm run build:standalone
+node scripts/publish-pages.mjs ../github-pages
+```
+
+Review, commit and push the changes in `../github-pages`; its existing Pages deployment publishes them. `projects.js` in that repository owns the directory card. `last-bastion/build.json` records the source commit used for the release. Build and commit source changes before staging a release so that commit is accurate.
+
+Source pushes alone do not deploy the game. This workflow needs no additional access tokens or Actions secrets.
