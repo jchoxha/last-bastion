@@ -1,0 +1,9 @@
+import fs from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+await fs.mkdir('_site',{recursive:true});
+await fs.copyFile('playable/last-bastion-world-lab.html','_site/index.html');
+await fs.writeFile('_site/.nojekyll','');
+await fs.writeFile('_site/directory.json',JSON.stringify({links:[{label:'Play Last Bastion',url:'./',primary:true}]},null,2)+'\n');
+const commit=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+await fs.writeFile('_site/build.json',JSON.stringify({source:'https://github.com/jchoxha/last-bastion',commit},null,2)+'\n');
+console.log('GitHub Pages artifact ready in _site');

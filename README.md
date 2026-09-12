@@ -29,7 +29,7 @@ For the development server:
 npm run dev
 ```
 
-The repository retains its original React/Vinext/Sites scaffold. Creating this repository does not publish a website or configure deployment.
+The repository retains its original React/Vinext/Sites scaffold. GitHub Pages builds use the standalone export rather than the server deployment.
 
 ## Source map
 
@@ -78,15 +78,12 @@ The implementation has not been refactored as part of repository setup. The late
 
 ## GitHub Pages publishing
 
-The source repository is private. Its current GitHub plan does not allow Pages from private repositories, so the standalone build is hosted in the public `jchoxha/jchoxha.github.io` repository under `last-bastion/`. Only the playable bundle and public metadata are copied; the source history remains here. Browser-delivered game code is necessarily public.
+This public repository hosts its own project site at https://jchoxha.github.io/last-bastion/.
 
-To publish an update with a local clone of that repository:
+Every push to `main` runs `.github/workflows/deploy.yml`: install dependencies, build the standalone game, stage `_site/`, and deploy using the official GitHub Pages Actions. Manual deployment is also available through Actions → Deploy to GitHub Pages → Run workflow.
 
 ```sh
-npm run build:standalone
-node scripts/publish-pages.mjs ../github-pages
+npm run build:pages
 ```
 
-Review, commit and push the changes in `../github-pages`; its existing Pages deployment publishes them. `projects.js` in that repository owns the directory card. `last-bastion/build.json` records the source commit used for the release. Build and commit source changes before staging a release so that commit is accurate.
-
-Source pushes alone do not deploy the game. This workflow needs no additional access tokens or Actions secrets.
+The artifact contains the game as `index.html`, a `directory.json` play link, and `build.json` identifying the deployed source commit. No server or secrets are required. The existing `jchoxha.github.io` directory links to this project via `projects.js`; it does not contain a copy of the game.
