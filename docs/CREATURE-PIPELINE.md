@@ -51,6 +51,8 @@ Jobs continue when the forge is closed. Closing the worker pauses processing; re
 
 ### Storage, hosting and validation limits
 
+The first live text-to-model run exposed Tripo's asset host `tripo-data.rg1.data.tripo3d.com`, which is now accepted alongside its `.ai` hosts. Downloads require HTTPS, reject embedded credentials/nonstandard ports and redirects, and never send the Tripo API key to storage. If an unfamiliar host is rejected, retain the saved job and verify the provider response before extending the allowlist; resume the existing task rather than generating another mesh.
+
 - `work/creature-pipeline/jobs/<job-id>/`: durable job state, complete Chimera definition, source art, neutral reference, mesh, rig and animated GLB. Failure retains successful stages. Provider keys are never written into job state.
 - `public/creatures/index.json` and immutable `asset_<hash>.glb/.png`: only installed assets. The normal Pages build copies these files into the published game. The local worker installs files automatically; it does not autonomously commit/push provider output. Normal checked source/asset commits publish through the existing main-branch workflow.
 - Public GitHub Pages is a static client. Its GitHub generation controls dispatch the Actions worker, which commits assets and deploys the updated site. The optional local worker still runs on this PC. A raw standalone HTML file requires the accompanying asset directory for generated models. Offline procedural prototypes still work without it.

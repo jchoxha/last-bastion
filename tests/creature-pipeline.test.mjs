@@ -431,3 +431,33 @@ test('text mode without source artwork uses the provider model preview as portra
     /600/,
   );
 });
+
+test('downloads accept the live Tripo storage host without credentials and reject unrelated origins', async () => {
+  const requests = [];
+  const provider = createTripo({
+    key: 'never-send-to-storage',
+    async fetchImpl(url, options) {
+      requests.push({ url: String(url), options });
+      return new Response('glb');
+    },
+  });
+  const host = 'tripo-data.rg1.data.tripo3d.com';
+  assert.equal(
+    (
+      await provider.download(`https://${host}/mesh.glb?signature=fixture`, 10)
+    ).toString(),
+    'glb',
+  );
+  assert.equal(requests[0].options.headers, undefined);
+  assert.equal(requests[0].options.redirect, 'error');
+  for (const url of [
+    `http://${host}/mesh.glb`,
+    `https://${host}.evil.example/mesh.glb`,
+    'https://127.0.0.1/mesh.glb',
+    'https://other-bucket.example/mesh.glb',
+    `https://user:secret@${host}/mesh.glb`,
+    `https://${host}:8443/mesh.glb`,
+  ])
+    await assert.rejects(provider.download(url, 10), /unexpected asset host/);
+  assert.equal(requests.length, 1);
+});

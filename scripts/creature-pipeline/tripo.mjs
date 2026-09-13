@@ -107,12 +107,19 @@ export function createTripo({ key, fetchImpl = fetch, pollMs = 5000 } = {}) {
       const parsed = new URL(url);
       if (
         parsed.protocol !== 'https:' ||
+        parsed.username ||
+        parsed.password ||
+        parsed.port ||
         !(
           parsed.hostname === 'tripo3d.ai' ||
-          parsed.hostname.endsWith('.tripo3d.ai')
+          parsed.hostname.endsWith('.tripo3d.ai') ||
+          // Observed in the authenticated v3 task response for our first live mesh.
+          parsed.hostname === 'tripo-data.rg1.data.tripo3d.com'
         )
       )
-        throw new PipelineError('Provider returned an unexpected asset host.');
+        throw new PipelineError(
+          `Provider returned an unexpected asset host (${parsed.hostname}).`,
+        );
       return boundedBytes(
         await fetchImpl(parsed, {
           signal: AbortSignal.timeout(120000),
