@@ -56,7 +56,21 @@ function Preview({
     null,
   );
   const helperRef = useRef<THREE.SkeletonHelper | null>(null);
+  const clockRef = useRef<HTMLOutputElement>(null);
+  const playbackRef = useRef({ paused: false, speed: 1 });
+  const [paused, setPaused] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  const [hasClip, setHasClip] = useState(false);
   const [error, setError] = useState('');
+  function pause(value: boolean) {
+    playbackRef.current.paused = value;
+    setPaused(value);
+  }
+  function step(direction: number) {
+    pause(true);
+    const actor = actorRef.current;
+    if (actor) actor.seekAnimation(actor.playback.time + direction / 30);
+  }
   useEffect(() => {
     if (!host.current || creature.assets.model !== 'prototype') return;
     let renderer: THREE.WebGLRenderer;
@@ -104,10 +118,28 @@ function Preview({
     });
     resize.observe(element);
     let previousState = actor.state;
+    let previousHasClip = false;
     let raf = 0,
       last = performance.now();
     const frame = (now: number) => {
-      actor.update((now - last) / 1000);
+      const playback = playbackRef.current;
+      actor.update(
+        playback.paused
+          ? 0
+          : Math.min((now - last) / 1000, 0.1) * playback.speed,
+      );
+      const position = actor.playback;
+      const available = position.duration > 0;
+      if (available !== previousHasClip) {
+        previousHasClip = available;
+        setHasClip(available);
+      }
+      element.dataset.animationTime = String(position.time);
+      element.dataset.animationDuration = String(position.duration);
+      if (clockRef.current)
+        clockRef.current.value = available
+          ? `${position.time.toFixed(2)} / ${position.duration.toFixed(2)} s`
+          : 'Static pose — no animation clip';
       element.dataset.assetState = actor.state;
       if (actor.state !== previousState) {
         previousState = actor.state;
@@ -147,19 +179,69 @@ function Preview({
     if (helperRef.current) helperRef.current.visible = bones;
   }, [creature, motion, bones]);
   return (
-    <div
-      className="forge-preview"
-      ref={host}
-      aria-label="Interactive creature preview"
-    >
-      {error && <p role="alert">{error}</p>}
-      {creature.assets.model !== 'prototype' && (
-        <p>
-          This body plan is a concept only.
-          <br />A rig must be built before 3D preview or spawning.
-        </p>
+    <>
+      <div
+        className="forge-preview"
+        ref={host}
+        aria-label="Interactive creature preview"
+      >
+        {error && <p role="alert">{error}</p>}
+        {creature.assets.model !== 'prototype' && (
+          <p>
+            This body plan is a concept only.
+            <br />A rig must be built before 3D preview or spawning.
+          </p>
+        )}
+      </div>
+      {creature.assets.model === 'prototype' && (
+        <fieldset
+          className="forge-tools"
+          aria-label="Animation playback controls"
+        >
+          <label>
+            Playback speed
+            <select
+              value={speed}
+              onChange={(e) => {
+                const next = Number(e.target.value);
+                playbackRef.current.speed = next;
+                setSpeed(next);
+              }}
+            >
+              {[0.1, 0.25, 0.5, 1].map((value) => (
+                <option key={value} value={value}>
+                  {value}×
+                </option>
+              ))}
+            </select>
+          </label>
+          <button disabled={!hasClip} onClick={() => pause(!paused)}>
+            {paused ? 'Play animation' : 'Pause animation'}
+          </button>
+          <button disabled={!hasClip} onClick={() => step(-1)}>
+            Previous frame
+          </button>
+          <button disabled={!hasClip} onClick={() => step(1)}>
+            Next frame
+          </button>
+          <button
+            disabled={!hasClip}
+            onClick={() => {
+              pause(true);
+              actorRef.current?.seekAnimation(0);
+            }}
+          >
+            Restart clip
+          </button>
+          <output ref={clockRef} aria-label="Animation position" />
+          <small>
+            Frame steps sample 1/30 second of the clip and pause playback. Drag
+            to inspect paws and joints from different angles. These controls
+            affect the preview only.
+          </small>
+        </fieldset>
       )}
-    </div>
+    </>
   );
 }
 

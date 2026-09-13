@@ -263,6 +263,25 @@ export function createRuntimeCreatureActor(creature: Creature) {
       return state;
     },
     setAnimation,
+    get playback() {
+      if (!mixer || !walk) return fallback.playback;
+      return {
+        duration: motion === 'walk' ? walk.duration : 0,
+        time: motion === 'walk' ? mixer.clipAction(walk).time : 0,
+      };
+    },
+    seekAnimation(seconds: number) {
+      if (!mixer || !walk) {
+        fallback.seekAnimation(seconds);
+        return;
+      }
+      if (motion !== 'walk' || !Number.isFinite(seconds)) return;
+      const wrapped =
+        ((seconds % walk.duration) + walk.duration) % walk.duration;
+      mixer.clipAction(walk).time =
+        wrapped < 1e-8 || walk.duration - wrapped < 1e-8 ? 0 : wrapped;
+      mixer.update(0);
+    },
     update(dt: number) {
       if (mixer) mixer.update(Math.min(dt, 0.1));
       else fallback.update(dt);

@@ -14,7 +14,8 @@ const {
     .map((dir) => path.join('work/pipeline-tests', dir, 'public/creatures'))
     .filter((dir) => fs.existsSync(path.join(dir, 'index.json')));
   assert(roots.length, 'Run npm run test:creature-pipeline first.');
-  const fixture = roots[roots.length - 1];
+  const fixture =
+    process.env.CREATURE_BROWSER_ASSETS || roots[roots.length - 1];
   const manifest = JSON.parse(
       fs.readFileSync(path.join(fixture, 'index.json')),
     ),
@@ -117,6 +118,36 @@ const {
           privateMaterials: a.mesh.material !== b.mesh.material,
           privateSkeleton: a.mesh.skeleton !== b.mesh.skeleton,
         };
+        a.seekAnimation(0);
+        const startPose = a.mesh.skeleton.bones.map((bone) =>
+          bone.quaternion.toArray().join(','),
+        );
+        a.seekAnimation(1 / 30);
+        if (Math.abs(a.playback.time - 1 / 30) > 1e-6)
+          throw Error('Frame stepping did not advance exactly 1/30 second.');
+        // Some provider clips hold their first pose until the first key at 1/30 s.
+        a.seekAnimation(0.25);
+        const steppedPose = a.mesh.skeleton.bones.map((bone) =>
+          bone.quaternion.toArray().join(','),
+        );
+        if (
+          Math.abs(a.playback.time - 0.25) > 1e-6 ||
+          !steppedPose.some((pose, i) => pose !== startPose[i])
+        )
+          throw Error('Frame stepping did not sample the actual bones.');
+        a.update(0);
+        if (
+          !a.mesh.skeleton.bones.every(
+            (bone, i) => bone.quaternion.toArray().join(',') === steppedPose[i],
+          )
+        )
+          throw Error('Paused update changed the pose.');
+        a.seekAnimation(-1 / 30);
+        if (Math.abs(a.playback.time - (a.playback.duration - 1 / 30)) > 1e-6)
+          throw Error('Backward step did not wrap to clip end.');
+        a.setAnimation('rest');
+        if (a.playback.duration !== 0)
+          throw Error('Static pose was exposed as a playable clip.');
         a.dispose();
         b.dispose();
         await api.refreshGeneratedAssets(`${base}/bad/creatures/`);
@@ -140,6 +171,61 @@ const {
     );
     await page.getByLabel('Show skeleton').check();
     await page.getByLabel('Preview motion').selectOption('walk');
+    await page
+      .getByRole('button', { name: 'Restart clip', exact: true })
+      .click();
+    const animationTime = () =>
+      page
+        .locator('.forge-preview')
+        .getAttribute('data-animation-time')
+        .then(Number);
+    await page.waitForFunction(
+      () =>
+        Number(
+          document.querySelector('.forge-preview').dataset.animationTime,
+        ) === 0,
+    );
+    await page.getByRole('button', { name: 'Next frame', exact: true }).click();
+    await page.waitForFunction(
+      () =>
+        Number(document.querySelector('.forge-preview').dataset.animationTime) >
+        0,
+    );
+    assert(Math.abs((await animationTime()) - 1 / 30) < 1e-6);
+    await page.waitForTimeout(150);
+    assert(
+      Math.abs((await animationTime()) - 1 / 30) < 1e-6,
+      'Paused pose must remain fixed.',
+    );
+    await page
+      .getByRole('button', { name: 'Previous frame', exact: true })
+      .click();
+    await page.waitForFunction(
+      () =>
+        Number(document.querySelector('.forge-preview').dataset.animationTime) <
+        1e-6,
+    );
+    await page.getByLabel('Playback speed').selectOption('0.25');
+    await page
+      .getByRole('button', { name: 'Play animation', exact: true })
+      .click();
+    const rate = await page.evaluate(async () => {
+      const el = document.querySelector('.forge-preview');
+      const start = Number(el.dataset.animationTime),
+        wall = performance.now();
+      for (let i = 0; i < 20; i++) await new Promise(requestAnimationFrame);
+      return (
+        (Number(el.dataset.animationTime) - start) /
+        ((performance.now() - wall) / 1000)
+      );
+    });
+    assert(
+      rate > 0.15 && rate < 0.35,
+      `Expected quarter-speed playback, got ${rate}`,
+    );
+    await page
+      .getByRole('button', { name: 'Pause animation', exact: true })
+      .click();
     await page.screenshot({
       path: 'work/pipeline-generated-fixture.png',
       fullPage: true,

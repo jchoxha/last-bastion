@@ -66,6 +66,12 @@ Provider contracts checked against the official [image-to-model API](https://dev
 
 ## Procedural prototype tools
 
+### Inspect animation before changing the rig
+
+The preview's **Playback speed** supports 0.1×, 0.25×, 0.5× and 1×. Select **walk**, then use **Pause animation**, **Previous frame**, **Next frame**, or **Restart clip**. Stepping pauses playback and samples exactly 1/30 second of animation time, wrapping around the clip; it does not imply the source was authored at 30 fps. The time counter shows position and clip duration. Camera orbit and skeleton visibility remain usable while paused. Static rest poses (and the generated model's current idle pose) have no playable clip, so stepping is disabled. These controls work on generated assets and prototypes and affect only the forge preview, not game speed or exported files.
+
+Use slow playback to check paw placement against the grid, stance-foot sliding, shoulder/hip deformation and the transition across the loop boundary. This is inspection tooling, not a repaired gait, foot-locking solver or animation editor. External animations remain a possible replacement, but must be retargeted to the creature's hierarchy, rest pose, proportions and axes before installation; arbitrary external clips cannot yet be imported through the forge.
+
 1. Open Creature forge. Describe the creature, choose its taxonomy, physical body plan, form, role, and seed.
 2. Click **Generate locally**. The same complete input gives the same definition. Concept text is retained as the description; local generation does not interpret natural language into a detailed mesh.
 3. For **Canine quadruped** or **Humanoid biped**, inspect the animated prototype. Drag to orbit, zoom, toggle skeleton visibility, and compare rest / idle / walk poses.

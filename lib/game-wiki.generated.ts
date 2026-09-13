@@ -1323,6 +1323,10 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
+            "text": "For generated models and prototypes, **Playback speed** offers 0.1×, 0.25×, 0.5× and 1×. Select **walk** to inspect animation, then pause, step backward/forward or restart the clip at time zero. Each frame step samples 1/30 second and pauses; stepping wraps around the clip boundary. The counter shows current time and duration. Orbit and skeleton controls remain available while paused. Static poses disable frame stepping. These controls affect the preview only and do not change the installed animation or gameplay speed. Inspect paws against the grid and watch shoulders and hips for deformation; replacement animations still need retargeting and cannot yet be imported through the forge."
+          },
+          {
+            "type": "paragraph",
             "text": "Save definitions in the separate device library (48 creatures), or export/import individual creature JSON files. The library does not travel with a game save. To test an enemy, first start a run, select a class, move outside the protected settlement, return to the menu and open the forge. Spawn test enemy places a hostile creature near you while the run remains paused. Resume to fight it. The normal enemy cap applies; a run can hold 64 custom species including the older creature lab. Spawned creatures and their definitions are included when you save that run."
           },
           {

@@ -288,6 +288,24 @@ export function createCreatureActor(creature: Creature) {
     clips,
     joints,
     setAnimation,
+    get playback() {
+      const clip =
+        active === 'walk' ? walk : active === 'idle' ? idle : undefined;
+      return {
+        duration: clip?.duration || 0,
+        time: clip ? mixer.clipAction(clip).time : 0,
+      };
+    },
+    seekAnimation(seconds: number) {
+      const clip =
+        active === 'walk' ? walk : active === 'idle' ? idle : undefined;
+      if (!clip || !Number.isFinite(seconds)) return;
+      const wrapped =
+        ((seconds % clip.duration) + clip.duration) % clip.duration;
+      mixer.clipAction(clip).time =
+        wrapped < 1e-8 || clip.duration - wrapped < 1e-8 ? 0 : wrapped;
+      mixer.update(0);
+    },
     update: (dt: number) => mixer.update(Math.min(dt, 0.1)),
     dispose: () => {
       mixer.stopAllAction();
