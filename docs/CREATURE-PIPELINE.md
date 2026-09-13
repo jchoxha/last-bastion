@@ -1,6 +1,6 @@
 # Creature generation pipeline
 
-Status: an automated Chimera → image → mesh → rig → animation → game installation worker is implemented, alongside the older procedural prototype. Open **Creature forge** on the main menu, or `#forge`. The Tripo integration has been tested with simulated provider responses and a synthetic skinned test asset, not a live paid generation. No real generated creature has passed visual rig review in this integration yet. A Tripo API key and credits are required for the current mesh worker; no paid service is enabled by default.
+Status: automated Chimera → text or image → mesh → rig → animation → game installation is implemented, alongside the older procedural prototype. Open **Creature forge** on the main menu, or `#forge`. The first live Voltfang text-to-3D job passed technical validation and was installed on September 13, 2026: 18,896 triangles, 31 bones and one quadruped walk clip. Its original 20-credit mesh task was reused after fixing a storage-host download rejection. Anatomical rig quality remains unverified. A Tripo API key and credits are required; jobs start only on explicit generation/resume actions.
 
 ## Automated model pipeline
 
@@ -33,7 +33,7 @@ Failed jobs retain `creature-job` artifacts, including provider task IDs and int
 
 If generation finished but committing/deploying failed, recover the `installed-assets` artifact or rerun deployment after the asset commit. Do not regenerate the creature. Resuming a completed generation intentionally refuses new paid work. Job artifacts contain creature prompts and provider outputs, never API keys; do not use confidential concepts in this public project. A successful rig still needs visual inspection of joint placement and deformation.
 
-The integration currently has mocked provider and browser coverage; no live Tripo mesh has been verified by these tests.
+Automated regression tests use mocked provider responses and synthetic assets. Separately, [live recovery run 34767650714](https://github.com/jchoxha/last-bastion/actions/runs/34767650714) completed generation, rigging, animation, technical validation and asset publishing for Voltfang. Passing technical validation does not certify anatomical quality.
 
 ### Start on this PC
 

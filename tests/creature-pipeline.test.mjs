@@ -437,7 +437,7 @@ test('downloads accept the live Tripo storage host without credentials and rejec
   const provider = createTripo({
     key: 'never-send-to-storage',
     async fetchImpl(url, options) {
-      requests.push({ url: String(url), options });
+      requests.push({ options });
       return new Response('glb');
     },
   });

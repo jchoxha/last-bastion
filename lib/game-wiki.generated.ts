@@ -1311,7 +1311,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "Installed models load automatically in the preview and game. They become eligible for ordinary wilderness grunt slots and can also be spawned explicitly for testing; scripted enemy selections remain unchanged. Technical validation catches malformed assets and body-type mismatches, but cannot certify anatomical joint placement. Inspect the actual walk and skeleton before considering a model finished. The current pipeline integration has been exercised with synthetic test assets and simulated provider responses; its first live generated creature still needs verification. Idle uses the bind pose, and no dedicated attack animation is supplied yet."
+            "text": "Installed models load automatically in the preview and game. They become eligible for ordinary wilderness grunt slots and can also be spawned explicitly for testing; scripted enemy selections remain unchanged. Technical validation catches malformed assets and body-type mismatches, but cannot certify anatomical joint placement. Inspect the actual walk and skeleton before considering a model finished. The first live Voltfang text-to-3D job was installed on September 13, 2026 with 18,896 triangles, 31 bones and a quadruped walk animation. Its mesh was reused after fixing a provider-storage download rejection; anatomical rig quality remains unverified. Idle uses the bind pose, and no dedicated attack animation is supplied yet."
           },
           {
             "type": "paragraph",
