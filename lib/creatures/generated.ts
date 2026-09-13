@@ -168,6 +168,8 @@ export function createRuntimeCreatureActor(creature: Creature) {
     motion: 'rest' | 'idle' | 'walk' = 'idle',
     walk: THREE.AnimationClip | undefined;
   let state = 'prototype';
+  let previewClips: THREE.AnimationClip[] = [],
+    previewClipIndex = 0;
   function setAnimation(next: 'rest' | 'idle' | 'walk') {
     if (motion === next) return;
     motion = next;
@@ -232,7 +234,9 @@ export function createRuntimeCreatureActor(creature: Creature) {
           obj.castShadow = true;
         }
       });
-      walk = gltf.animations[record.asset.walkClip];
+      previewClips = gltf.animations;
+      previewClipIndex = record.asset.walkClip;
+      walk = previewClips[previewClipIndex];
       if (!walk || mesh === fallback.mesh)
         throw Error('Generated model has no working skin or walk clip.');
       mixer = new THREE.AnimationMixer(content);
@@ -263,6 +267,23 @@ export function createRuntimeCreatureActor(creature: Creature) {
       return state;
     },
     setAnimation,
+    get previewClips() {
+      return previewClips.map((clip, index) => ({
+        index,
+        name: clip.name || `Clip ${index + 1}`,
+      }));
+    },
+    get previewClipIndex() {
+      return previewClipIndex;
+    },
+    selectPreviewClip(index: number) {
+      if (!mixer || !Number.isInteger(index) || !previewClips[index]) return;
+      mixer.stopAllAction();
+      previewClipIndex = index;
+      walk = previewClips[index];
+      if (motion === 'walk') mixer.clipAction(walk).reset().play();
+      mixer.update(0);
+    },
     get playback() {
       if (!mixer || !walk) return fallback.playback;
       return {

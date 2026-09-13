@@ -2,7 +2,7 @@
   "version": 1,
   "assets": [
     {
-      "id": "asset_77b12bc91500528d69d3194c",
+      "id": "asset_6b400a86fead98a914ab27e7",
       "creature": {
         "version": 1,
         "id": "cf_e881f0335f04e8f3",
@@ -40,9 +40,9 @@
           "rigVersion": 1
         }
       },
-      "model": "asset_77b12bc91500528d69d3194c.glb",
-      "portrait": "asset_77b12bc91500528d69d3194c.png",
-      "sha256": "77b12bc91500528d69d3194c3d2cd1ac6f0a5a68f4f9517c085f0231fce2641b",
+      "model": "asset_6b400a86fead98a914ab27e7.glb",
+      "portrait": "asset_6b400a86fead98a914ab27e7.png",
+      "sha256": "6b400a86fead98a914ab27e74f0f34fb8ecaefb24f122798f6887bb18b20043e",
       "walkClip": 0,
       "yaw": -1.5707963267948966,
       "report": {
@@ -51,7 +51,8 @@
         "bones": 31,
         "primitives": 1,
         "clips": [
-          "preset:quadruped:walk"
+          "preset:quadruped:walk",
+          "Quaternius wolf walk — retargeted trial"
         ],
         "walkClip": 0,
         "warnings": 2,
@@ -66,6 +67,18 @@
           "image": "seedream_v5",
           "mesh": "v3.1-20260211",
           "rig": "v2.5-20260210"
+        },
+        "animationTrial": {
+          "clip": 1,
+          "author": "Quaternius",
+          "pack": "Ultimate Animated Animal Pack",
+          "sourceClip": "Wolf / Walk",
+          "license": "CC0-1.0",
+          "url": "https://quaternius.com/packs/ultimateanimatedanimals.html",
+          "sourceSha256": "cc02e9d128b5715f352ee8bea086f97a35f1d875d240de99b0f9f2775c37d415",
+          "baseModel": "asset_77b12bc91500528d69d3194c.glb",
+          "mapping": "scripts/creature-pipeline/retarget-voltfang.mjs",
+          "status": "experimental; foot contact needs review"
         }
       }
     }

@@ -61,6 +61,8 @@ function Preview({
   const [paused, setPaused] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [hasClip, setHasClip] = useState(false);
+  const [clips, setClips] = useState<{ index: number; name: string }[]>([]);
+  const [clipIndex, setClipIndex] = useState(0);
   const [error, setError] = useState('');
   function pause(value: boolean) {
     playbackRef.current.paused = value;
@@ -143,6 +145,8 @@ function Preview({
       element.dataset.assetState = actor.state;
       if (actor.state !== previousState) {
         previousState = actor.state;
+        setClips(actor.state === 'generated' ? actor.previewClips : []);
+        setClipIndex(actor.previewClipIndex);
         const visible = helper.visible;
         scene.remove(helper);
         helper.dispose();
@@ -198,6 +202,31 @@ function Preview({
           className="forge-tools"
           aria-label="Animation playback controls"
         >
+          {clips.length > 1 && (
+            <label style={{ flexBasis: '100%', minWidth: 0 }}>
+              Walk clip (preview)
+              <select
+                style={{ maxWidth: '100%' }}
+                disabled={motion !== 'walk'}
+                value={clipIndex}
+                onChange={(e) => {
+                  const index = Number(e.target.value);
+                  actorRef.current?.selectPreviewClip(index);
+                  setClipIndex(index);
+                }}
+              >
+                {clips.map((clip) => (
+                  <option key={clip.index} value={clip.index}>
+                    {clip.name}
+                  </option>
+                ))}
+              </select>
+              <small>
+                Select walk motion to compare clips. This selection does not
+                change the game’s default animation.
+              </small>
+            </label>
+          )}
           <label>
             Playback speed
             <select

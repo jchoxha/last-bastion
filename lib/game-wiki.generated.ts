@@ -1323,7 +1323,11 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "For generated models and prototypes, **Playback speed** offers 0.1×, 0.25×, 0.5× and 1×. Select **walk** to inspect animation, then pause, step backward/forward or restart the clip at time zero. Each frame step samples 1/30 second and pauses; stepping wraps around the clip boundary. The counter shows current time and duration. Orbit and skeleton controls remain available while paused. Static poses disable frame stepping. These controls affect the preview only and do not change the installed animation or gameplay speed. Inspect paws against the grid and watch shoulders and hips for deformation; replacement animations still need retargeting and cannot yet be imported through the forge."
+            "text": "For generated models and prototypes, **Playback speed** offers 0.1×, 0.25×, 0.5× and 1×. Select **walk** to inspect animation, then pause, step backward/forward or restart the clip at time zero. Each frame step samples 1/30 second and pauses; stepping wraps around the clip boundary. The counter shows current time and duration. Orbit and skeleton controls remain available while paused. Static poses disable frame stepping. These controls affect the preview only and do not change gameplay speed."
+          },
+          {
+            "type": "paragraph",
+            "text": "Voltfang's **Walk clip (preview)** selector compares its original Tripo walk with **Quaternius wolf walk — retargeted trial**, adapted from a CC0 animal animation pack. The trial uses the same mesh, textures, bones and skin weights, with broader strides; inspect paw contact and shoulder/hip deformation before choosing a replacement. It is experimental and does not replace the default gameplay walk. Switching clips resets preview time, and reopening the preview restores the original clip. No API generation is needed to compare them. Arbitrary animation-file imports and automatic retargeting for other rigs are not yet available."
           },
           {
             "type": "paragraph",

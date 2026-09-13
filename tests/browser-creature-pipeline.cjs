@@ -148,6 +148,31 @@ const {
         a.setAnimation('rest');
         if (a.playback.duration !== 0)
           throw Error('Static pose was exposed as a playable clip.');
+        if (a.previewClips.length > 1) {
+          a.setAnimation('walk');
+          a.selectPreviewClip(1);
+          a.seekAnimation(0.25);
+          if (
+            !a.mesh.skeleton.bones.some(
+              (bone, i) =>
+                bone.quaternion.toArray().join(',') !== steppedPose[i],
+            )
+          )
+            throw Error('Alternative clip did not change the sampled pose.');
+          if (b.previewClipIndex !== 0)
+            throw Error('Preview choice affected another actor.');
+          a.selectPreviewClip(0);
+          a.seekAnimation(0.25);
+          if (
+            !a.mesh.skeleton.bones.every(
+              (bone, i) =>
+                bone.quaternion.toArray().join(',') === steppedPose[i],
+            )
+          )
+            throw Error(
+              'Switching back did not restore the original clip pose.',
+            );
+        }
         a.dispose();
         b.dispose();
         await api.refreshGeneratedAssets(`${base}/bad/creatures/`);
@@ -226,6 +251,37 @@ const {
     await page
       .getByRole('button', { name: 'Pause animation', exact: true })
       .click();
+    if (await page.getByLabel('Walk clip (preview)').count()) {
+      await page.getByLabel('Walk clip (preview)').selectOption('1');
+      await page.waitForFunction(
+        () =>
+          Number(
+            document.querySelector('.forge-preview').dataset.animationTime,
+          ) === 0,
+      );
+      assert(
+        (await page
+          .getByRole('button', { name: 'Play animation', exact: true })
+          .count()) === 1,
+      );
+      assert(
+        Number(
+          await page
+            .locator('.forge-preview')
+            .getAttribute('data-animation-duration'),
+        ) < 1.1,
+      );
+      await page
+        .getByRole('button', { name: 'Next frame', exact: true })
+        .click();
+      await page.waitForFunction(
+        () =>
+          Number(
+            document.querySelector('.forge-preview').dataset.animationTime,
+          ) > 0,
+      );
+      assert(Math.abs((await animationTime()) - 1 / 30) < 1e-6);
+    }
     await page.screenshot({
       path: 'work/pipeline-generated-fixture.png',
       fullPage: true,
