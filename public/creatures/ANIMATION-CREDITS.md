@@ -19,3 +19,15 @@ only the requested output file; it does not install a model or call a provider.
 
 This is an experimental comparison clip. It needs foot-contact and deformation
 review and is not the default gameplay walk.
+
+The shared **Quaternius wolf walk — canine profile trial** uses the same CC0
+Wolf / Walk source. Its animation-only glTF (Walk channels/accessors and node
+transforms, without meshes, materials or other clips) is bundled at
+`scripts/creature-pipeline/animations/quaternius-wolf-walk.gltf`.
+Derived-file SHA-256: `b30d0d36387f1768c9af27ddcff627efc6104cc3561e2d1c160c72e328c06ffe`.
+This permits offline reuse in generation jobs without external downloads.
+Use `scripts/creature-pipeline/retarget.mjs INPUT.glb OUTPUT.glb [CALIBRATION.json]`
+for compatible Tripo canines. The manifest records the profile revision,
+source checksum, optional head calibration and review diagnostics. No creature
+identity or target hash is required by this shared profile. Both retargeted trials
+remain previews; the first script is retained for historical reproducibility.

@@ -208,6 +208,8 @@ test('actual Tripo adapter drives all stages and atomically installs a verified 
   );
   assert.equal(manifest.assets.length, 1);
   const asset = manifest.assets[0];
+  assert.equal(asset.source.animationTrial.status, 'skipped');
+  assert.match(asset.source.animationTrial.reason, /role/);
   assert.equal(asset.sha256, createHash('sha256').update(bytes).digest('hex'));
   assert.deepEqual(
     await readFile(path.join(root, 'public/creatures', asset.model)),
@@ -227,6 +229,45 @@ test('actual Tripo adapter drives all stages and atomically installs a verified 
   const restarted = await createPipeline({ root, chimera, provider });
   assert.equal((await restarted.resume(started.id)).status, 'ready');
   assert.equal(calls.length, count);
+});
+test('generation installs an offline canine trial without extra provider calls or changing the default walk', async () => {
+  const root = await temporary();
+  const realAsset = await readFile(
+    'public/creatures/asset_77b12bc91500528d69d3194c.glb',
+  );
+  const { provider, calls } = fakeTripo({ assetBytes: realAsset });
+  const pipeline = await createPipeline({ root, chimera, provider });
+  const started = await pipeline.submit({ ...input, mode: 'text' });
+  const done = await finished(pipeline, started.id);
+  assert.equal(done.status, 'ready', done.error);
+  assert.equal(calls.length, 4, 'mesh, rig check, rig and provider walk only');
+  const manifest = JSON.parse(
+    await readFile(path.join(root, 'public/creatures/index.json')),
+  );
+  const asset = manifest.assets[0];
+  assert.equal(asset.walkClip, 0);
+  assert.equal(asset.source.animationTrial.status, 'preview-only');
+  assert.equal(asset.source.animationTrial.clip, 1);
+  assert.equal(asset.report.clips.length, 2);
+  const saved = JSON.parse(
+    await readFile(
+      path.join(
+        root,
+        'work/creature-pipeline/jobs',
+        started.id,
+        'animation-trial.json',
+      ),
+    ),
+  );
+  assert.equal(saved.profile, 'tripo-canine');
+  const installed = await readFile(
+    path.join(root, 'public/creatures', asset.model),
+  );
+  assert.equal(
+    createHash('sha256').update(installed).digest('hex'),
+    asset.sha256,
+  );
+  await validateRiggedGlb(installed, 'canine-v1');
 });
 test('wrong skeleton and invalid GLB cannot enter the game library', async () => {
   for (const options of [{ rigType: 'biped' }, { assetBytes: raw }]) {

@@ -12,6 +12,7 @@ import { FORMS } from '../../lib/creatures/core.ts';
 import { PipelineError, TRIPO_MODELS } from './tripo.mjs';
 import { validateRiggedGlb } from './validate.mjs';
 import { modelPrompt } from './model-prompt.mjs';
+import { prepareAnimationTrial } from './animation-trial.mjs';
 
 const hash = (value) => createHash('sha256').update(value).digest('hex');
 async function json(file, fallback) {
@@ -267,7 +268,7 @@ export async function createPipeline({
         export_with_geometry: true,
         animate_in_place: true,
       });
-      const bytes = await provider.download(
+      let bytes = await provider.download(
         animation.output.model_url,
         32 * 1024 * 1024,
       );
@@ -275,6 +276,16 @@ export async function createPipeline({
       job.stage = 'validation';
       await save();
       job.report = await validate(bytes, job.request.bodyPlan);
+      const trial = await prepareAnimationTrial(bytes, job.request.bodyPlan);
+      job.animationTrial = trial.report;
+      if (trial.report.status === 'preview-only') {
+        bytes = trial.bytes;
+        const defaultWalk = job.report.walkClip;
+        job.report = await validate(bytes, job.request.bodyPlan);
+        job.report.walkClip = defaultWalk;
+        await writeFile(path.join(dir, 'animation-trial.glb'), bytes);
+      }
+      await atomicJson(path.join(dir, 'animation-trial.json'), trial.report);
       await save();
       const assetId = `asset_${hash(bytes).slice(0, 24)}`;
       job.stage = 'installation';
@@ -306,6 +317,7 @@ export async function createPipeline({
           rosterId: job.request.rosterId,
           jobId: job.id,
           models: TRIPO_MODELS,
+          animationTrial: job.animationTrial,
         },
       };
       manifest.assets = [

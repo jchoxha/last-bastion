@@ -1327,7 +1327,11 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "Voltfang's **Walk clip (preview)** selector compares its original Tripo walk with **Quaternius wolf walk — retargeted trial**, adapted from a CC0 animal animation pack. The trial uses the same mesh, textures, bones and skin weights, with broader strides; inspect paw contact and shoulder/hip deformation before choosing a replacement. It is experimental and does not replace the default gameplay walk. Switching clips resets preview time, and reopening the preview restores the original clip. No API generation is needed to compare them. Arbitrary animation-file imports and automatic retargeting for other rigs are not yet available."
+            "text": "Voltfang's **Walk clip (preview)** selector includes the original Tripo walk, the first **Quaternius wolf walk — retargeted trial**, and **Quaternius wolf walk — canine profile trial**. The newest trial uses a shared canine rig profile with all four paw controls, measured heading and leg lengths. Future compatible canine generation jobs add this comparison clip automatically without an extra provider call. These clips preserve the mesh, bones and skin weights and remain experimental; gameplay still uses the original walk. Switching clips resets preview time, and reopening restores the default. Neither comparison nor playback consumes API credits."
+          },
+          {
+            "type": "paragraph",
+            "text": "The shared profile records compatibility and movement checks, but foot locking, terrain contact and automatic face-direction correction remain unfinished. A straight skeleton does not guarantee a forward-facing generated face; the offline pipeline supports explicit head-yaw calibration, with an uncalibrated default. Incompatible rigs retain their provider animation and a recorded skip reason. Validation currently covers one real generated canine and synthetic proportion variants; other generated creatures still need visual review. The forge does not yet offer arbitrary animation-file imports or a calibration editor."
           },
           {
             "type": "paragraph",

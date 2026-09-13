@@ -150,7 +150,7 @@ const {
           throw Error('Static pose was exposed as a playable clip.');
         if (a.previewClips.length > 1) {
           a.setAnimation('walk');
-          a.selectPreviewClip(1);
+          a.selectPreviewClip(a.previewClips.length - 1);
           a.seekAnimation(0.25);
           if (
             !a.mesh.skeleton.bones.some(
@@ -252,7 +252,10 @@ const {
       .getByRole('button', { name: 'Pause animation', exact: true })
       .click();
     if (await page.getByLabel('Walk clip (preview)').count()) {
-      await page.getByLabel('Walk clip (preview)').selectOption('1');
+      const select = page.getByLabel('Walk clip (preview)');
+      await select.selectOption(
+        String((await select.locator('option').count()) - 1),
+      );
       await page.waitForFunction(
         () =>
           Number(

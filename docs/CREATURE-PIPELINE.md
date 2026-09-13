@@ -76,7 +76,26 @@ Voltfang now includes **Quaternius wolf walk — retargeted trial** alongside th
 
 The trial comes from Quaternius's CC0 **Ultimate Animated Animal Pack**, using an explicit source-to-target bone map and world-space rest-pose compensation. Its 1.067-second cycle has a broader stride and less sideways paw motion in sampled poses than the original; it still needs foot-contact and deformation review. The original 2.6-second Tripo clip contains approximately three gait cycles, so duration alone is not a cadence comparison. This experiment preserves the original mesh, textures, skeleton, weights and animation verbatim and appends a second clip. It is not an automatically approved replacement.
 
-Source/license details are in `public/creatures/ANIMATION-CREDITS.md`. Reproduce with `node scripts/creature-pipeline/retarget-voltfang.mjs SOURCE_Wolf.gltf public/creatures/asset_77b12bc91500528d69d3194c.glb OUTPUT.glb`. Input hashes are pinned because this mapping is specific to these two rigs. The script validates and writes an output GLB without publishing it; retargeting other creatures requires their own mapping and review.
+### Shared canine animation profile
+
+New compatible canine generation jobs also append **Quaternius wolf walk — canine profile trial** offline before installation. This uses the same worker locally and on GitHub Actions, adds no provider calls, and keeps the provider walk as the gameplay default. Voltfang retains all three clips for comparison: original, initial experiment, and shared-profile trial. The shared profile is experimental; it has been exercised on one real generated rig plus synthetic changes to scale, heading and limb proportions, not a second independently generated creature.
+
+`rig-profiles.mjs` separates semantic anatomy roles from provider bone names. Revision 1 supports the current Tripo canine hierarchy and the bundled Quaternius wolf donor. It resolves all four paw controls, checks required skinned joints and parent chains, measures body heading and leg lengths, and scales root motion to the target. Paw rotations use each donor foot's lowest sampled pose as its stance reference. Meshes, textures, weights, bind poses and existing clips are preserved. Unsupported/ambiguous rigs keep the original asset and record a skip reason; unexpected processing failures or invalid output stop installation. Humanoids do not receive this canine trial.
+
+The job retains `animation-trial.json` and, when compatible, `animation-trial.glb`; the manifest also records profile/revision, source checksum, calibration, measured proportions, foot excursions, below-rest-height movement, loop closure and review warnings. The appended clip is validated alone as well as in the complete asset. These measurements concern bone controls, not actual mesh-to-ground contact. **No foot IK, foot locking, terrain adaptation, or automatic visual approval is implemented.** Limb lengths naturally affect the transferred stride; a proportion-aware contact solver is still needed.
+
+Head bones cannot reliably reveal where an asymmetric generated face is looking. The offline tool supports explicit calibration JSON such as `{ "headYawDegrees": 15 }`, a signed rotation around model-world +Y limited to ±60 degrees. It rotates the head/neck animation without modifying skin or rest data. Zero is the automatic default and is reported as uncalibrated. Review the face and neck deformation before choosing a value; the app does not yet have a calibration editor.
+
+```sh
+node scripts/creature-pipeline/retarget.mjs INPUT.glb OUTPUT.glb
+node scripts/creature-pipeline/retarget.mjs INPUT.glb OUTPUT.glb CALIBRATION.json
+```
+
+The command reads the bundled animation-only donor, validates a compatible input, and writes a new GLB plus `OUTPUT.glb.report.json`; it refuses to overwrite the input or an existing output. It does not publish or call a provider. This is the reusable entry point for future compatible generated canines; it does not pin a creature ID or target asset hash. Other body plans/providers require a versioned adapter and independent visual testing.
+
+Source/license details are in `public/creatures/ANIMATION-CREDITS.md`. The historical `retarget-voltfang.mjs` script remains only to reproduce the original comparison with its pinned source/target files. The shared pipeline bundles just the donor's Walk animation and node transforms, not the Quaternius mesh. Changing the donor or mapping requires updating provenance/checksum or profile revision and rerunning the focused tests.
+
+### Generate a procedural prototype
 
 1. Open Creature forge. Describe the creature, choose its taxonomy, physical body plan, form, role, and seed.
 2. Click **Generate locally**. The same complete input gives the same definition. Concept text is retained as the description; local generation does not interpret natural language into a detailed mesh.

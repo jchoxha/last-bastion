@@ -1,0 +1,2 @@
+# The offline donor is checksum-pinned; keep identical bytes on Windows and Actions.
+scripts/creature-pipeline/animations/*.gltf text eol=lf

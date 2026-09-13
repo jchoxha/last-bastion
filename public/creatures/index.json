@@ -2,7 +2,7 @@
   "version": 1,
   "assets": [
     {
-      "id": "asset_6b400a86fead98a914ab27e7",
+      "id": "asset_5d7993d8ee0258d6df478391",
       "creature": {
         "version": 1,
         "id": "cf_e881f0335f04e8f3",
@@ -40,9 +40,9 @@
           "rigVersion": 1
         }
       },
-      "model": "asset_6b400a86fead98a914ab27e7.glb",
-      "portrait": "asset_6b400a86fead98a914ab27e7.png",
-      "sha256": "6b400a86fead98a914ab27e74f0f34fb8ecaefb24f122798f6887bb18b20043e",
+      "model": "asset_5d7993d8ee0258d6df478391.glb",
+      "portrait": "asset_5d7993d8ee0258d6df478391.png",
+      "sha256": "5d7993d8ee0258d6df478391297b11bb0ba4b4d1f4e42f8a335f409f2b6ee099",
       "walkClip": 0,
       "yaw": -1.5707963267948966,
       "report": {
@@ -52,7 +52,8 @@
         "primitives": 1,
         "clips": [
           "preset:quadruped:walk",
-          "Quaternius wolf walk — retargeted trial"
+          "Quaternius wolf walk — retargeted trial",
+          "Quaternius wolf walk — canine profile trial"
         ],
         "walkClip": 0,
         "warnings": 2,
@@ -69,6 +70,62 @@
           "rig": "v2.5-20260210"
         },
         "animationTrial": {
+          "profile": "tripo-canine",
+          "revision": 1,
+          "calibration": {},
+          "clip": 2,
+          "clipName": "Quaternius wolf walk — canine profile trial",
+          "rootMotionScale": 0.23515632706422174,
+          "legLengths": {
+            "frontLeft": 0.3923340876391371,
+            "frontRight": 0.3925605856370887,
+            "rearLeft": 0.4602203733466708,
+            "rearRight": 0.462285137781604
+          },
+          "forward": [
+            0.9998151402045397,
+            0,
+            0.019227205147314755
+          ],
+          "feet": {
+            "frontLeft2": {
+              "excursion": 0.32817356996804453,
+              "maxBelowRestHeight": 0.027653734466907887,
+              "maxRotationFromStanceDegrees": 57.503822970276126,
+              "loopPositionError": 4.257260595689349e-8
+            },
+            "frontRight2": {
+              "excursion": 0.3286782839118395,
+              "maxBelowRestHeight": 0.027272160766057707,
+              "maxRotationFromStanceDegrees": 57.51167853052734,
+              "loopPositionError": 2.5595814480914738e-8
+            },
+            "rearLeft3": {
+              "excursion": 0.4368298037724093,
+              "maxBelowRestHeight": 0.029517378744594924,
+              "maxRotationFromStanceDegrees": 67.51796772051605,
+              "loopPositionError": 1.308682091719343e-7
+            },
+            "rearRight3": {
+              "excursion": 0.4383836029605608,
+              "maxBelowRestHeight": 0.030595798376387096,
+              "maxRotationFromStanceDegrees": 67.85695626736357,
+              "loopPositionError": 4.531112277667076e-8
+            }
+          },
+          "warnings": [
+            "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+            "Head facing is uncalibrated: bone positions cannot establish the mesh’s gaze direction."
+          ],
+          "visualReview": "unverified",
+          "sourceSha256": "b30d0d36387f1768c9af27ddcff627efc6104cc3561e2d1c160c72e328c06ffe",
+          "status": "preview-only",
+          "author": "Quaternius",
+          "license": "CC0-1.0",
+          "url": "https://quaternius.com/packs/ultimateanimatedanimals.html",
+          "baseModel": "asset_6b400a86fead98a914ab27e7.glb"
+        },
+        "previousAnimationTrial": {
           "clip": 1,
           "author": "Quaternius",
           "pack": "Ultimate Animated Animal Pack",

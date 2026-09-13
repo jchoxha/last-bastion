@@ -33,3 +33,5 @@ Current new-world default: `node tests/browser-plateaus.cjs` and `node --experim
 
 - `node tests/browser-traversal.cjs`: actual climb key presses, stamina HUD, release, and 24-nearby-enemy simulation timing.
 - `node --experimental-strip-types tests/traversal-performance.test.cjs`: low-framerate ramp steps, cliff/wall climbing, mantle, stamina exhaustion/recovery, gameplay rays and safe airborne saves.
+
+- `tests/canine-retarget.test.mjs` (included in `test:creature-pipeline`): shared canine profile on the real Voltfang asset and synthetic scale/heading/proportion variants, paw coverage, bind/skin preservation, head calibration and incompatible-rig rejection. These variants are not independently generated meshes.
