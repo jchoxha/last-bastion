@@ -132,9 +132,10 @@ export async function loadChimera(
             path.join(source, 'public/art/gen', `${found.id}${suffix}.png`),
           );
         } catch {
-          throw new PipelineError(
-            'Chimera has no readable baked portrait for this creature/form. Select a form with existing art or forge a new concept.',
-          );
+          if (request.mode !== 'text')
+            throw new PipelineError(
+              'Chimera has no readable baked portrait for this creature/form. Select a form with existing art or forge a new concept.',
+            );
         }
       } else {
         definition = await api.forgeCreature(

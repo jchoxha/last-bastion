@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { type Creature } from '@/lib/creatures/core';
+import CreatureCloud from './creature-cloud';
 import {
   assetBase,
   initializeGeneratedAssets,
@@ -176,146 +177,151 @@ export default function CreaturePipeline({
     }
   }
   return (
-    <section
-      className="forge-panel pipeline-panel"
-      aria-label="Chimera model pipeline"
-    >
-      <h2>Chimera → rigged game creature</h2>
-      <p>
-        Chimera definition and art → neutral reference → textured mesh →
-        body-specific rig → walk animation → validation → game library.
-      </p>
-      <button onClick={connect} disabled={busy}>
-        {health ? 'Reconnect worker' : 'Connect local worker'}
-      </button>
-      <output>{status}</output>
-      {health && (
-        <>
-          <div className="forge-fields">
-            <label>
-              Chimera source
-              <select
-                value={rosterId}
-                onChange={(e) => setRosterId(e.target.value)}
-              >
-                <option value="">Forge a new concept</option>
-                {catalog.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Model body plan
-              <select
-                value={bodyPlan}
-                onChange={(e) => setBodyPlan(e.target.value)}
-              >
-                <option value="canine-v1">Canine quadruped</option>
-                <option value="humanoid-v1">Humanoid biped</option>
-              </select>
-            </label>
-            <label>
-              Model form
-              <select value={form} onChange={(e) => setForm(e.target.value)}>
-                {['baby', 'young', 'regular', 'elite', 'boss'].map((f) => (
-                  <option key={f}>{f}</option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Generation seed
-              <input
-                value={seed}
-                maxLength={80}
-                onChange={(e) => setSeed(e.target.value)}
-              />
-            </label>
-          </div>
-          {!rosterId && (
-            <label>
-              New Chimera concept
-              <textarea
-                value={concept}
-                maxLength={400}
-                onChange={(e) => setConcept(e.target.value)}
-              />
-            </label>
-          )}
-          {!rosterId && !health.conceptConfigured && (
+    <>
+      <CreatureCloud onSelect={onSelect} />
+      <section
+        className="forge-panel pipeline-panel"
+        aria-label="Chimera model pipeline"
+      >
+        <h2>Chimera → rigged game creature</h2>
+        <p>
+          Chimera definition and art → neutral reference → textured mesh →
+          body-specific rig → walk animation → validation → game library.
+        </p>
+        <button onClick={connect} disabled={busy}>
+          {health ? 'Reconnect worker' : 'Connect local worker'}
+        </button>
+        <output>{status}</output>
+        {health && (
+          <>
+            <div className="forge-fields">
+              <label>
+                Chimera source
+                <select
+                  value={rosterId}
+                  onChange={(e) => setRosterId(e.target.value)}
+                >
+                  <option value="">Forge a new concept</option>
+                  {catalog.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Model body plan
+                <select
+                  value={bodyPlan}
+                  onChange={(e) => setBodyPlan(e.target.value)}
+                >
+                  <option value="canine-v1">Canine quadruped</option>
+                  <option value="humanoid-v1">Humanoid biped</option>
+                </select>
+              </label>
+              <label>
+                Model form
+                <select value={form} onChange={(e) => setForm(e.target.value)}>
+                  {['baby', 'young', 'regular', 'elite', 'boss'].map((f) => (
+                    <option key={f}>{f}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Generation seed
+                <input
+                  value={seed}
+                  maxLength={80}
+                  onChange={(e) => setSeed(e.target.value)}
+                />
+              </label>
+            </div>
+            {!rosterId && (
+              <label>
+                New Chimera concept
+                <textarea
+                  value={concept}
+                  maxLength={400}
+                  onChange={(e) => setConcept(e.target.value)}
+                />
+              </label>
+            )}
+            {!rosterId && !health.conceptConfigured && (
+              <p>
+                Configure CREATURE_AI_MODEL on the worker to use Chimera’s AI
+                forge.
+              </p>
+            )}
             <p>
-              Configure CREATURE_AI_MODEL on the worker to use Chimera’s AI
-              forge.
+              {health.configured
+                ? 'This action sends the selected art/concept to Tripo and consumes API credits for reference, mesh, rig and animation generation.'
+                : 'Mesh generation is blocked until TRIPO_API_KEY is configured. Preparing inputs does not call Tripo.'}
             </p>
-          )}
-          <p>
-            {health.configured
-              ? 'This action sends the selected art/concept to Tripo and consumes API credits for reference, mesh, rig and animation generation.'
-              : 'Mesh generation is blocked until TRIPO_API_KEY is configured. Preparing inputs does not call Tripo.'}
-          </p>
-          <button
-            disabled={
-              busy ||
-              (!rosterId && (!concept.trim() || !health.conceptConfigured))
-            }
-            onClick={submit}
-          >
-            {health.configured
-              ? 'Generate and install creature'
-              : 'Prepare Chimera inputs'}
-          </button>
-          <ul>
-            {jobs.map((job) => (
-              <li key={job.id}>
-                <strong>{job.creature?.spec.name || 'Chimera creature'}</strong>
-                : {job.status} · {job.stage}
-                {job.status === 'running' ? ` ${job.progress}%` : ''}
-                {job.error && <p>{job.error}</p>}
-                {['blocked', 'failed', 'paused'].includes(job.status) && (
+            <button
+              disabled={
+                busy ||
+                (!rosterId && (!concept.trim() || !health.conceptConfigured))
+              }
+              onClick={submit}
+            >
+              {health.configured
+                ? 'Generate and install creature'
+                : 'Prepare Chimera inputs'}
+            </button>
+            <ul>
+              {jobs.map((job) => (
+                <li key={job.id}>
+                  <strong>
+                    {job.creature?.spec.name || 'Chimera creature'}
+                  </strong>
+                  : {job.status} · {job.stage}
+                  {job.status === 'running' ? ` ${job.progress}%` : ''}
+                  {job.error && <p>{job.error}</p>}
+                  {['blocked', 'failed', 'paused'].includes(job.status) && (
+                    <button
+                      onClick={() => {
+                        void request(`/jobs/${job.id}/resume`, {}).catch((e) =>
+                          setStatus(e.message),
+                        );
+                      }}
+                    >
+                      Resume saved job
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {assets.length > 0 && (
+          <>
+            <h3>Generated game library</h3>
+            <p>
+              Technical validation passed. Anatomical placement and deformation
+              still need visual inspection; no automatic quality guarantee is
+              implied.
+            </p>
+            <ul>
+              {assets.map((asset) => (
+                <li key={asset.id}>
                   <button
                     onClick={() => {
-                      void request(`/jobs/${job.id}/resume`, {}).catch((e) =>
-                        setStatus(e.message),
-                      );
+                      void preloadGeneratedAsset(asset.creature)
+                        .then(() => onSelect(asset.creature))
+                        .catch((e) => setStatus(e.message));
                     }}
                   >
-                    Resume saved job
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      {assets.length > 0 && (
-        <>
-          <h3>Generated game library</h3>
-          <p>
-            Technical validation passed. Anatomical placement and deformation
-            still need visual inspection; no automatic quality guarantee is
-            implied.
-          </p>
-          <ul>
-            {assets.map((asset) => (
-              <li key={asset.id}>
-                <button
-                  onClick={() => {
-                    void preloadGeneratedAsset(asset.creature)
-                      .then(() => onSelect(asset.creature))
-                      .catch((e) => setStatus(e.message));
-                  }}
-                >
-                  {asset.creature.spec.name} · inspect mesh
-                </button>{' '}
-                <a href={`${base}${asset.model}`} download>
-                  Download rigged GLB
-                </a>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </section>
+                    {asset.creature.spec.name} · inspect mesh
+                  </button>{' '}
+                  <a href={`${base}${asset.model}`} download>
+                    Download rigged GLB
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
+    </>
   );
 }

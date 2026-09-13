@@ -1,0 +1,90 @@
+name: Generate creature
+run-name: Creature generation · ${{ github.run_number }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      request:
+        description: Creature request JSON (ignored when resuming)
+        required: true
+        default: '{"version":1,"rosterId":"voltfang","bodyPlan":"canine-v1","form":"regular","seed":"voltfang-text-1","mode":"text","modelDescription":"Slate-blue wolf with cyan mane highlights, yellow eyes, muscular shoulders, pointed ears and a single bushy tail."}'
+        type: string
+      resume_run_id:
+        description: Optional previous failed run ID; restores saved tasks without resubmitting
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: creature-generation
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    if: github.ref == 'refs/heads/main' && github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Restore saved job for explicit resume
+        if: inputs.resume_run_id != '' && github.run_attempt == 1
+        uses: actions/download-artifact@v4
+        with:
+          name: creature-job
+          path: work/recovered
+          run-id: ${{ inputs.resume_run_id }}
+          github-token: ${{ github.token }}
+      - name: Generate, rig, validate and install
+        env:
+          TRIPO_API_KEY: ${{ secrets.TRIPO_API_KEY }}
+          CREATURE_AI_URL: ${{ vars.CREATURE_AI_URL }}
+          CREATURE_AI_MODEL: ${{ vars.CREATURE_AI_MODEL }}
+          CREATURE_AI_KEY: ${{ secrets.CREATURE_AI_KEY }}
+          CREATURE_REQUEST: ${{ inputs.request }}
+          RESUME_RUN_ID: ${{ inputs.resume_run_id }}
+        run: node scripts/creature-pipeline/actions.mjs
+      - name: Retain task IDs and intermediate models, including failed jobs
+        if: always() && github.run_attempt == 1
+        uses: actions/upload-artifact@v4
+        with:
+          name: creature-job
+          path: work/creature-pipeline/jobs/
+          retention-days: 30
+          if-no-files-found: ignore
+      - name: Retain installed assets for recovery if publishing fails
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installed-assets
+          path: public/creatures/
+          retention-days: 30
+      - name: Publish generated assets to main
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/creatures/
+          if ! git diff --cached --quiet; then
+            git commit -m "Add generated creature assets"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
+      # GITHUB_TOKEN pushes do not trigger push workflows. Dispatch Pages explicitly.
+      - name: Deploy the updated game
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              ...context.repo, workflow_id: 'deploy.yml', ref: 'main'
+            });

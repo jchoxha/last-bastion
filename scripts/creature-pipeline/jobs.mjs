@@ -11,6 +11,7 @@ import path from 'node:path';
 import { FORMS } from '../../lib/creatures/core.ts';
 import { PipelineError, TRIPO_MODELS } from './tripo.mjs';
 import { validateRiggedGlb } from './validate.mjs';
+import { modelPrompt } from './model-prompt.mjs';
 
 const hash = (value) => createHash('sha256').update(value).digest('hex');
 async function json(file, fallback) {
@@ -50,6 +51,16 @@ export function normalizeRequest(value) {
     value.seed.length > 80
   )
     throw new PipelineError('A seed of 1–80 characters is required.');
+  if (value.mode !== undefined && !['text', 'image'].includes(value.mode))
+    throw new PipelineError('Choose text or image modeling.');
+  if (
+    value.modelDescription !== undefined &&
+    (typeof value.modelDescription !== 'string' ||
+      value.modelDescription.length > 600)
+  )
+    throw new PipelineError(
+      'Model description must be at most 600 characters.',
+    );
   return {
     version: 1,
     rosterId,
@@ -57,6 +68,10 @@ export function normalizeRequest(value) {
     bodyPlan: value.bodyPlan,
     form: value.form,
     seed: value.seed.trim(),
+    ...(value.mode ? { mode: value.mode } : {}),
+    ...(value.modelDescription
+      ? { modelDescription: value.modelDescription.trim() }
+      : {}),
   };
 }
 export async function createPipeline({
@@ -128,64 +143,97 @@ export async function createPipeline({
         await save();
         return;
       }
-      let artSource;
-      if (job.hasArt) {
-        if (!job.artToken) {
-          job.stage = 'upload';
-          await save();
-          job.artToken = await provider.upload(
-            await readFile(path.join(dir, 'art.png')),
-            'chimera.png',
-          );
-          await save();
-        }
-        artSource = job.artToken;
-      } else {
-        const art = await task('art', '/generation/text-to-image', {
-          model: TRIPO_MODELS.image,
-          prompt: job.artPrompt,
-          size: '2K',
-          output_format: 'png',
+      const seed =
+        parseInt(hash(job.request.seed).slice(0, 8), 16) & 0x7fffffff;
+      let mesh;
+      if (job.request.mode === 'text') {
+        job.modelPrompt ||= modelPrompt(
+          job.creature,
+          job.request.modelDescription,
+        );
+        await save();
+        mesh = await task('mesh', '/generation/text-to-model', {
+          ...job.modelPrompt,
+          model: TRIPO_MODELS.mesh,
+          texture: true,
+          pbr: true,
+          face_limit: 20000,
+          texture_quality: 'standard',
+          model_seed: seed,
+          image_seed: seed,
+          texture_seed: seed,
         });
-        artSource = art.taskId;
+        if (!job.hasArt) {
+          await writeFile(
+            path.join(dir, 'art.png'),
+            await provider.download(
+              mesh.output.rendered_image_url,
+              20 * 1024 * 1024,
+            ),
+          );
+        }
+      } else {
+        let artSource;
+        if (job.hasArt) {
+          if (!job.artToken) {
+            job.stage = 'upload';
+            await save();
+            job.artToken = await provider.upload(
+              await readFile(path.join(dir, 'art.png')),
+              'chimera.png',
+            );
+            await save();
+          }
+          artSource = job.artToken;
+        } else {
+          const art = await task('art', '/generation/text-to-image', {
+            model: TRIPO_MODELS.image,
+            prompt: job.artPrompt,
+            size: '2K',
+            output_format: 'png',
+          });
+          artSource = art.taskId;
+          await writeFile(
+            path.join(dir, 'art.png'),
+            await provider.download(
+              art.output.generated_image_url,
+              20 * 1024 * 1024,
+            ),
+          );
+        }
+        const pose =
+          job.request.bodyPlan === 'canine-v1'
+            ? 'A neutral standing canine quadruped: exactly four separated legs, all four paws planted on one level, visible gaps between limbs, straight relaxed spine, tail separated from legs, relaxed closed jaw. Do not turn it into a biped.'
+            : 'A neutral humanoid A-pose: exactly two separated legs and two arms angled away from the torso, both feet planted, relaxed hands.';
+        const reference = await task(
+          'reference',
+          '/generation/image-to-image',
+          {
+            input: artSource,
+            model: TRIPO_MODELS.image,
+            size: '2K',
+            output_format: 'png',
+            prompt: `Create one full-body 3D modeling reference from this Chimera creature artwork. Preserve its identity, proportions, silhouette, fur, colors and markings. ${pose} Three-quarter view with every limb visible. Plain white background, even light. Remove lightning, smoke, scenery, text, cards, floating particles and cast shadow. No extra limbs and no multiple views.`,
+          },
+        );
         await writeFile(
-          path.join(dir, 'art.png'),
+          path.join(dir, 'reference.png'),
           await provider.download(
-            art.output.generated_image_url,
+            reference.output.generated_image_url,
             20 * 1024 * 1024,
           ),
         );
+        mesh = await task('mesh', '/generation/image-to-model', {
+          input: reference.taskId,
+          model: TRIPO_MODELS.mesh,
+          texture: true,
+          pbr: true,
+          face_limit: 20000,
+          texture_quality: 'standard',
+          model_seed: seed,
+          texture_seed: seed,
+        });
       }
-      const pose =
-        job.request.bodyPlan === 'canine-v1'
-          ? 'A neutral standing canine quadruped: exactly four separated legs, all four paws planted on one level, visible gaps between limbs, straight relaxed spine, tail separated from legs, relaxed closed jaw. Do not turn it into a biped.'
-          : 'A neutral humanoid A-pose: exactly two separated legs and two arms angled away from the torso, both feet planted, relaxed hands.';
-      const reference = await task('reference', '/generation/image-to-image', {
-        input: artSource,
-        model: TRIPO_MODELS.image,
-        size: '2K',
-        output_format: 'png',
-        prompt: `Create one full-body 3D modeling reference from this Chimera creature artwork. Preserve its identity, proportions, silhouette, fur, colors and markings. ${pose} Three-quarter view with every limb visible. Plain white background, even light. Remove lightning, smoke, scenery, text, cards, floating particles and cast shadow. No extra limbs and no multiple views.`,
-      });
-      await writeFile(
-        path.join(dir, 'reference.png'),
-        await provider.download(
-          reference.output.generated_image_url,
-          20 * 1024 * 1024,
-        ),
-      );
-      const seed =
-        parseInt(hash(job.request.seed).slice(0, 8), 16) & 0x7fffffff;
-      const mesh = await task('mesh', '/generation/image-to-model', {
-        input: reference.taskId,
-        model: TRIPO_MODELS.mesh,
-        texture: true,
-        pbr: true,
-        face_limit: 20000,
-        texture_quality: 'standard',
-        model_seed: seed,
-        texture_seed: seed,
-      });
       await writeFile(
         path.join(dir, 'mesh.glb'),
         await provider.download(mesh.output.model_url, 32 * 1024 * 1024),

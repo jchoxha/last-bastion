@@ -38,6 +38,7 @@ export function assetBase() {
 }
 export async function refreshGeneratedAssets(
   base = assetBase(),
+  preferSource = false,
 ): Promise<GeneratedAsset[]> {
   const response = await fetch(new URL('index.json', base), {
     cache: 'no-store',
@@ -77,7 +78,11 @@ export async function refreshGeneratedAssets(
     if (record.base === base && !ids.has(id)) records.delete(id);
   for (const asset of validated) {
     const old = records.get(asset.creature.id);
-    if (old?.base === 'http://127.0.0.1:8790/assets/' && base !== old.base)
+    if (
+      !preferSource &&
+      old?.base === 'http://127.0.0.1:8790/assets/' &&
+      base !== old.base
+    )
       continue;
     if (old?.asset.id !== asset.id || old.base !== base)
       records.set(asset.creature.id, { asset, base });

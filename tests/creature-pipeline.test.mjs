@@ -123,7 +123,10 @@ function fakeTripo({ rigType = 'quadruped', assetBytes = bytes } = {}) {
           ? { riggable: true, rig_type: rigType }
           : route.endsWith('image')
             ? { generated_image_url: 'https://cdn.tripo3d.ai/test.png' }
-            : { model_url: 'https://cdn.tripo3d.ai/test.glb' };
+            : {
+                model_url: 'https://cdn.tripo3d.ai/test.glb',
+                rendered_image_url: 'https://cdn.tripo3d.ai/test.png',
+              };
         tasks.set(id, output);
         return Response.json({ code: 0, data: { task_id: id } });
       }
@@ -358,4 +361,73 @@ test('loopback HTTP rejects hostile origins and oversized job input', async () =
   } finally {
     await new Promise((resolve) => server.close(resolve));
   }
+});
+
+test('text mode skips paid image stages and shares the validated rig/install path', async () => {
+  const root = await temporary();
+  const { provider, calls } = fakeTripo();
+  const pipeline = await createPipeline({ root, chimera, provider });
+  const request = {
+    ...input,
+    mode: 'text',
+    modelDescription: 'Slate-blue wolf with cyan fur highlights.',
+  };
+  const first = await pipeline.submit(request);
+  const done = await finished(pipeline, first.id);
+  assert.equal(done.status, 'ready', done.error);
+  assert.deepEqual(
+    calls.map((c) => c.route),
+    [
+      '/generation/text-to-model',
+      '/animations/rig-check',
+      '/animations/rig',
+      '/animations/retarget',
+    ],
+  );
+  assert.match(calls[0].body.prompt, /four distinct legs/);
+  assert.match(calls[0].body.prompt, /Slate-blue wolf/);
+  assert.equal(calls[0].body.image_seed, calls[0].body.model_seed);
+  assert.equal(calls[0].body.texture_seed, calls[0].body.model_seed);
+  assert(calls[0].body.prompt.length <= 1024);
+  assert(calls[0].body.negative_prompt.length <= 255);
+  assert.equal((await pipeline.submit(request)).id, first.id);
+  assert.equal(calls.length, 4);
+  const other = await pipeline.submit({
+    ...request,
+    modelDescription: 'White wolf.',
+  });
+  assert.notEqual(other.id, first.id);
+  await finished(pipeline, other.id);
+});
+
+test('text mode without source artwork uses the provider model preview as portrait', async () => {
+  const root = await temporary();
+  const { provider, calls } = fakeTripo();
+  const source = {
+    ...chimera,
+    async resolve() {
+      return { ...(await chimera.resolve()), art: undefined };
+    },
+  };
+  const pipeline = await createPipeline({ root, chimera: source, provider });
+  const job = await pipeline.submit({ ...input, mode: 'text' });
+  const done = await finished(pipeline, job.id);
+  assert.equal(done.status, 'ready', done.error);
+  assert.equal(calls.length, 4);
+  assert.deepEqual(
+    await readFile(path.join(root, 'public/creatures', done.asset.portrait)),
+    png,
+  );
+  await assert.rejects(
+    pipeline.submit({ ...input, mode: 'bad' }),
+    /text or image/,
+  );
+  await assert.rejects(
+    pipeline.submit({
+      ...input,
+      mode: 'text',
+      modelDescription: 'x'.repeat(601),
+    }),
+    /600/,
+  );
 });

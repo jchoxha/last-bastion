@@ -1,5 +1,7 @@
 # Current verification
 
+- `node tests/browser-creature-cloud.cjs` after the standalone build: mocked GitHub connection/dispatch, text-mode request, token isolation, repeat-click protection, explicit recovery, disconnect and mobile layout. No real workflow or provider call is submitted.
+
 - `npm run test:creatures`: deterministic creature definitions, schema/import boundaries, body-plan compatibility, actual prototype rest joints, and an AI service with a mocked upstream (no API charges).
 - `npm run test:creature-pipeline`: real worker orchestration and Tripo adapter with simulated HTTP responses, a test-only textured skin, GLB validation, atomic installation, rig mismatch rejection, missing credentials, duplicate-charge prevention and local HTTP boundaries. No provider credits are used.
 - `node tests/browser-creature-pipeline.cjs` after the pipeline tests and standalone build: uses their synthetic fixture to verify textured GLB loading, independently animated skeletons, shared geometry/private hit materials, checksum rejection, UI/mobile, actual generated-model enemies and fresh save restoration. This is integration coverage, not a claim of AI mesh/rig quality.

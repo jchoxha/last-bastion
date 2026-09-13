@@ -1295,7 +1295,19 @@ export const wikiChapters: WikiChapter[] = [
         "blocks": [
           {
             "type": "paragraph",
-            "text": "Open Creature forge from the main menu. The **Chimera model pipeline** connects to a local worker that reads Chimera Cards' real creature definitions and artwork, creates a neutral reference, generates a textured mesh, requests the matching quadruped or biped rig, adds a walk animation, validates the GLB and installs it in the game library. New concepts use Chimera's AI forge and art prompts. This worker requires separately configured text inference for new concepts and Tripo API credentials/credits for image, mesh, rig and animation generation. With no key, it can prepare the existing Chimera inputs and display the blocked stage. Jobs persist on the PC and continue while the menu is closed; resume after restarting the worker."
+            "text": "Open Creature forge from the main menu. **Generate creatures on GitHub** works from the published Pages site with this PC off. Store the Tripo key as the repository Actions secret `TRIPO_API_KEY`; connect the forge with a separate GitHub token restricted to this repository with Actions read/write permission. The GitHub token stays in memory only. Alternatively, use the linked GitHub workflow form with your GitHub login. Only the repository owner can dispatch generation on `main`."
+          },
+          {
+            "type": "paragraph",
+            "text": "Choose an existing Chimera roster ID (start with `voltfang`), **Text to 3D**, a compatible body plan, form, appearance details and seed. The worker combines the definition/details with neutral-pose constraints, generates a textured mesh directly from text, checks riggability, rigs and animates it, validates the asset, commits it to `main` and requests Pages deployment. Standard text generation plus rig and one walk is estimated at $0.55 per attempt at September 13, 2026 prices; the existing-art route including reference editing is about $0.70. Each new job can incur charges even with a repeated seed. After deployment, click **Refresh published creatures** to inspect the model; normal game startup also loads published assets."
+          },
+          {
+            "type": "paragraph",
+            "text": "Follow the GitHub run links for progress. Failed jobs retain task IDs and models as artifacts for 30 days; **Resume saved tasks** reuses them. Do not use GitHub's Re-run jobs action for paid generation; it is blocked. Missing recovery artifacts and uncertain submissions require checking Tripo before starting another job. If generation succeeded but publishing failed, recover the installed-assets artifact without regenerating. Anatomical rig quality still requires inspection."
+          },
+          {
+            "type": "paragraph",
+            "text": "The optional local **Chimera model pipeline** reads Chimera Cards' definitions and artwork, creates a neutral reference, generates a textured mesh, requests the matching quadruped or biped rig, adds a walk animation, validates the GLB and installs it in the local game library. New concepts use Chimera's AI forge and art prompts. This worker requires separately configured text inference for new concepts and Tripo API credentials/credits. With no key, it can prepare existing Chimera inputs and display the blocked stage. Local jobs persist on the PC and continue while the menu is closed; resume after restarting the worker."
           },
           {
             "type": "paragraph",
