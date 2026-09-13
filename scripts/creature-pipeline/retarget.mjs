@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { prepareAnimationTrial } from './animation-trial.mjs';
+import { buildAnimationSet } from './animation-set.mjs';
 import { validateRiggedGlb } from './validate.mjs';
 
 const [input, output, calibrationFile] = process.argv.slice(2);
@@ -21,7 +21,7 @@ const calibration = calibrationFile
   : {};
 const bytes = await readFile(input);
 await validateRiggedGlb(bytes, 'canine-v1');
-const trial = await prepareAnimationTrial(bytes, 'canine-v1', calibration);
+const trial = await buildAnimationSet(bytes, 'canine-v1', calibration);
 if (trial.report.status === 'skipped') throw Error(trial.report.reason);
 await writeFile(output, trial.bytes, { flag: 'wx' });
 await writeFile(

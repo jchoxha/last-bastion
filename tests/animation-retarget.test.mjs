@@ -12,10 +12,12 @@ function unpack(bytes) {
 }
 test('retargeted walk preserves Voltfang geometry, weights, bind pose and original animation', async () => {
   const original = unpack(
-    await readFile('public/creatures/asset_77b12bc91500528d69d3194c.glb'),
+    await readFile(
+      'tests/fixtures/creatures/asset_77b12bc91500528d69d3194c.glb',
+    ),
   );
   const bytes = await readFile(
-    'public/creatures/asset_6b400a86fead98a914ab27e7.glb',
+    'tests/fixtures/creatures/asset_6b400a86fead98a914ab27e7.glb',
   );
   const trial = unpack(bytes);
   for (const key of [

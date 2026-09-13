@@ -20,7 +20,7 @@
     "dev:creature-provider": "node --env-file-if-exists=.env.creatures scripts/creature-provider.mjs",
     "test:wiki": "node scripts/integrate-bastion.cjs && node tests/wiki.test.mjs",
     "dev:creature-pipeline": "node --env-file-if-exists=.env.creatures scripts/creature-pipeline/server.mjs",
-    "test:creature-pipeline": "node --test tests/creature-pipeline.test.mjs tests/animation-retarget.test.mjs tests/canine-retarget.test.mjs"
+    "test:creature-pipeline": "node --test tests/creature-pipeline.test.mjs tests/animation-retarget.test.mjs tests/canine-retarget.test.mjs tests/animation-set.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",

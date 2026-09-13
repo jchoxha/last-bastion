@@ -95,7 +95,7 @@ export async function validateRiggedGlb(
   )
     fail('texture exceeds 2048 pixels.');
   const clips = gltf.animations || [];
-  if (!clips.length || clips.length > 12)
+  if (!clips.length || clips.length > 24)
     fail('missing animations or too many clips.');
   const binaryOffset = 28 + length;
   function changes(animation, channel) {

@@ -2,24 +2,19 @@
   "version": 1,
   "assets": [
     {
-      "id": "asset_5e52d8f0e5c7b0eba09dd923",
+      "id": "asset_937da5ef51792ea87f535289",
       "creature": {
         "version": 1,
         "id": "cf_e881f0335f04e8f3",
         "spec": {
           "seed": "voltfang-text-1",
           "concept": "A feral skirmisher whose strikes shock and tax the foe.",
-          "bodies": [
-            "Beast"
-          ],
+          "bodies": ["Beast"],
           "family": "Mammalian",
           "manifestation": "",
           "archetype": "",
           "subtypes": [],
-          "attunements": [
-            "Energy",
-            "Physical"
-          ],
+          "attunements": ["Energy", "Physical"],
           "form": "regular",
           "role": "skirmisher",
           "bodyPlan": "canine-v1",
@@ -40,10 +35,10 @@
           "rigVersion": 1
         }
       },
-      "model": "asset_5e52d8f0e5c7b0eba09dd923.glb",
-      "portrait": "asset_5e52d8f0e5c7b0eba09dd923.png",
-      "sha256": "5e52d8f0e5c7b0eba09dd923bf9bffd5eade3dc25fa703e20896012108d3d9d1",
-      "walkClip": 0,
+      "model": "asset_937da5ef51792ea87f535289.glb",
+      "portrait": "asset_937da5ef51792ea87f535289.png",
+      "sha256": "937da5ef51792ea87f5352892ad239bcb977475d6b29129ca2ec842ac4edf591",
+      "walkClip": 1,
       "yaw": -1.5707963267948966,
       "report": {
         "triangles": 18896,
@@ -51,11 +46,24 @@
         "bones": 31,
         "primitives": 1,
         "clips": [
-          "preset:quadruped:walk",
-          "Quaternius wolf walk — retargeted trial",
-          "Quaternius wolf walk — canine profile v3 trial"
+          "idle",
+          "walk",
+          "run",
+          "attack",
+          "hit",
+          "death",
+          "turn-left",
+          "turn-right",
+          "turn-around",
+          "charge",
+          "leap",
+          "cast",
+          "stagger",
+          "jump",
+          "land",
+          "spawn"
         ],
-        "walkClip": 0,
+        "walkClip": 1,
         "warnings": 2,
         "visualReview": "unverified"
       },
@@ -69,7 +77,9 @@
           "mesh": "v3.1-20260211",
           "rig": "v2.5-20260210"
         },
-        "animationTrial": {
+        "animationSet": {
+          "status": "animation-set",
+          "version": 1,
           "profile": "tripo-canine",
           "revision": 3,
           "calibration": {
@@ -79,143 +89,704 @@
             "degrees": 25.463359015129043,
             "status": "inferred-from-tail-axis"
           },
-          "secondaryMotion": {
-            "enabled": true,
-            "headYawDegrees": 5,
-            "headPitchDegrees": 2,
-            "tailRootYawDegrees": 9,
-            "tailTipYawDegrees": 18,
-            "tailPhaseLagRadians": 1.1,
-            "mappedTailJoints": 5
-          },
-          "clip": 2,
-          "clipName": "Quaternius wolf walk — canine profile v3 trial",
-          "rootMotionScale": 0.23515632706422174,
-          "legLengths": {
-            "frontLeft": 0.3923340876391371,
-            "frontRight": 0.3925605856370887,
-            "rearLeft": 0.4602203733466708,
-            "rearRight": 0.462285137781604
-          },
-          "forward": [
-            0.9998151402045397,
-            0,
-            0.019227205147314755
-          ],
-          "feet": {
-            "frontLeft2": {
-              "excursion": 0.32817356996804453,
-              "maxBelowRestHeight": 0.027653734466907887,
-              "maxRotationFromStanceDegrees": 57.503822970276126,
-              "loopPositionError": 4.257260595689349e-8
+          "diagnostics": {
+            "idle": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 1,
+              "clipName": "idle",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.00673918939098736,
+                  "maxBelowRestHeight": 0.0017527988192234112,
+                  "maxRotationFromStanceDegrees": 0.0000029575586669421963,
+                  "loopPositionError": 8.757620259151196e-10
+                },
+                "frontRight2": {
+                  "excursion": 0.006739410588090938,
+                  "maxBelowRestHeight": 0.0017242600351031478,
+                  "maxRotationFromStanceDegrees": 0.0000034150945850063755,
+                  "loopPositionError": 5.4583515444963145e-9
+                },
+                "rearLeft3": {
+                  "excursion": 0.0005815332259715422,
+                  "maxBelowRestHeight": 0.0030426928854904722,
+                  "maxRotationFromStanceDegrees": 0,
+                  "loopPositionError": 2.650843211604352e-8
+                },
+                "rearRight3": {
+                  "excursion": 0.0005918124569533334,
+                  "maxBelowRestHeight": 0.002953345535698648,
+                  "maxRotationFromStanceDegrees": 0.003468060919627784,
+                  "loopPositionError": 2.5545294814561042e-8
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation."
+              ],
+              "visualReview": "unverified"
             },
-            "frontRight2": {
-              "excursion": 0.3286782839118395,
-              "maxBelowRestHeight": 0.027272160766057707,
-              "maxRotationFromStanceDegrees": 57.51167853052734,
-              "loopPositionError": 2.5595814480914738e-8
+            "run": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 2,
+              "clipName": "run",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.5706051472174356,
+                  "maxBelowRestHeight": 0.014779277821767023,
+                  "maxRotationFromStanceDegrees": 136.02334740859467,
+                  "loopPositionError": 5.785039487287378e-8
+                },
+                "frontRight2": {
+                  "excursion": 0.5019898230540589,
+                  "maxBelowRestHeight": 0,
+                  "maxRotationFromStanceDegrees": 136.02335194354856,
+                  "loopPositionError": 8.220858338651273e-8
+                },
+                "rearLeft3": {
+                  "excursion": 0.5244913801815773,
+                  "maxBelowRestHeight": 0.016947233785397753,
+                  "maxRotationFromStanceDegrees": 110.80732982845645,
+                  "loopPositionError": 9.679139449649156e-8
+                },
+                "rearRight3": {
+                  "excursion": 0.5412707735785925,
+                  "maxBelowRestHeight": 0,
+                  "maxRotationFromStanceDegrees": 110.80732130616292,
+                  "loopPositionError": 9.878189378961384e-8
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation."
+              ],
+              "visualReview": "unverified"
             },
-            "rearLeft3": {
-              "excursion": 0.4368298037724093,
-              "maxBelowRestHeight": 0.029517378744594924,
-              "maxRotationFromStanceDegrees": 67.51796772051605,
-              "loopPositionError": 1.308682091719343e-7
+            "attack": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 3,
+              "clipName": "attack",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.2555115050385124,
+                  "maxBelowRestHeight": 0.03556371869279909,
+                  "maxRotationFromStanceDegrees": 61.92929685381918,
+                  "loopPositionError": 3.7784329728523514e-8
+                },
+                "frontRight2": {
+                  "excursion": 0.2215628122034996,
+                  "maxBelowRestHeight": 0.0427345384289082,
+                  "maxRotationFromStanceDegrees": 61.51673566936858,
+                  "loopPositionError": 3.486017036223026e-8
+                },
+                "rearLeft3": {
+                  "excursion": 0.07337191362765805,
+                  "maxBelowRestHeight": 0.057381449861052786,
+                  "maxRotationFromStanceDegrees": 0,
+                  "loopPositionError": 3.906861829463432e-8
+                },
+                "rearRight3": {
+                  "excursion": 0.07315738038525754,
+                  "maxBelowRestHeight": 0.054644516566954404,
+                  "maxRotationFromStanceDegrees": 0.00347464098980882,
+                  "loopPositionError": 5.465359479765222e-8
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation.",
+                "Paw control drops more than 10% of leg length below its rest height."
+              ],
+              "visualReview": "unverified"
             },
-            "rearRight3": {
-              "excursion": 0.4383836029605608,
-              "maxBelowRestHeight": 0.030595798376387096,
-              "maxRotationFromStanceDegrees": 67.85695626736357,
-              "loopPositionError": 4.531112277667076e-8
+            "hit": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 4,
+              "clipName": "hit",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.007995870538778788,
+                  "maxBelowRestHeight": 0.0030923474625663416,
+                  "maxRotationFromStanceDegrees": 0.0000029575586669421963,
+                  "loopPositionError": 3.682291413355173e-8
+                },
+                "frontRight2": {
+                  "excursion": 0.006597820969758333,
+                  "maxBelowRestHeight": 0,
+                  "maxRotationFromStanceDegrees": 0.0000034150945850063755,
+                  "loopPositionError": 3.4267977911158426e-8
+                },
+                "rearLeft3": {
+                  "excursion": 0.003029524533709582,
+                  "maxBelowRestHeight": 0.04183761988396181,
+                  "maxRotationFromStanceDegrees": 0,
+                  "loopPositionError": 3.906861829463432e-8
+                },
+                "rearRight3": {
+                  "excursion": 0.007105513837196986,
+                  "maxBelowRestHeight": 0.029979884999087436,
+                  "maxRotationFromStanceDegrees": 0.003468060919627784,
+                  "loopPositionError": 5.465359479765222e-8
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation."
+              ],
+              "visualReview": "unverified"
+            },
+            "death": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 5,
+              "clipName": "death",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.11008767997400709,
+                  "maxBelowRestHeight": 0.20628862557675265,
+                  "maxRotationFromStanceDegrees": 107.50005765899598,
+                  "loopPositionError": 0.2693198144857448
+                },
+                "frontRight2": {
+                  "excursion": 0.05906931527295714,
+                  "maxBelowRestHeight": 0.18295555152498041,
+                  "maxRotationFromStanceDegrees": 99.65885517768538,
+                  "loopPositionError": 0.31895485119662154
+                },
+                "rearLeft3": {
+                  "excursion": 0.05904922247630917,
+                  "maxBelowRestHeight": 0.21376151068293134,
+                  "maxRotationFromStanceDegrees": 98.40970691429156,
+                  "loopPositionError": 0.21845494875343488
+                },
+                "rearRight3": {
+                  "excursion": 0.06897554409993123,
+                  "maxBelowRestHeight": 0.08386548203863549,
+                  "maxRotationFromStanceDegrees": 89.85939785565668,
+                  "loopPositionError": 0.3212477661590917
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation.",
+                "Paw control drops more than 10% of leg length below its rest height."
+              ],
+              "visualReview": "unverified"
+            },
+            "charge": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 6,
+              "clipName": "charge",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.5706051472174356,
+                  "maxBelowRestHeight": 0.014779277821767023,
+                  "maxRotationFromStanceDegrees": 136.02334740859467,
+                  "loopPositionError": 5.785039487287378e-8
+                },
+                "frontRight2": {
+                  "excursion": 0.5019898230540589,
+                  "maxBelowRestHeight": 0,
+                  "maxRotationFromStanceDegrees": 136.02335194354856,
+                  "loopPositionError": 8.220858338651273e-8
+                },
+                "rearLeft3": {
+                  "excursion": 0.5244913801815773,
+                  "maxBelowRestHeight": 0.016947233785397753,
+                  "maxRotationFromStanceDegrees": 110.80732982845645,
+                  "loopPositionError": 9.679139449649156e-8
+                },
+                "rearRight3": {
+                  "excursion": 0.5412707735785925,
+                  "maxBelowRestHeight": 0,
+                  "maxRotationFromStanceDegrees": 110.80732130616292,
+                  "loopPositionError": 9.878189378961384e-8
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation."
+              ],
+              "visualReview": "unverified"
+            },
+            "leap": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 7,
+              "clipName": "leap",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.618411710753076,
+                  "maxBelowRestHeight": 0.014907308808691344,
+                  "maxRotationFromStanceDegrees": 135.21368935374943,
+                  "loopPositionError": 4.904191442896826e-8
+                },
+                "frontRight2": {
+                  "excursion": 0.5391455194583776,
+                  "maxBelowRestHeight": 0.011179074706631181,
+                  "maxRotationFromStanceDegrees": 82.20316115515544,
+                  "loopPositionError": 6.187498608395671e-8
+                },
+                "rearLeft3": {
+                  "excursion": 0.4519912562682295,
+                  "maxBelowRestHeight": 0.018788533999896884,
+                  "maxRotationFromStanceDegrees": 92.75315039511706,
+                  "loopPositionError": 3.646605944940635e-8
+                },
+                "rearRight3": {
+                  "excursion": 0.5186415335383902,
+                  "maxBelowRestHeight": 0.01621448389782512,
+                  "maxRotationFromStanceDegrees": 98.17855214980017,
+                  "loopPositionError": 3.1151542100718073e-8
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation."
+              ],
+              "visualReview": "unverified"
+            },
+            "stagger": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 8,
+              "clipName": "stagger",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.006278166676019242,
+                  "maxBelowRestHeight": 0,
+                  "maxRotationFromStanceDegrees": 0.0000029575586669421963,
+                  "loopPositionError": 3.682291413355173e-8
+                },
+                "frontRight2": {
+                  "excursion": 0.02771096743481019,
+                  "maxBelowRestHeight": 0.0023605306915246427,
+                  "maxRotationFromStanceDegrees": 0.0000034150945850063755,
+                  "loopPositionError": 3.278658050239674e-8
+                },
+                "rearLeft3": {
+                  "excursion": 0.006880479839959541,
+                  "maxBelowRestHeight": 0.03081123912468217,
+                  "maxRotationFromStanceDegrees": 0,
+                  "loopPositionError": 3.906861829463432e-8
+                },
+                "rearRight3": {
+                  "excursion": 0.002848376280791598,
+                  "maxBelowRestHeight": 0.0398728364562998,
+                  "maxRotationFromStanceDegrees": 0.003468060919627784,
+                  "loopPositionError": 5.465359479765222e-8
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation."
+              ],
+              "visualReview": "unverified"
+            },
+            "jump": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 9,
+              "clipName": "jump",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.618411710753076,
+                  "maxBelowRestHeight": 0.014907308808691344,
+                  "maxRotationFromStanceDegrees": 135.21368935374943,
+                  "loopPositionError": 4.904191442896826e-8
+                },
+                "frontRight2": {
+                  "excursion": 0.5391455194583776,
+                  "maxBelowRestHeight": 0.011179074706631181,
+                  "maxRotationFromStanceDegrees": 82.20316115515544,
+                  "loopPositionError": 6.187498608395671e-8
+                },
+                "rearLeft3": {
+                  "excursion": 0.4519912562682295,
+                  "maxBelowRestHeight": 0.018788533999896884,
+                  "maxRotationFromStanceDegrees": 92.75315039511706,
+                  "loopPositionError": 3.646605944940635e-8
+                },
+                "rearRight3": {
+                  "excursion": 0.5186415335383902,
+                  "maxBelowRestHeight": 0.01621448389782512,
+                  "maxRotationFromStanceDegrees": 98.17855214980017,
+                  "loopPositionError": 3.1151542100718073e-8
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation."
+              ],
+              "visualReview": "unverified"
+            },
+            "land": {
+              "profile": "tripo-canine",
+              "revision": 3,
+              "calibration": {
+                "headYawDegrees": -10,
+                "secondaryMotion": false
+              },
+              "tailCalibration": {
+                "degrees": 25.463359015129043,
+                "status": "inferred-from-tail-axis"
+              },
+              "secondaryMotion": {
+                "enabled": false,
+                "mappedTailJoints": 5
+              },
+              "clip": 10,
+              "clipName": "land",
+              "rootMotionScale": 0.23515632706422174,
+              "legLengths": {
+                "frontLeft": 0.3923340876391371,
+                "frontRight": 0.3925605856370887,
+                "rearLeft": 0.4602203733466708,
+                "rearRight": 0.462285137781604
+              },
+              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "feet": {
+                "frontLeft2": {
+                  "excursion": 0.6158243840761629,
+                  "maxBelowRestHeight": 0.014803766541673896,
+                  "maxRotationFromStanceDegrees": 135.1070487551634,
+                  "loopPositionError": 0.24407588712891773
+                },
+                "frontRight2": {
+                  "excursion": 0.5440508362602136,
+                  "maxBelowRestHeight": 0.010673757425854496,
+                  "maxRotationFromStanceDegrees": 81.33028928621889,
+                  "loopPositionError": 0.20705027151987196
+                },
+                "rearLeft3": {
+                  "excursion": 0.4392037372182842,
+                  "maxBelowRestHeight": 0.019136215686132843,
+                  "maxRotationFromStanceDegrees": 92.75315039511706,
+                  "loopPositionError": 0.19651910035370956
+                },
+                "rearRight3": {
+                  "excursion": 0.5197859078695518,
+                  "maxBelowRestHeight": 0.01665154378253003,
+                  "maxRotationFromStanceDegrees": 98.1908593849614,
+                  "loopPositionError": 0.2466342678630658
+                }
+              },
+              "warnings": [
+                "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
+                "Head yaw was explicitly calibrated; inspect neck skin deformation."
+              ],
+              "visualReview": "unverified"
             }
           },
-          "warnings": [
-            "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
-            "Head yaw was explicitly calibrated; inspect neck skin deformation."
-          ],
-          "visualReview": "unverified",
-          "sourceSha256": "b30d0d36387f1768c9af27ddcff627efc6104cc3561e2d1c160c72e328c06ffe",
-          "status": "preview-only",
-          "author": "Quaternius",
-          "license": "CC0-1.0",
-          "url": "https://quaternius.com/packs/ultimateanimatedanimals.html",
-          "baseModel": "asset_6b400a86fead98a914ab27e7.glb"
-        },
-        "previousAnimationTrial": {
-          "clip": 1,
-          "author": "Quaternius",
-          "pack": "Ultimate Animated Animal Pack",
-          "sourceClip": "Wolf / Walk",
-          "license": "CC0-1.0",
-          "url": "https://quaternius.com/packs/ultimateanimatedanimals.html",
-          "sourceSha256": "cc02e9d128b5715f352ee8bea086f97a35f1d875d240de99b0f9f2775c37d415",
-          "baseModel": "asset_77b12bc91500528d69d3194c.glb",
-          "mapping": "scripts/creature-pipeline/retarget-voltfang.mjs",
-          "status": "experimental; foot contact needs review"
-        },
-        "previousProfileTrial": {
-          "profile": "tripo-canine",
-          "revision": 2,
-          "calibration": {},
-          "secondaryMotion": {
-            "enabled": true,
-            "headYawDegrees": 5,
-            "headPitchDegrees": 2,
-            "tailRootYawDegrees": 9,
-            "tailTipYawDegrees": 18,
-            "tailPhaseLagRadians": 1.1,
-            "mappedTailJoints": 5
-          },
-          "clip": 2,
-          "clipName": "Quaternius wolf walk — canine profile v2 trial",
-          "rootMotionScale": 0.23515632706422174,
-          "legLengths": {
-            "frontLeft": 0.3923340876391371,
-            "frontRight": 0.3925605856370887,
-            "rearLeft": 0.4602203733466708,
-            "rearRight": 0.462285137781604
-          },
-          "forward": [
-            0.9998151402045397,
-            0,
-            0.019227205147314755
-          ],
-          "feet": {
-            "frontLeft2": {
-              "excursion": 0.32817356996804453,
-              "maxBelowRestHeight": 0.027653734466907887,
-              "maxRotationFromStanceDegrees": 57.503822970276126,
-              "loopPositionError": 4.257260595689349e-8
+          "walkClip": 1,
+          "clips": [
+            {
+              "name": "idle",
+              "label": "Idle",
+              "loop": true,
+              "source": "Idle",
+              "visualReview": "unverified"
             },
-            "frontRight2": {
-              "excursion": 0.3286782839118395,
-              "maxBelowRestHeight": 0.027272160766057707,
-              "maxRotationFromStanceDegrees": 57.51167853052734,
-              "loopPositionError": 2.5595814480914738e-8
+            {
+              "name": "walk",
+              "label": "Walk",
+              "loop": true,
+              "source": "reviewed canine profile v3",
+              "visualReview": "unverified"
             },
-            "rearLeft3": {
-              "excursion": 0.4368298037724093,
-              "maxBelowRestHeight": 0.029517378744594924,
-              "maxRotationFromStanceDegrees": 67.51796772051605,
-              "loopPositionError": 1.308682091719343e-7
+            {
+              "name": "run",
+              "label": "Run / chase",
+              "loop": true,
+              "source": "Gallop",
+              "visualReview": "unverified"
             },
-            "rearRight3": {
-              "excursion": 0.4383836029605608,
-              "maxBelowRestHeight": 0.030595798376387096,
-              "maxRotationFromStanceDegrees": 67.85695626736357,
-              "loopPositionError": 4.531112277667076e-8
+            {
+              "name": "attack",
+              "label": "Basic attack",
+              "loop": false,
+              "source": "Attack",
+              "impactFraction": 0.4,
+              "visualReview": "unverified"
+            },
+            {
+              "name": "hit",
+              "label": "Hit reaction",
+              "loop": false,
+              "source": "Idle_HitReact1",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "death",
+              "label": "Death",
+              "loop": false,
+              "source": "Death",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "turn-left",
+              "label": "Pivot left",
+              "loop": true,
+              "source": "procedural canine pose/step sequence",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "turn-right",
+              "label": "Pivot right",
+              "loop": true,
+              "source": "procedural canine pose/step sequence",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "turn-around",
+              "label": "Turn around",
+              "loop": false,
+              "source": "procedural canine pose/step sequence",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "charge",
+              "label": "Charge",
+              "loop": true,
+              "source": "Gallop",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "leap",
+              "label": "Leap",
+              "loop": false,
+              "source": "Gallop_Jump",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "cast",
+              "label": "Cast / roar",
+              "loop": false,
+              "source": "procedural canine pose/step sequence",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "stagger",
+              "label": "Stagger",
+              "loop": false,
+              "source": "Idle_HitReact2",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "jump",
+              "label": "Jump",
+              "loop": false,
+              "source": "Gallop_Jump",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "land",
+              "label": "Landing",
+              "loop": false,
+              "source": "Jump_ToIdle",
+              "visualReview": "unverified"
+            },
+            {
+              "name": "spawn",
+              "label": "Spawn / rise",
+              "loop": false,
+              "source": "procedural canine pose/step sequence",
+              "visualReview": "unverified"
             }
-          },
+          ],
+          "sourceSha256": "90001d38562205c58cea21cf355a540ad2c595c5c1997be20497a42f87c7289f",
+          "visualReview": "unverified",
           "warnings": [
             "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
-            "Head facing is uncalibrated: bone positions cannot establish the mesh’s gaze direction."
-          ],
-          "visualReview": "unverified",
-          "sourceSha256": "b30d0d36387f1768c9af27ddcff627efc6104cc3561e2d1c160c72e328c06ffe",
-          "status": "preview-only",
-          "author": "Quaternius",
-          "license": "CC0-1.0",
-          "url": "https://quaternius.com/packs/ultimateanimatedanimals.html",
-          "baseModel": "asset_6b400a86fead98a914ab27e7.glb"
+            "Head yaw was explicitly calibrated; inspect neck skin deformation.",
+            "Paw control drops more than 10% of leg length below its rest height.",
+            "Procedural pivots need contact review; special clips do not grant combat abilities."
+          ]
         }
       }
     }

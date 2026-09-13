@@ -12,7 +12,7 @@ import {
   values,
 } from '../scripts/creature-pipeline/animation-gltf.mjs';
 const original = await readFile(
-  'public/creatures/asset_77b12bc91500528d69d3194c.glb',
+  'tests/fixtures/creatures/asset_77b12bc91500528d69d3194c.glb',
 );
 const donor = JSON.parse(
   await readFile(
@@ -224,7 +224,7 @@ test('tail centering resolves the body-relative neutral bias without flattening 
 
 test('an isolated clip remains validated when prior clips leave many unused accessors', async () => {
   const previous = await readFile(
-    'public/creatures/asset_5d7993d8ee0258d6df478391.glb',
+    'tests/fixtures/creatures/asset_5d7993d8ee0258d6df478391.glb',
   );
   const result = await prepareAnimationTrial(previous, 'canine-v1');
   assert.equal(result.report.status, 'preview-only');

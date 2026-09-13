@@ -53,7 +53,13 @@ function landmarks(roles, which) {
 
 // Pure offline conversion: accepts any compatible Tripo canine, not a creature ID/hash.
 // The only asset-specific input is optional, explicit visual calibration metadata.
-export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
+export function retargetCanine(
+  sourceDoc,
+  targetBytes,
+  calibration = {},
+  options = {},
+) {
+  const { sourceClip = 'Walk', clipName = CANINE_CLIP, loop = true } = options;
   const {
     headYawDegrees = 0,
     secondaryMotion = true,
@@ -74,7 +80,7 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
       'Calibration supports headYawDegrees/tailYawDegrees between -60 and 60 and a boolean secondaryMotion.',
     );
   const { doc: targetDoc, bin: targetBin } = unpackGlb(targetBytes);
-  if (targetDoc.animations?.some((clip) => clip.name === CANINE_CLIP))
+  if (targetDoc.animations?.some((clip) => clip.name === clipName))
     throw new RigCompatibilityError(
       'This asset already includes the canine trial; recalibrate from its original provider asset.',
     );
@@ -101,7 +107,7 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
     sourceDoc.buffers[0].uri.split(',')[1],
     'base64',
   );
-  const animation = sourceDoc.animations.find((c) => c.name === 'Walk');
+  const animation = sourceDoc.animations.find((c) => c.name === sourceClip);
   if (!animation)
     throw new RigCompatibilityError('Source has no Walk animation.');
   const tracks = animation.channels.map((c) => {
@@ -125,7 +131,7 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
       values(sourceDoc, sourceBin, s.output),
     );
   });
-  const clip = new THREE.AnimationClip('Walk', -1, tracks);
+  const clip = new THREE.AnimationClip(sourceClip, -1, tracks);
   if (
     !Number.isFinite(clip.duration) ||
     clip.duration <= 0 ||
@@ -134,6 +140,10 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
     throw new RigCompatibilityError('Invalid walk duration.');
   const mixer = new THREE.AnimationMixer(source.root),
     action = mixer.clipAction(clip).play();
+  if (!loop) {
+    action.setLoop(THREE.LoopOnce, 1);
+    action.clampWhenFinished = true;
+  }
   const frameCount = Math.ceil(clip.duration * 30);
   const times = Array.from(
     { length: frameCount + 1 },
@@ -275,9 +285,10 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
     }
   if (
     positions.some((v) => !Number.isFinite(v)) ||
-    Object.values(feet).some(
-      (f) => f.loopPositionError > targetShape.length * 0.01,
-    )
+    (loop &&
+      Object.values(feet).some(
+        (f) => f.loopPositionError > targetShape.length * 0.01,
+      ))
   )
     throw Error(
       'Retargeting produced an invalid translation or open foot loop.',
@@ -293,7 +304,7 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
       mappedTailJoints: pairs.filter((p) => /^tail\d+$/.test(p.role)).length,
     },
     clip: targetDoc.animations?.length || 0,
-    clipName: CANINE_CLIP,
+    clipName,
     rootMotionScale: scale,
     legLengths: targetShape.legs,
     forward: targetShape.forward.toArray(),
@@ -308,7 +319,7 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
     samples,
     roles.root.ti,
     positions,
-    CANINE_CLIP,
+    clipName,
   );
   return { bytes, report };
 }

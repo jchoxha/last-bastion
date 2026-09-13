@@ -12,7 +12,7 @@ import { FORMS } from '../../lib/creatures/core.ts';
 import { PipelineError, TRIPO_MODELS } from './tripo.mjs';
 import { validateRiggedGlb } from './validate.mjs';
 import { modelPrompt } from './model-prompt.mjs';
-import { prepareAnimationTrial } from './animation-trial.mjs';
+import { buildAnimationSet } from './animation-set.mjs';
 
 const hash = (value) => createHash('sha256').update(value).digest('hex');
 async function json(file, fallback) {
@@ -276,11 +276,11 @@ export async function createPipeline({
       job.stage = 'validation';
       await save();
       job.report = await validate(bytes, job.request.bodyPlan);
-      const trial = await prepareAnimationTrial(bytes, job.request.bodyPlan);
+      const trial = await buildAnimationSet(bytes, job.request.bodyPlan);
       job.animationTrial = trial.report;
-      if (trial.report.status === 'preview-only') {
+      if (trial.report.status === 'animation-set') {
         bytes = trial.bytes;
-        const defaultWalk = job.report.walkClip;
+        const defaultWalk = trial.report.walkClip;
         job.report = await validate(bytes, job.request.bodyPlan);
         job.report.walkClip = defaultWalk;
         await writeFile(path.join(dir, 'animation-trial.glb'), bytes);

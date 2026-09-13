@@ -230,10 +230,10 @@ test('actual Tripo adapter drives all stages and atomically installs a verified 
   assert.equal((await restarted.resume(started.id)).status, 'ready');
   assert.equal(calls.length, count);
 });
-test('generation installs an offline canine trial without extra provider calls or changing the default walk', async () => {
+test('generation installs the full canine animation set without extra provider calls', async () => {
   const root = await temporary();
   const realAsset = await readFile(
-    'public/creatures/asset_77b12bc91500528d69d3194c.glb',
+    'tests/fixtures/creatures/asset_77b12bc91500528d69d3194c.glb',
   );
   const { provider, calls } = fakeTripo({ assetBytes: realAsset });
   const pipeline = await createPipeline({ root, chimera, provider });
@@ -245,10 +245,10 @@ test('generation installs an offline canine trial without extra provider calls o
     await readFile(path.join(root, 'public/creatures/index.json')),
   );
   const asset = manifest.assets[0];
-  assert.equal(asset.walkClip, 0);
-  assert.equal(asset.source.animationTrial.status, 'preview-only');
-  assert.equal(asset.source.animationTrial.clip, 1);
-  assert.equal(asset.report.clips.length, 2);
+  assert.equal(asset.walkClip, 1);
+  assert.equal(asset.source.animationTrial.status, 'animation-set');
+  assert.equal(asset.report.clips.length, 16);
+  assert.equal(asset.report.clips[asset.walkClip], 'walk');
   const saved = JSON.parse(
     await readFile(
       path.join(
@@ -259,7 +259,7 @@ test('generation installs an offline canine trial without extra provider calls o
       ),
     ),
   );
-  assert.equal(saved.profile, 'tripo-canine');
+  assert.equal(saved.version, 1);
   const installed = await readFile(
     path.join(root, 'public/creatures', asset.model),
   );

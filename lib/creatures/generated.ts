@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CREATURE_MOTIONS, type CreatureMotion } from './motions';
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { makeCreature, type Creature } from './core';
@@ -12,7 +13,12 @@ export type GeneratedAsset = {
   sha256: string;
   walkClip: number;
   yaw: number;
-  report: { triangles: number; bones: number; visualReview: string };
+  report: {
+    triangles: number;
+    bones: number;
+    visualReview: string;
+    clips?: string[];
+  };
 };
 type RecordAsset = {
   asset: GeneratedAsset;
@@ -66,7 +72,7 @@ export async function refreshGeneratedAssets(
       !Number.isFinite(raw.yaw) ||
       !Number.isInteger(raw.walkClip) ||
       raw.walkClip < 0 ||
-      raw.walkClip > 11
+      raw.walkClip > 23
     )
       throw Error('Invalid generated asset entry.');
     return { ...raw, creature };
@@ -165,24 +171,67 @@ export function createRuntimeCreatureActor(creature: Creature) {
     disposed = false,
     mixer: THREE.AnimationMixer | undefined;
   let model: THREE.Object3D | undefined,
-    motion: 'rest' | 'idle' | 'walk' = 'idle',
+    motion: CreatureMotion | 'rest' = 'idle',
     walk: THREE.AnimationClip | undefined;
   let state = 'prototype';
   let previewClips: THREE.AnimationClip[] = [],
     previewClipIndex = 0;
-  function setAnimation(next: 'rest' | 'idle' | 'walk') {
-    if (motion === next) return;
-    motion = next;
-    if (!mixer || !walk) {
-      fallback.setAnimation(next);
+  let currentAction: THREE.AnimationAction | undefined;
+  let fadingAction: THREE.AnimationAction | undefined;
+  let fadeLeft = 0;
+  function playClip(clip: THREE.AnimationClip | undefined, immediate = false) {
+    if (!mixer) return;
+    fadingAction?.stop();
+    fadingAction = undefined;
+    if (!clip) {
+      mixer.stopAllAction();
+      currentAction = undefined;
       return;
     }
-    mixer.stopAllAction();
-    // Quadruped provider currently supplies walk only. Rest is honest idle until an idle clip exists.
-    if (next === 'walk') mixer.clipAction(walk).reset().play();
+    const next = mixer.clipAction(clip);
+    const loop = CREATURE_MOTIONS[clip.name as CreatureMotion]?.loop ?? true;
+    if (currentAction && currentAction !== next && !immediate) {
+      fadingAction = currentAction;
+      fadingAction.fadeOut(0.12);
+      fadeLeft = 0.12;
+    } else currentAction?.stop();
+    currentAction = next
+      .reset()
+      .setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
+    currentAction.clampWhenFinished = !loop;
+    currentAction.setEffectiveTimeScale(1).setEffectiveWeight(1).play();
+    if (fadingAction) currentAction.fadeIn(0.12);
+    mixer.update(0);
+  }
+  function setAnimation(next: CreatureMotion | 'rest', restart = false) {
+    if (motion === next && !restart) return;
+    motion = next;
+    if (!mixer) {
+      fallback.setAnimation(
+        next === 'rest'
+          ? 'rest'
+          : ['walk', 'run', 'charge'].includes(next)
+            ? 'walk'
+            : 'idle',
+      );
+      return;
+    }
+    const clip =
+      next === 'rest'
+        ? undefined
+        : previewClips.find((c) => c.name === next) ||
+          (['walk', 'run', 'charge'].includes(next) ? walk : undefined);
+    if (clip) previewClipIndex = previewClips.indexOf(clip);
+    playClip(clip);
   }
   const playCurrent = () => {
-    if (motion === 'walk' && mixer && walk) mixer.clipAction(walk).play();
+    const clip =
+      motion === 'rest'
+        ? undefined
+        : previewClips.find((c) => c.name === motion) ||
+          (motion === 'walk' ? walk : undefined);
+    if (clip) previewClipIndex = previewClips.indexOf(clip);
+    playClip(clip, true);
   };
   void (async () => {
     await initializeGeneratedAssets();
@@ -276,36 +325,70 @@ export function createRuntimeCreatureActor(creature: Creature) {
     get previewClipIndex() {
       return previewClipIndex;
     },
+    hasAnimation(name: CreatureMotion) {
+      return previewClips.some((c) => c.name === name);
+    },
+    get motion() {
+      return motion;
+    },
+    get turning() {
+      return {
+        maxTurnSpeed: Math.PI * 1.5,
+        minRadius: creature.stats.radius * 2,
+      };
+    },
+    animationDuration(name: CreatureMotion) {
+      return previewClips.find((c) => c.name === name)?.duration || 0;
+    },
     selectPreviewClip(index: number) {
       if (!mixer || !Number.isInteger(index) || !previewClips[index]) return;
-      mixer.stopAllAction();
       previewClipIndex = index;
-      walk = previewClips[index];
-      if (motion === 'walk') mixer.clipAction(walk).reset().play();
-      mixer.update(0);
+      const clip = previewClips[index];
+      motion = (
+        clip.name in CREATURE_MOTIONS ? clip.name : 'walk'
+      ) as CreatureMotion;
+      playClip(clip, true);
     },
     get playback() {
-      if (!mixer || !walk) return fallback.playback;
+      if (!mixer) return { ...fallback.playback, loop: true, finished: false };
+      const duration = currentAction?.getClip().duration || 0,
+        time = currentAction?.time || 0;
+      const loop = currentAction?.loop !== THREE.LoopOnce;
       return {
-        duration: motion === 'walk' ? walk.duration : 0,
-        time: motion === 'walk' ? mixer.clipAction(walk).time : 0,
+        duration,
+        time,
+        loop,
+        finished: !loop && duration > 0 && time >= duration - 1e-6,
       };
     },
     seekAnimation(seconds: number) {
-      if (!mixer || !walk) {
+      if (!mixer) {
         fallback.seekAnimation(seconds);
         return;
       }
-      if (motion !== 'walk' || !Number.isFinite(seconds)) return;
-      const wrapped =
-        ((seconds % walk.duration) + walk.duration) % walk.duration;
-      mixer.clipAction(walk).time =
-        wrapped < 1e-8 || walk.duration - wrapped < 1e-8 ? 0 : wrapped;
+      if (!currentAction || !Number.isFinite(seconds)) return;
+      const duration = currentAction.getClip().duration;
+      const loop = currentAction.loop !== THREE.LoopOnce;
+      const wrapped = loop
+        ? ((seconds % duration) + duration) % duration
+        : Math.max(0, Math.min(duration, seconds));
+      currentAction.paused = false;
+      currentAction.time =
+        loop && (wrapped < 1e-8 || duration - wrapped < 1e-8) ? 0 : wrapped;
+      fadingAction?.stop();
+      fadingAction = undefined;
+      currentAction.stopFading().setEffectiveWeight(1);
       mixer.update(0);
     },
     update(dt: number) {
-      if (mixer) mixer.update(Math.min(dt, 0.1));
-      else fallback.update(dt);
+      if (mixer) {
+        const step = Math.max(0, Math.min(dt, 0.1));
+        mixer.update(step);
+        if (fadingAction && (fadeLeft -= step) <= 0) {
+          fadingAction.stop();
+          fadingAction = undefined;
+        }
+      } else fallback.update(dt);
     },
     dispose() {
       disposed = true;

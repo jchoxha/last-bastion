@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { CREATURE_MOTIONS, type CreatureMotion } from '@/lib/creatures/motions';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { createCreatureActor, rigJoints } from '@/lib/creatures/actor';
@@ -48,7 +49,7 @@ function Preview({
   bones,
 }: {
   creature: Creature;
-  motion: 'rest' | 'idle' | 'walk';
+  motion: CreatureMotion | 'rest';
   bones: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
@@ -61,10 +62,11 @@ function Preview({
   const [paused, setPaused] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [hasClip, setHasClip] = useState(false);
-  const [clips, setClips] = useState<{ index: number; name: string }[]>([]);
-  const [clipIndex, setClipIndex] = useState(0);
+
   const [error, setError] = useState('');
   function pause(value: boolean) {
+    if (!value && actorRef.current?.playback.finished)
+      actorRef.current.seekAnimation(0);
     playbackRef.current.paused = value;
     setPaused(value);
   }
@@ -131,6 +133,14 @@ function Preview({
           : Math.min((now - last) / 1000, 0.1) * playback.speed,
       );
       const position = actor.playback;
+      const current = actor.motion;
+      actor.group.rotation.y =
+        current.startsWith('turn-') && position.duration > 0
+          ? ((current === 'turn-left' ? -1 : 1) *
+              (current === 'turn-around' ? Math.PI : Math.PI / 2) *
+              position.time) /
+            position.duration
+          : 0;
       const available = position.duration > 0;
       if (available !== previousHasClip) {
         previousHasClip = available;
@@ -145,8 +155,7 @@ function Preview({
       element.dataset.assetState = actor.state;
       if (actor.state !== previousState) {
         previousState = actor.state;
-        setClips(actor.state === 'generated' ? actor.previewClips : []);
-        setClipIndex(actor.previewClipIndex);
+
         const visible = helper.visible;
         scene.remove(helper);
         helper.dispose();
@@ -202,31 +211,6 @@ function Preview({
           className="forge-tools"
           aria-label="Animation playback controls"
         >
-          {clips.length > 1 && (
-            <label style={{ flexBasis: '100%', minWidth: 0 }}>
-              Walk clip (preview)
-              <select
-                style={{ maxWidth: '100%' }}
-                disabled={motion !== 'walk'}
-                value={clipIndex}
-                onChange={(e) => {
-                  const index = Number(e.target.value);
-                  actorRef.current?.selectPreviewClip(index);
-                  setClipIndex(index);
-                }}
-              >
-                {clips.map((clip) => (
-                  <option key={clip.index} value={clip.index}>
-                    {clip.name}
-                  </option>
-                ))}
-              </select>
-              <small>
-                Select walk motion to compare clips. This selection does not
-                change the game’s default animation.
-              </small>
-            </label>
-          )}
           <label>
             Playback speed
             <select
@@ -292,8 +276,15 @@ export default function CreatureForge({
   );
   const [endpoint, setEndpoint] = useState('http://127.0.0.1:8788/creatures');
   const [busy, setBusy] = useState(false),
-    [motion, setMotion] = useState<'rest' | 'idle' | 'walk'>('idle'),
+    [motion, setMotion] = useState<CreatureMotion | 'rest'>('idle'),
     [bones, setBones] = useState(false);
+  const fullAnimationSet = generatedAsset(creature.id)?.report.clips?.includes(
+    'attack',
+  );
+  const previewMotion =
+    fullAnimationSet || ['rest', 'idle', 'walk'].includes(motion)
+      ? motion
+      : 'idle';
   const cancel = useRef<AbortController | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -617,12 +608,29 @@ export default function CreatureForge({
             </div>
             <span className="forge-badge">{creature.spec.form}</span>
           </div>
-          <Preview creature={creature} motion={motion} bones={bones} />
+          <Preview creature={creature} motion={previewMotion} bones={bones} />
           {ready && (
             <div className="forge-tools">
-              {select('Preview motion', motion, ['rest', 'idle', 'walk'], (v) =>
-                setMotion(v as typeof motion),
-              )}
+              <label>
+                Preview motion
+                <select
+                  value={previewMotion}
+                  onChange={(e) => setMotion(e.target.value as typeof motion)}
+                >
+                  {[
+                    'rest',
+                    ...(fullAnimationSet
+                      ? Object.keys(CREATURE_MOTIONS)
+                      : ['idle', 'walk']),
+                  ].map((name) => (
+                    <option key={name} value={name}>
+                      {name === 'rest'
+                        ? 'Rest (imported bind pose)'
+                        : CREATURE_MOTIONS[name as CreatureMotion].label}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label className="forge-check">
                 <input
                   type="checkbox"

@@ -97,6 +97,7 @@ const {
           await new Promise((resolve) => setTimeout(resolve, 25));
         if (a.state !== 'generated' || b.state !== 'generated')
           throw Error('Generated mesh did not load.');
+        const otherClip = b.previewClipIndex;
         const qa = a.mesh.skeleton.bones.map((bone) =>
           bone.quaternion.toArray().join(','),
         );
@@ -159,9 +160,9 @@ const {
             )
           )
             throw Error('Alternative clip did not change the sampled pose.');
-          if (b.previewClipIndex !== 0)
+          if (b.previewClipIndex !== otherClip)
             throw Error('Preview choice affected another actor.');
-          a.selectPreviewClip(0);
+          a.setAnimation('walk');
           a.seekAnimation(0.25);
           if (
             !a.mesh.skeleton.bones.every(
@@ -251,39 +252,58 @@ const {
     await page
       .getByRole('button', { name: 'Pause animation', exact: true })
       .click();
-    if (await page.getByLabel('Walk clip (preview)').count()) {
-      const select = page.getByLabel('Walk clip (preview)');
-      await select.selectOption(
-        String((await select.locator('option').count()) - 1),
+    if (asset.report.clips.includes('attack')) {
+      assert.equal(await page.getByLabel('Walk clip (preview)').count(), 0);
+      const select = page.getByLabel('Preview motion');
+      for (const name of asset.report.clips) {
+        await select.selectOption(name);
+        await page.waitForFunction(
+          () =>
+            Number(
+              document.querySelector('.forge-preview').dataset
+                .animationDuration,
+            ) > 0,
+        );
+        await page
+          .getByRole('button', { name: 'Restart clip', exact: true })
+          .click();
+        await page
+          .getByRole('button', { name: 'Next frame', exact: true })
+          .click();
+        await page.waitForFunction(
+          () =>
+            Number(
+              document.querySelector('.forge-preview').dataset.animationTime,
+            ) > 0,
+        );
+      }
+      await select.selectOption('death');
+      await page
+        .getByRole('button', { name: 'Restart clip', exact: true })
+        .click();
+      for (let i = 0; i < 45; i++)
+        await page
+          .getByRole('button', { name: 'Next frame', exact: true })
+          .click();
+      const end = await animationTime();
+      const duration = Number(
+        await page
+          .locator('.forge-preview')
+          .getAttribute('data-animation-duration'),
       );
-      await page.waitForFunction(
-        () =>
-          Number(
-            document.querySelector('.forge-preview').dataset.animationTime,
-          ) === 0,
-      );
-      assert(
-        (await page
-          .getByRole('button', { name: 'Play animation', exact: true })
-          .count()) === 1,
-      );
-      assert(
-        Number(
-          await page
-            .locator('.forge-preview')
-            .getAttribute('data-animation-duration'),
-        ) < 1.1,
+      assert.ok(
+        Math.abs(end - duration) < 1e-6,
+        'one-shot clamps to final pose',
       );
       await page
-        .getByRole('button', { name: 'Next frame', exact: true })
+        .getByRole('button', { name: 'Previous frame', exact: true })
         .click();
-      await page.waitForFunction(
-        () =>
-          Number(
-            document.querySelector('.forge-preview').dataset.animationTime,
-          ) > 0,
-      );
-      assert(Math.abs((await animationTime()) - 1 / 30) < 1e-6);
+      await page.waitForFunction(() => {
+        const e = document.querySelector('.forge-preview');
+        return (
+          Number(e.dataset.animationTime) < Number(e.dataset.animationDuration)
+        );
+      });
     }
     await page.screenshot({
       path: 'work/pipeline-generated-fixture.png',
@@ -332,6 +352,55 @@ const {
       const e = G.enemies.find((item) => item.type === id);
       return e && forgeModels.get(e.mesh)?.state === 'generated';
     }, asset.creature.id);
+    if (asset.report.clips.includes('attack')) {
+      await game.evaluate(async (id) => {
+        const e = G.enemies.find((e) => e.type === id),
+          rig = forgeModels.get(e.mesh);
+        e.forgeAnimationReady = true;
+        forgeActions.delete(e);
+        rig.setAnimation('idle', true);
+        e.mesh.rotation.y = 0;
+        const target = { hp: 100, pos: e.pos.clone().add(V3(0, 0, 1)) };
+        if (!forgedEnemyAttack(e, target) || target.hp !== 100)
+          throw Error('Attack damaged before impact');
+        const at = forgeAttacks.get(e).at;
+        G.time = at - 0.01;
+        updatePlayer(0);
+        if (target.hp !== 100) throw Error('Attack landed early');
+        G.time = at + 0.01;
+        updatePlayer(0);
+        if (target.hp !== 100 - e.d.dmg) throw Error('Attack failed at impact');
+        updatePlayer(0);
+        if (target.hp !== 100 - e.d.dmg) throw Error('Impact applied twice');
+        forgeActions.delete(e);
+        e.forgePivoting = false;
+        rig.setAnimation('idle', true);
+        e.mesh.rotation.y = 0;
+        const factor = steerForgedEnemy(e, V3(0, 0, -1), 0.1, e.d.spd);
+        if (
+          factor !== 0 ||
+          Math.abs(e.mesh.rotation.y) > rig.turning.maxTurnSpeed * 0.1 + 1e-6
+        )
+          throw Error('Reversal spun or moved instantly');
+        e.forgePivoting = false;
+        rig.setAnimation('idle', true);
+        const victim = frontierSpawnAt(e.pos.clone().add(V3(2, 0, 0)), id);
+        const deathRig = forgeModels.get(victim.mesh);
+        for (let i = 0; i < 100 && deathRig.state !== 'generated'; i++)
+          await new Promise((r) => setTimeout(r, 20));
+        damage(victim, victim.hp + 1000);
+        if (
+          !victim.dead ||
+          victim.mesh.parent !== G.world ||
+          deathRig.motion !== 'death'
+        )
+          throw Error('Death model removed before animation');
+        for (let t = 0; t < deathRig.animationDuration('death') + 0.7; t += 0.1)
+          updatePlayer(0.1);
+        if (victim.mesh.parent === G.world || forgeModels.has(victim.mesh))
+          throw Error('Death model was not cleaned up');
+      }, asset.creature.id);
+    }
     assert(await game.evaluate(() => window.bastion.save()));
     await page.reload();
     if (await page.getByRole('button', { name: 'Back to menu' }).count())

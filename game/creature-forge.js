@@ -2,6 +2,83 @@
 const forgeDefinitions = new Map();
 const forgeModels = new Map();
 const forgeLastPositions = new WeakMap();
+const forgeActions = new WeakMap();
+const forgeAttacks = new Map();
+const forgeCorpses = new Map();
+function forgeAction(enemy, name) {
+  const rig = forgeModels.get(enemy.mesh);
+  if (!rig?.hasAnimation(name)) return false;
+  rig.setAnimation(name, true);
+  enemy.forgePivoting = false;
+  forgeActions.set(enemy, name);
+  return true;
+}
+function steerForgedEnemy(enemy, direction, dt, speed) {
+  const rig = forgeModels.get(enemy.mesh);
+  if (!rig?.hasAnimation('turn-left')) return 1;
+  if (forgeActions.has(enemy)) {
+    enemy.forgePivoting = true;
+    direction.set(
+      Math.sin(enemy.mesh.rotation.y),
+      0,
+      Math.cos(enemy.mesh.rotation.y),
+    );
+    return 0;
+  }
+  const desired = Math.atan2(direction.x, direction.z),
+    angle = Math.atan2(
+      Math.sin(desired - enemy.mesh.rotation.y),
+      Math.cos(desired - enemy.mesh.rotation.y),
+    );
+  const maxSpeed = rig.turning.maxTurnSpeed;
+  const pivot = Math.abs(angle) > 0.85;
+  const rate = pivot
+    ? maxSpeed
+    : Math.min(maxSpeed, Math.max(0.5, speed / rig.turning.minRadius));
+  const change = clamp(angle, -rate * dt, rate * dt);
+  enemy.mesh.rotation.y += change;
+  direction.set(
+    Math.sin(enemy.mesh.rotation.y),
+    0,
+    Math.cos(enemy.mesh.rotation.y),
+  );
+  enemy.forgePivoting = pivot;
+  if (pivot)
+    rig.setAnimation(
+      Math.abs(angle) > 2.5
+        ? 'turn-around'
+        : angle > 0
+          ? 'turn-right'
+          : 'turn-left',
+    );
+  return pivot ? 0 : Math.max(0.35, Math.cos(angle));
+}
+function forgedEnemyAttack(enemy, target) {
+  const rig = forgeModels.get(enemy.mesh);
+  if (!rig?.hasAnimation('attack')) return false;
+  const goal = target.corePos || target.pos;
+  if (target.b) target.hp ??= 180;
+  const desired = Math.atan2(goal.x - enemy.pos.x, goal.z - enemy.pos.z);
+  const angle = Math.atan2(
+    Math.sin(desired - enemy.mesh.rotation.y),
+    Math.cos(desired - enemy.mesh.rotation.y),
+  );
+  if (Math.abs(angle) > 0.35) {
+    enemy.forgeAim = goal.clone();
+    enemy.attackCd = 0.05;
+    return true;
+  }
+  if (forgeActions.has(enemy)) {
+    enemy.attackCd = 0.05;
+    return true;
+  }
+  delete enemy.forgeAim;
+  forgeAction(enemy, 'attack');
+  const duration = rig.animationDuration('attack');
+  enemy.attackCd = Math.max(1, duration + 0.15);
+  forgeAttacks.set(enemy, { target, at: G.time + duration * 0.4 });
+  return true;
+}
 const forgeRecipeBase = registerCreatureRecipe;
 registerCreatureRecipe = function (id, spec, remember = true) {
   if (!spec.forge && !spec.forgeJson)
@@ -85,17 +162,67 @@ const forgeAnimateBase = animateVoxelActor;
 animateVoxelActor = function (actor, dt) {
   const rig = forgeModels.get(actor.mesh);
   if (!rig) return forgeAnimateBase(actor, dt);
+  if (actor.dead) return;
   const previous = forgeLastPositions.get(actor);
-  const moving = previous && actor.pos.distanceToSquared(previous) > 0.00001;
+  const moved = previous ? actor.pos.distanceTo(previous) : 0;
+  const moving = moved > 0.003;
   if (previous) previous.copy(actor.pos);
   else forgeLastPositions.set(actor, actor.pos.clone());
-  rig.setAnimation(moving ? 'walk' : 'idle');
+  if (rig.state === 'generated' && !actor.forgeAnimationReady) {
+    actor.forgeAnimationReady = true;
+    forgeAction(actor, 'spawn');
+  }
+  if (actor.forgeAim && !forgeActions.has(actor)) {
+    const direction = actor.forgeAim.clone().sub(actor.pos);
+    direction.y = 0;
+    direction.normalize();
+    steerForgedEnemy(actor, direction, dt, 0);
+  }
+  const action = forgeActions.get(actor);
+  if (action && rig.playback.finished) {
+    forgeActions.delete(actor);
+    actor.forgePivoting = false;
+  }
+  if (!forgeActions.has(actor) && !actor.forgePivoting) {
+    const speed = moved / Math.max(dt, 0.001);
+    rig.setAnimation(
+      moving ? (speed > actor.d.spd * 0.65 ? 'run' : 'walk') : 'idle',
+    );
+  }
   rig.update(dt);
   actor.body = rig.mesh;
 };
 const forgeUpdateBase = updatePlayer;
 updatePlayer = function (dt) {
   forgeUpdateBase(dt);
+  for (const [enemy, attack] of forgeAttacks) {
+    if (enemy.dead) {
+      forgeAttacks.delete(enemy);
+      continue;
+    }
+    if (G.time < attack.at) continue;
+    forgeAttacks.delete(enemy);
+    const target = attack.target,
+      goal = target.corePos || target.pos;
+    if (
+      (target.hp > 0 || target.coreHp > 0) &&
+      goal &&
+      enemy.pos.distanceTo(goal) <
+        (target.b ? CELL + 1 : enemy.d.size + (target.corePos ? 2.1 : 1.2)) &&
+      Math.abs(enemy.pos.y - goal.y) < 5
+    ) {
+      hurtFriendly(target, enemy.d.dmg);
+      if (target.b && target.hp <= 0) destroyStructure(target);
+    }
+  }
+  for (const [model, corpse] of forgeCorpses) {
+    corpse.rig.update(dt);
+    corpse.left -= dt;
+    if (corpse.left <= 0) {
+      G.world.remove(model);
+      forgeCorpses.delete(model);
+    }
+  }
   for (const [model, actor] of forgeModels) {
     if (model.parent !== G.world) {
       actor.dispose();
@@ -103,10 +230,44 @@ updatePlayer = function (dt) {
     }
   }
 };
+const forgeDamageBase = damage;
+damage = function (enemy, amount) {
+  const wasDead = enemy.dead,
+    hp = enemy.hp,
+    rig = forgeModels.get(enemy.mesh);
+  forgeDamageBase(enemy, amount);
+  if (!rig || wasDead || enemy.hp >= hp) return;
+  if (enemy.dead && rig.hasAnimation('death')) {
+    forgeAttacks.delete(enemy);
+    rig.setAnimation('death', true);
+    enemy.hb.visible = false;
+    enemy.mesh.traverse((o) => {
+      if (o.isMesh) o.raycast = () => {};
+    });
+    G.world.add(enemy.mesh);
+    forgeCorpses.set(enemy.mesh, {
+      rig,
+      left: rig.animationDuration('death') + 0.5,
+    });
+    while (forgeCorpses.size > 16) {
+      const model = forgeCorpses.keys().next().value;
+      G.world.remove(model);
+      forgeCorpses.delete(model);
+    }
+  } else if (!forgeActions.has(enemy)) forgeAction(enemy, 'hit');
+};
+const forgePushBase = pushEnemy;
+pushEnemy = function (enemy, from, power) {
+  forgePushBase(enemy, from, power);
+  if (!enemy.dead && power >= 10 && forgeAction(enemy, 'stagger'))
+    forgeAttacks.delete(enemy);
+};
 const forgeDiscardBase = discardWorld;
 discardWorld = function () {
   for (const actor of forgeModels.values()) actor.dispose();
   forgeModels.clear();
+  forgeAttacks.clear();
+  forgeCorpses.clear();
   return forgeDiscardBase();
 };
 window.bastion.spawnForgedCreature = function (value) {
