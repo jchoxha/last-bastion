@@ -2,7 +2,7 @@
   "version": 1,
   "assets": [
     {
-      "id": "asset_20c61bb69b26a5fbdc112d12",
+      "id": "asset_5e52d8f0e5c7b0eba09dd923",
       "creature": {
         "version": 1,
         "id": "cf_e881f0335f04e8f3",
@@ -40,9 +40,9 @@
           "rigVersion": 1
         }
       },
-      "model": "asset_20c61bb69b26a5fbdc112d12.glb",
-      "portrait": "asset_20c61bb69b26a5fbdc112d12.png",
-      "sha256": "20c61bb69b26a5fbdc112d12287e6d51d6c37981f59f09ceccc43ac566e2a1d8",
+      "model": "asset_5e52d8f0e5c7b0eba09dd923.glb",
+      "portrait": "asset_5e52d8f0e5c7b0eba09dd923.png",
+      "sha256": "5e52d8f0e5c7b0eba09dd923bf9bffd5eade3dc25fa703e20896012108d3d9d1",
       "walkClip": 0,
       "yaw": -1.5707963267948966,
       "report": {
@@ -53,7 +53,7 @@
         "clips": [
           "preset:quadruped:walk",
           "Quaternius wolf walk — retargeted trial",
-          "Quaternius wolf walk — canine profile v2 trial"
+          "Quaternius wolf walk — canine profile v3 trial"
         ],
         "walkClip": 0,
         "warnings": 2,
@@ -71,8 +71,14 @@
         },
         "animationTrial": {
           "profile": "tripo-canine",
-          "revision": 2,
-          "calibration": {},
+          "revision": 3,
+          "calibration": {
+            "headYawDegrees": -10
+          },
+          "tailCalibration": {
+            "degrees": 25.463359015129043,
+            "status": "inferred-from-tail-axis"
+          },
           "secondaryMotion": {
             "enabled": true,
             "headYawDegrees": 5,
@@ -83,7 +89,7 @@
             "mappedTailJoints": 5
           },
           "clip": 2,
-          "clipName": "Quaternius wolf walk — canine profile v2 trial",
+          "clipName": "Quaternius wolf walk — canine profile v3 trial",
           "rootMotionScale": 0.23515632706422174,
           "legLengths": {
             "frontLeft": 0.3923340876391371,
@@ -124,7 +130,7 @@
           },
           "warnings": [
             "Visual review required: paw controls are not mesh contact points; foot locking/IK is not implemented.",
-            "Head facing is uncalibrated: bone positions cannot establish the mesh’s gaze direction."
+            "Head yaw was explicitly calibrated; inspect neck skin deformation."
           ],
           "visualReview": "unverified",
           "sourceSha256": "b30d0d36387f1768c9af27ddcff627efc6104cc3561e2d1c160c72e328c06ffe",
@@ -148,10 +154,19 @@
         },
         "previousProfileTrial": {
           "profile": "tripo-canine",
-          "revision": 1,
+          "revision": 2,
           "calibration": {},
+          "secondaryMotion": {
+            "enabled": true,
+            "headYawDegrees": 5,
+            "headPitchDegrees": 2,
+            "tailRootYawDegrees": 9,
+            "tailTipYawDegrees": 18,
+            "tailPhaseLagRadians": 1.1,
+            "mappedTailJoints": 5
+          },
           "clip": 2,
-          "clipName": "Quaternius wolf walk — canine profile trial",
+          "clipName": "Quaternius wolf walk — canine profile v2 trial",
           "rootMotionScale": 0.23515632706422174,
           "legLengths": {
             "frontLeft": 0.3923340876391371,

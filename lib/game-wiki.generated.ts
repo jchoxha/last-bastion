@@ -1327,11 +1327,15 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "Voltfang's **Walk clip (preview)** selector includes the original Tripo walk, the first **Quaternius wolf walk — retargeted trial**, and **Quaternius wolf walk — canine profile v2 trial**. The newest trial uses a shared canine rig profile with all four paw controls, measured heading and leg lengths. Future compatible canine generation jobs add this comparison clip automatically without an extra provider call. These clips preserve the mesh, bones and skin weights and remain experimental; gameplay still uses the original walk. Switching clips resets preview time, and reopening restores the default. Neither comparison nor playback consumes API credits."
+            "text": "Voltfang's **Walk clip (preview)** selector includes the original Tripo walk, the first **Quaternius wolf walk — retargeted trial**, and **Quaternius wolf walk — canine profile v3 trial**. The newest trial uses a shared canine rig profile with all four paw controls, measured heading and leg lengths. Future compatible canine generation jobs add this comparison clip automatically without an extra provider call. These clips preserve the mesh, bones and skin weights and remain experimental; gameplay still uses the original walk. Switching clips resets preview time, and reopening restores the default. Neither comparison nor playback consumes API credits."
           },
           {
             "type": "paragraph",
-            "text": "The v2 trial adds small head turns and nods plus tail sway with delayed movement toward the tip. This is procedural motion added by our shared canine profile and baked into the walk; it does not add reactive looking, physics or an idle clip. It keeps the existing leg animation. Compatible future canine jobs use the same motion settings."
+            "text": "The v3 trial includes small head turns and nods plus tail sway with delayed movement toward the tip. This is procedural motion added by our shared canine profile and baked into the walk; it does not add reactive looking, physics or an idle clip. It keeps the existing leg animation. Compatible future canine jobs use the same motion settings."
+          },
+          {
+            "type": "paragraph",
+            "text": "The v3 walk also corrects the neutral leftward bias before adding sway. Tail centering is inferred from the rig; Voltfang's head uses an individually reviewed calibration offset. Other generated heads still need their own visual calibration. Select **canine profile v3 trial** to inspect these corrections; rest/idle and the original walk retain the imported pose."
           },
           {
             "type": "paragraph",

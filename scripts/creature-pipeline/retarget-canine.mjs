@@ -11,8 +11,9 @@ import {
   applySecondaryMotion,
   CANINE_SECONDARY_MOTION,
 } from './secondary-motion.mjs';
+import { inferTailYaw } from './pose-calibration.mjs';
 
-export const CANINE_CLIP = 'Quaternius wolf walk — canine profile v2 trial';
+export const CANINE_CLIP = 'Quaternius wolf walk — canine profile v3 trial';
 const up = new THREE.Vector3(0, 1, 0);
 const worldPosition = (n) => n.getWorldPosition(new THREE.Vector3());
 const worldRotation = (n) => n.getWorldQuaternion(new THREE.Quaternion());
@@ -53,17 +54,24 @@ function landmarks(roles, which) {
 // Pure offline conversion: accepts any compatible Tripo canine, not a creature ID/hash.
 // The only asset-specific input is optional, explicit visual calibration metadata.
 export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
-  const { headYawDegrees = 0, secondaryMotion = true } = calibration;
+  const {
+    headYawDegrees = 0,
+    secondaryMotion = true,
+    tailYawDegrees,
+  } = calibration;
   if (
     Object.keys(calibration).some(
-      (k) => !['headYawDegrees', 'secondaryMotion'].includes(k),
+      (k) =>
+        !['headYawDegrees', 'secondaryMotion', 'tailYawDegrees'].includes(k),
     ) ||
     typeof secondaryMotion !== 'boolean' ||
     !Number.isFinite(headYawDegrees) ||
-    Math.abs(headYawDegrees) > 60
+    Math.abs(headYawDegrees) > 60 ||
+    (tailYawDegrees !== undefined &&
+      (!Number.isFinite(tailYawDegrees) || Math.abs(tailYawDegrees) > 60))
   )
     throw new RigCompatibilityError(
-      'Calibration supports headYawDegrees between -60 and 60 and a boolean secondaryMotion.',
+      'Calibration supports headYawDegrees/tailYawDegrees between -60 and 60 and a boolean secondaryMotion.',
     );
   const { doc: targetDoc, bin: targetBin } = unpackGlb(targetBytes);
   if (targetDoc.animations?.some((clip) => clip.name === CANINE_CLIP))
@@ -80,6 +88,14 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
     targetShape.forward,
   );
   const inverseAlignment = alignment.clone().invert();
+  const tailCalibration =
+    tailYawDegrees === undefined
+      ? inferTailYaw(pairs, target, targetShape.forward)
+      : { degrees: tailYawDegrees, status: 'explicit' };
+  const tailCorrection = new THREE.Quaternion().setFromAxisAngle(
+    up,
+    THREE.MathUtils.degToRad(tailCalibration.degrees),
+  );
   const scale = targetShape.length / sourceShape.length;
   const sourceBin = Buffer.from(
     sourceDoc.buffers[0].uri.split(',')[1],
@@ -164,6 +180,7 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
           .multiply(target.rest[p.ti].quaternion);
         if (['neck', 'upperNeck', 'head'].includes(p.role))
           q.premultiply(headCorrection);
+        if (/^tail\d+$/.test(p.role)) q.premultiply(tailCorrection);
         return [p.to, q];
       }),
     );
@@ -235,6 +252,10 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
         ]
       : ['Head yaw was explicitly calibrated; inspect neck skin deformation.']),
   ];
+  if (['unresolved', 'needs-review'].includes(tailCalibration.status))
+    warnings.push(
+      'Tail centering needs visual calibration; no yaw correction was inferred.',
+    );
   if (
     Object.values(feet).some(
       (f) => f.maxBelowRestHeight > targetShape.length * 0.1,
@@ -265,6 +286,7 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
     profile: CANINE_PROFILE.id,
     revision: CANINE_PROFILE.revision,
     calibration,
+    tailCalibration,
     secondaryMotion: {
       enabled: secondaryMotion,
       ...(secondaryMotion ? CANINE_SECONDARY_MOTION : {}),

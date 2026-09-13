@@ -6,7 +6,7 @@ export class RigCompatibilityError extends Error {}
 // Revision changes whenever mapping or calibration semantics change.
 export const CANINE_PROFILE = {
   id: 'tripo-canine',
-  revision: 2,
+  revision: 3,
   bodyPlan: 'canine-v1',
   roles: {
     root: ['tripo::Root', 'Body'],

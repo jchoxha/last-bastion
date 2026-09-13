@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import * as THREE from 'three';
 import { retargetCanine } from '../scripts/creature-pipeline/retarget-canine.mjs';
 import { prepareAnimationTrial } from '../scripts/creature-pipeline/animation-trial.mjs';
+import { inferTailYaw } from '../scripts/creature-pipeline/pose-calibration.mjs';
 import {
   unpackGlb,
   packGlb,
@@ -143,7 +144,7 @@ test('head calibration changes head tracks only, leaving geometry and gait intac
 test('secondary motion adds head/tail movement, preserves the gait, and closes every rotation loop', () => {
   const enabled = retargetCanine(donor, original);
   const disabled = retargetCanine(donor, original, { secondaryMotion: false });
-  assert.equal(enabled.report.revision, 2);
+  assert.equal(enabled.report.revision, 3);
   assert.equal(enabled.report.secondaryMotion.mappedTailJoints, 5);
   const a = unpackGlb(enabled.bytes),
     b = unpackGlb(disabled.bytes);
@@ -169,6 +170,56 @@ test('secondary motion adds head/tail movement, preserves the gait, and closes e
   assert.ok(changed.includes('tripo::Tail_1'), 'tail tip follows through');
   assert.deepEqual(a.doc.nodes, b.doc.nodes);
   assert.deepEqual(enabled.report.feet, disabled.report.feet);
+});
+
+test('tail centering resolves the body-relative neutral bias without flattening its elevation', () => {
+  const pairs = [
+    { role: 'tail0', ti: 0 },
+    { role: 'tail1', ti: 1 },
+  ];
+  for (const yaw of [0, 0.8, -1.2]) {
+    const rotation = new THREE.Quaternion().setFromAxisAngle(
+      new THREE.Vector3(0, 1, 0),
+      yaw,
+    );
+    const direction = new THREE.Vector3(-1, 0.4, -0.5).applyQuaternion(
+      rotation,
+    );
+    const forward = new THREE.Vector3(1, 0, 0).applyQuaternion(rotation);
+    const target = {
+      rest: [{ position: new THREE.Vector3() }, { position: direction }],
+    };
+    const calibration = inferTailYaw(pairs, target, forward);
+    assert.ok(Math.abs(calibration.degrees - 26.565051) < 1e-5);
+    const centered = direction
+      .clone()
+      .applyAxisAngle(
+        new THREE.Vector3(0, 1, 0),
+        THREE.MathUtils.degToRad(calibration.degrees),
+      );
+    assert.equal(centered.y, direction.y);
+    assert.ok(
+      centered.setY(0).normalize().dot(forward.clone().negate()) > 0.99999,
+    );
+  }
+  assert.equal(
+    inferTailYaw(
+      pairs,
+      {
+        rest: [
+          { position: new THREE.Vector3() },
+          { position: new THREE.Vector3(0, 1, 0) },
+        ],
+      },
+      new THREE.Vector3(1, 0, 0),
+    ).status,
+    'unresolved',
+  );
+  const centered = retargetCanine(donor, original);
+  const uncentered = retargetCanine(donor, original, { tailYawDegrees: 0 });
+  assert.ok(centered.report.tailCalibration.degrees > 20);
+  assert.deepEqual(centered.report.feet, uncentered.report.feet);
+  assert.equal(uncentered.report.tailCalibration.status, 'explicit');
 });
 
 test('an isolated clip remains validated when prior clips leave many unused accessors', async () => {
