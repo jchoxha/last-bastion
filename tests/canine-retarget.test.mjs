@@ -140,6 +140,46 @@ test('head calibration changes head tracks only, leaving geometry and gait intac
   assert.ok(changed > 0);
 });
 
+test('secondary motion adds head/tail movement, preserves the gait, and closes every rotation loop', () => {
+  const enabled = retargetCanine(donor, original);
+  const disabled = retargetCanine(donor, original, { secondaryMotion: false });
+  assert.equal(enabled.report.revision, 2);
+  assert.equal(enabled.report.secondaryMotion.mappedTailJoints, 5);
+  const a = unpackGlb(enabled.bytes),
+    b = unpackGlb(disabled.bytes);
+  const clip = a.doc.animations.at(-1),
+    plain = b.doc.animations.at(-1);
+  const changed = [];
+  for (const channel of clip.channels) {
+    const name = a.doc.nodes[channel.target.node].name;
+    const av = values(a.doc, a.bin, clip.samplers[channel.sampler].output);
+    const bv = values(b.doc, b.bin, plain.samplers[channel.sampler].output);
+    if (av.some((v, i) => Math.abs(v - bv[i]) > 1e-5)) changed.push(name);
+    if (/Limb|Spine|Root/.test(name)) assert.deepEqual(av, bv, name);
+    if (channel.target.path === 'rotation') {
+      const first = new THREE.Quaternion().fromArray(av).normalize();
+      const last = new THREE.Quaternion()
+        .fromArray(av, av.length - 4)
+        .normalize();
+      assert.ok(first.angleTo(last) < 1e-4, `${name} closes at loop seam`);
+    }
+  }
+  assert.ok(changed.includes('tripo::Head_0'));
+  assert.ok(changed.includes('bone_24'), 'tail base must actually sway');
+  assert.ok(changed.includes('tripo::Tail_1'), 'tail tip follows through');
+  assert.deepEqual(a.doc.nodes, b.doc.nodes);
+  assert.deepEqual(enabled.report.feet, disabled.report.feet);
+});
+
+test('an isolated clip remains validated when prior clips leave many unused accessors', async () => {
+  const previous = await readFile(
+    'public/creatures/asset_5d7993d8ee0258d6df478391.glb',
+  );
+  const result = await prepareAnimationTrial(previous, 'canine-v1');
+  assert.equal(result.report.status, 'preview-only');
+  assert.equal(unpackGlb(result.bytes).doc.animations.length, 4);
+});
+
 test('missing, ambiguous, disconnected or unsupported rigs cannot receive an animation by guesswork', async () => {
   for (const change of [
     (d) => {

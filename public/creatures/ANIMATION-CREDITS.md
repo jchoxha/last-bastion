@@ -31,3 +31,7 @@ for compatible Tripo canines. The manifest records the profile revision,
 source checksum, optional head calibration and review diagnostics. No creature
 identity or target hash is required by this shared profile. Both retargeted trials
 remain previews; the first script is retained for historical reproducibility.
+
+The canine profile v2 trial also includes Last Bastion’s procedural head and tail
+secondary motion, layered over the Quaternius walk. These additions are not part
+of the donor animation; their settings are recorded in the asset manifest.

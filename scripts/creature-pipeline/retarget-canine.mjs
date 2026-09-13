@@ -7,8 +7,12 @@ import {
   resolveCanineProfile,
   RigCompatibilityError,
 } from './rig-profiles.mjs';
+import {
+  applySecondaryMotion,
+  CANINE_SECONDARY_MOTION,
+} from './secondary-motion.mjs';
 
-export const CANINE_CLIP = 'Quaternius wolf walk — canine profile trial';
+export const CANINE_CLIP = 'Quaternius wolf walk — canine profile v2 trial';
 const up = new THREE.Vector3(0, 1, 0);
 const worldPosition = (n) => n.getWorldPosition(new THREE.Vector3());
 const worldRotation = (n) => n.getWorldQuaternion(new THREE.Quaternion());
@@ -49,14 +53,17 @@ function landmarks(roles, which) {
 // Pure offline conversion: accepts any compatible Tripo canine, not a creature ID/hash.
 // The only asset-specific input is optional, explicit visual calibration metadata.
 export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
-  const { headYawDegrees = 0 } = calibration;
+  const { headYawDegrees = 0, secondaryMotion = true } = calibration;
   if (
-    Object.keys(calibration).some((k) => k !== 'headYawDegrees') ||
+    Object.keys(calibration).some(
+      (k) => !['headYawDegrees', 'secondaryMotion'].includes(k),
+    ) ||
+    typeof secondaryMotion !== 'boolean' ||
     !Number.isFinite(headYawDegrees) ||
     Math.abs(headYawDegrees) > 60
   )
     throw new RigCompatibilityError(
-      'Calibration supports headYawDegrees between -60 and 60.',
+      'Calibration supports headYawDegrees between -60 and 60 and a boolean secondaryMotion.',
     );
   const { doc: targetDoc, bin: targetBin } = unpackGlb(targetBytes);
   if (targetDoc.animations?.some((clip) => clip.name === CANINE_CLIP))
@@ -160,6 +167,13 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
         return [p.to, q];
       }),
     );
+    if (secondaryMotion)
+      applySecondaryMotion(
+        desired,
+        pairs,
+        targetShape.forward,
+        (2 * Math.PI * time) / clip.duration,
+      );
     const root = roles.root;
     const position = worldPosition(root.from)
       .sub(source.rest[root.si].position)
@@ -251,6 +265,11 @@ export function retargetCanine(sourceDoc, targetBytes, calibration = {}) {
     profile: CANINE_PROFILE.id,
     revision: CANINE_PROFILE.revision,
     calibration,
+    secondaryMotion: {
+      enabled: secondaryMotion,
+      ...(secondaryMotion ? CANINE_SECONDARY_MOTION : {}),
+      mappedTailJoints: pairs.filter((p) => /^tail\d+$/.test(p.role)).length,
+    },
     clip: targetDoc.animations?.length || 0,
     clipName: CANINE_CLIP,
     rootMotionScale: scale,

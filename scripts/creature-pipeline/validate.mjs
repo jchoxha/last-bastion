@@ -1,8 +1,12 @@
-import validator from 'gltf-validator';
+import { validateBytes } from 'gltf-validator';
 import { PipelineError } from './tripo.mjs';
 
 // Structural validation is automatic. It cannot certify anatomical joint placement.
-export async function validateRiggedGlb(bytes, bodyPlan) {
+export async function validateRiggedGlb(
+  bytes,
+  bodyPlan,
+  { isolatedAnimation = false } = {},
+) {
   const fail = (message) => {
     throw new PipelineError(`Asset rejected: ${message}`);
   };
@@ -32,8 +36,11 @@ export async function validateRiggedGlb(bytes, bodyPlan) {
     )
   )
     fail('unsupported required compression/material extension.');
-  const report = await validator.validateBytes(new Uint8Array(bytes), {
+  const report = await validateBytes(new Uint8Array(bytes), {
     maxIssues: 100,
+    // Isolating a clip intentionally leaves older animation accessors unused.
+    // Suppress only those informational notices; validate the full asset normally.
+    ...(isolatedAnimation ? { ignoredIssues: ['UNUSED_OBJECT'] } : {}),
   });
   if (report.issues.numErrors || report.issues.truncated)
     fail(

@@ -23,7 +23,9 @@ export async function prepareAnimationTrial(bytes, bodyPlan, calibration = {}) {
   }
   const { doc, bin } = unpackGlb(result.bytes);
   doc.animations = [doc.animations.at(-1)];
-  await validateRiggedGlb(packGlb(doc, bin), bodyPlan);
+  await validateRiggedGlb(packGlb(doc, bin), bodyPlan, {
+    isolatedAnimation: true,
+  });
   await validateRiggedGlb(result.bytes, bodyPlan);
   return { ...result, report: { ...result.report, status: 'preview-only' } };
 }
