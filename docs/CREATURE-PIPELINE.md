@@ -2,24 +2,6 @@
 
 Status: automated Chimera definition → card illustration → low-poly specification image → mesh → rig → animation → game installation is implemented, alongside the older procedural prototype and experimental direct-generation routes. Open **Creature forge** on the main menu, or `#forge`. The first live Voltfang text-to-3D job passed technical validation and was installed on September 13, 2026: 18,896 triangles and 31 bones. On September 14 its animation set was upgraded to 26 clips: all 18 licensed DIMOS wolf animations plus eight gameplay fallbacks. Later comparison jobs proved that a provider walk alone does not equal the full mapped set and that direct text/image inputs do not reliably preserve both style and anatomy. A Tripo API key and credits are required; jobs start only on explicit generation/resume actions.
 
-## Production direction: skeleton first
-
-Every creature that Chimera Cards can generate must be able to become an animated game creature without an artist repairing a one-off mesh. That means the production path cannot treat a provider-generated skeleton as the authority. An arbitrary image-to-3D mesh has no reliable relationship to the game's joints, rest pose, skin weights, limb count, or animation library.
-
-Last Bastion will therefore use a finite, versioned **body-plan grammar**. “Any creature” means any visual and gameplay variation that fits one of the game's supported anatomical plans; it does not mean accepting an unbounded new skeleton topology from a text prompt. A generated definition chooses its body plan before card art is requested. Card art, target portraits, materials, markings, horns, armor, crests, tails, and elemental effects must respect that plan. The plan owns the rest pose, named bones, safe proportion ranges, attachment sockets, semantic animation clips, and a validator.
-
-The planned production flow is:
-
-1. Forge the Chimera definition and deterministically classify or constrain it to an available body plan.
-2. Generate a versioned **creature blueprint** from the definition and seed: dimensions, palette, surface pattern, head/tail/ear/wing choices, and socketed cosmetic parts. The blueprint may vary appearance; it cannot add or remove required limbs or bones.
-3. Build the animated low-poly core locally from that blueprint. Its mesh is already skinned to the canonical plan, so every approved clip works immediately and repeatably.
-4. Generate the Chimera card image and target portrait separately. They preserve the expressive art direction but are not allowed to redefine anatomy.
-5. Optionally request a Tripo or Meshy mesh/texture as a visual reference, material source, or socketed non-deforming decoration. It must pass the same plan validator before it can replace the procedural core. A provider result that fails never blocks the creature from existing in-game.
-
-The first body family is the canine plan because it already has a full motion library. It is a template for the other families, not a special creature path. The complete grammar will cover humanoid, quadruped, avian, winged quadruped, arthropod, serpentine, and radial/amorphous bodies. A plan enters production only after its canonical skeleton and required clips are bundled and its generated blueprints pass regression cases. Until then, the forge must constrain new concepts to released plans instead of silently producing an unanimated creature.
-
-This is intentionally low-poly and modular rather than literal voxel art. Per-bone faceted body segments give deterministic skinning and can still match the game's chunky terrain. The system can later use generated textures or provider meshes where they meet the contract, without making a paid API call the source of animation compatibility.
-
 ## Automated model pipeline
 
 The worker executes Chimera Cards' `forgeCreature` and validators from pinned commit `38a3f180eabe0c2684590ac7956cb489ea545c04`; it never edits that repository. Chimera supplies definitions and imported roster art. Last Bastion owns both image roles and their prompts in `scripts/creature-pipeline/art-prompt.mjs`. A matching image at `public/creatures/card-art/<id>[-<form>].png` overrides imported art. New concepts first use the original Chimera Cards flat, outlined trading-card schema. A separate image-to-image prompt then translates that design into chunky faceted volumes, a restrained matte palette, separated anatomy and a level neutral three-quarter pose. A heuristic definition fallback is treated as a failed production job.

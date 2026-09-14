@@ -1327,10 +1327,6 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "The production direction is **skeleton first**. Before art or modeling, a generated definition is placed in a released anatomical body plan. That plan owns canonical bones, neutral pose, safe proportion limits, cosmetic sockets and the named animation library. A deterministic blueprint can vary palette, markings, head, tail, ears, horns, armor and elemental effects, but it cannot change required limbs or the skeleton. The game builds an already-skinned low-poly core from that blueprint, so every approved creature in the plan has the full animation set. Chimera art stays expressive card art; optional Tripo or Meshy results can supply reference, textures or validated decoration. They cannot become the sole path to a working animated creature. Planned families are humanoid, quadruped, avian, winged quadruped, arthropod, serpentine and radial/amorphous. A family is only offered once its tested canonical rig and required motions are bundled."
-          },
-          {
-            "type": "paragraph",
             "text": "The separate **Creature blueprint** tools remain available offline. Choose body types, a family or manifestation, attunements, descriptive subtypes, a size form, combat role and physical body plan. Generate locally produces the same definition for identical inputs; it retains concept text as a description rather than making a detailed mesh. Optional AI authoring in that older section authors names, descriptions and colors only."
           },
           {
