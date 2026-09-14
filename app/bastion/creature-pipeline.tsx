@@ -186,7 +186,7 @@ export default function CreaturePipeline({
         <h2>Chimera → rigged game creature</h2>
         <p>
           Chimera definition and art → neutral reference → textured mesh →
-          body-specific rig → walk animation → validation → game library.
+          body-specific rig → animation library → validation → game library.
         </p>
         <button onClick={connect} disabled={busy}>
           {health ? 'Reconnect worker' : 'Connect local worker'}

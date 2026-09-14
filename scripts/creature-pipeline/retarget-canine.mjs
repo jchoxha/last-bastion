@@ -54,12 +54,17 @@ function landmarks(roles, which) {
 // Pure offline conversion: accepts any compatible Tripo canine, not a creature ID/hash.
 // The only asset-specific input is optional, explicit visual calibration metadata.
 export function retargetCanine(
-  sourceDoc,
+  sourceInput,
   targetBytes,
   calibration = {},
   options = {},
 ) {
-  const { sourceClip = 'Walk', clipName = CANINE_CLIP, loop = true } = options;
+  const {
+    sourceClip = 'Walk',
+    clipName = CANINE_CLIP,
+    loop = true,
+    donorProfile,
+  } = options;
   const {
     headYawDegrees = 0,
     secondaryMotion = true,
@@ -82,11 +87,24 @@ export function retargetCanine(
   const { doc: targetDoc, bin: targetBin } = unpackGlb(targetBytes);
   if (targetDoc.animations?.some((clip) => clip.name === clipName))
     throw new RigCompatibilityError(
-      'This asset already includes the canine trial; recalibrate from its original provider asset.',
+      `This asset already includes animation "${clipName}"; rebuild from its original provider asset.`,
     );
-  const source = hierarchy(sourceDoc),
+  const sourceFile = Buffer.isBuffer(sourceInput)
+      ? unpackGlb(sourceInput)
+      : {
+          doc: sourceInput,
+          bin: Buffer.from(sourceInput.buffers[0].uri.split(',')[1], 'base64'),
+        },
+    sourceDoc = sourceFile.doc,
+    sourceBin = sourceFile.bin,
+    source = hierarchy(sourceDoc),
     target = hierarchy(targetDoc);
-  const { pairs, roles } = resolveCanineProfile(targetDoc, target, source);
+  const { pairs, roles } = resolveCanineProfile(
+    targetDoc,
+    target,
+    source,
+    donorProfile,
+  );
   const sourceShape = landmarks(roles, 'from'),
     targetShape = landmarks(roles, 'to');
   const alignment = new THREE.Quaternion().setFromUnitVectors(
@@ -103,16 +121,14 @@ export function retargetCanine(
     THREE.MathUtils.degToRad(tailCalibration.degrees),
   );
   const scale = targetShape.length / sourceShape.length;
-  const sourceBin = Buffer.from(
-    sourceDoc.buffers[0].uri.split(',')[1],
-    'base64',
-  );
   const animation = sourceDoc.animations.find((c) => c.name === sourceClip);
   if (!animation)
-    throw new RigCompatibilityError('Source has no Walk animation.');
+    throw new RigCompatibilityError(
+      `Source has no requested animation: ${sourceClip}.`,
+    );
   const tracks = animation.channels.map((c) => {
     const s = animation.samplers[c.sampler];
-    if (s.interpolation && s.interpolation !== 'LINEAR')
+    if (s.interpolation && !['LINEAR', 'STEP'].includes(s.interpolation))
       throw new RigCompatibilityError('Expected baked linear donor tracks.');
     const property = {
       rotation: 'quaternion',
@@ -125,11 +141,14 @@ export function retargetCanine(
       property === 'quaternion'
         ? THREE.QuaternionKeyframeTrack
         : THREE.VectorKeyframeTrack;
-    return new Track(
+    const track = new Track(
       `node${c.target.node}.${property}`,
       values(sourceDoc, sourceBin, s.input),
       values(sourceDoc, sourceBin, s.output),
     );
+    if (s.interpolation === 'STEP')
+      track.setInterpolation(THREE.InterpolateDiscrete);
+    return track;
   });
   const clip = new THREE.AnimationClip(sourceClip, -1, tracks);
   if (
@@ -137,7 +156,7 @@ export function retargetCanine(
     clip.duration <= 0 ||
     clip.duration > 30
   )
-    throw new RigCompatibilityError('Invalid walk duration.');
+    throw new RigCompatibilityError('Invalid animation duration.');
   const mixer = new THREE.AnimationMixer(source.root),
     action = mixer.clipAction(clip).play();
   if (!loop) {
@@ -156,8 +175,10 @@ export function retargetCanine(
   // Each donor foot's lowest sampled control position is its stance reference.
   // Use motion relative to that orientation, not its unrelated exported rest pose.
   const stance = new Map();
-  for (const time of times) {
-    action.time = time;
+  for (let sampleIndex = 0; sampleIndex < times.length; sampleIndex++) {
+    const time = times[sampleIndex];
+    const sampleTime = loop && sampleIndex === times.length - 1 ? 0 : time;
+    action.time = sampleTime;
     mixer.update(0);
     source.root.updateMatrixWorld(true);
     for (const role of footRoles) {
@@ -173,8 +194,20 @@ export function retargetCanine(
   );
   const pawSamples = Object.fromEntries(paws.map((r) => [r, []]));
   const footAngle = new Map(paws.map((r) => [r, 0]));
-  for (const time of times) {
-    action.time = time;
+  const sourceDelta = (pair, rest) => {
+    const first = worldRotation(pair.from).multiply(
+      (rest || source.rest[pair.si].quaternion).clone().invert(),
+    );
+    if (!pair.fromB) return first;
+    const second = worldRotation(pair.fromB).multiply(
+      source.rest[pair.siB].quaternion.clone().invert(),
+    );
+    return first.slerp(second, pair.alpha);
+  };
+  for (let sampleIndex = 0; sampleIndex < times.length; sampleIndex++) {
+    const time = times[sampleIndex];
+    const sampleTime = loop && sampleIndex === times.length - 1 ? 0 : time;
+    action.time = sampleTime;
     mixer.update(0);
     source.root.updateMatrixWorld(true);
     const desired = new Map(
@@ -182,7 +215,7 @@ export function retargetCanine(
         const rest = footRoles.has(p.role)
           ? stance.get(p.role).quaternion
           : source.rest[p.si].quaternion;
-        const delta = worldRotation(p.from).multiply(rest.clone().invert());
+        const delta = sourceDelta(p, rest);
         const q = alignment
           .clone()
           .multiply(delta)
@@ -199,7 +232,7 @@ export function retargetCanine(
         desired,
         pairs,
         targetShape.forward,
-        (2 * Math.PI * time) / clip.duration,
+        (2 * Math.PI * sampleTime) / clip.duration,
       );
     const root = roles.root;
     const position = worldPosition(root.from)

@@ -181,8 +181,8 @@ export default function CreatureCloud({
     >
       <h2>Generate creatures on GitHub</h2>
       <p>
-        Chimera definition → textured 3D mesh → matching rig → walk animation →
-        game. Text mode skips separate artwork generation.
+        Chimera definition → textured 3D mesh → matching rig → animation library
+        → game. Text mode skips separate artwork generation.
       </p>
       <details>
         <summary>One-time setup</summary>

@@ -36,5 +36,5 @@ Current new-world default: `node tests/browser-plateaus.cjs` and `node --experim
 
 - `tests/canine-retarget.test.mjs` (included in `test:creature-pipeline`): shared canine profile on the real Voltfang asset and synthetic scale/heading/proportion variants, paw coverage, bind/skin preservation, head calibration and incompatible-rig rejection. These variants are not independently generated meshes.
 
-- `tests/animation-set.test.mjs` (included in `test:creature-pipeline`): all 16 semantic clips, exact latest-walk preservation, unchanged mesh/rest data, loop closure, per-clip glTF validation and bounded asset growth. Historical GLBs are regression fixtures, excluded from Pages.
+- `tests/animation-set.test.mjs` (included in `test:creature-pipeline`): all 26 canine clips, coverage of every licensed donor clip, unchanged mesh/rest data, loop closure, per-clip glTF validation and bounded asset growth. Historical GLBs are regression fixtures, excluded from Pages.
 - `CREATURE_BROWSER_ASSETS=public/creatures node tests/browser-creature-pipeline.cjs` (set the environment variable using your shell): after `build:standalone`, inspect all published motion options, one-shot frame stepping, delayed melee impact, bounded reversal, death cleanup and save restoration in Chrome.

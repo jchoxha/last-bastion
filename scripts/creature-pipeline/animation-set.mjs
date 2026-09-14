@@ -2,15 +2,11 @@ import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import * as THREE from 'three';
 import { CREATURE_MOTIONS } from '../../lib/creatures/motions.ts';
-import {
-  appendCanineTrial,
-  retargetCanine,
-  CANINE_CLIP,
-} from './retarget-canine.mjs';
+import { retargetCanine } from './retarget-canine.mjs';
 import { unpackGlb, packGlb, appendClip, values } from './animation-gltf.mjs';
 import { compactGlb } from './compact-glb.mjs';
 import { validateRiggedGlb } from './validate.mjs';
-import { RigCompatibilityError } from './rig-profiles.mjs';
+import { DIMOS_WOLF_DONOR, RigCompatibilityError } from './rig-profiles.mjs';
 
 function procedural(bytes, name) {
   const { doc, bin } = unpackGlb(bytes);
@@ -119,51 +115,85 @@ export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
       },
     };
   try {
-    let bytes = input;
+    let bytes;
     const diagnostics = {};
-    let parsed = unpackGlb(bytes);
-    // Keep exactly the reviewed v3 walk, including its calibration and secondary motion.
-    if (!parsed.doc.animations.some((a) => a.name === CANINE_CLIP)) {
-      const walk = await appendCanineTrial(bytes, calibration);
-      bytes = walk.bytes;
-      diagnostics.walk = walk.report;
-    }
-    parsed = unpackGlb(bytes);
-    parsed.doc.animations = [
-      {
-        ...parsed.doc.animations.find((a) => a.name === CANINE_CLIP),
-        name: 'walk',
-      },
-    ];
+    let parsed = unpackGlb(input);
+    parsed.doc.animations = [];
     bytes = compactGlb(packGlb(parsed.doc, parsed.bin));
-    const sourceBytes = await readFile(
+    const dimosBytes = await readFile(
+      new URL('./animations/dimos-lost-ark-wolf-actions.glb', import.meta.url),
+    );
+    const dimosSha256 = createHash('sha256').update(dimosBytes).digest('hex');
+    if (
+      dimosSha256 !==
+      '37bb55237896c6cad81c47b718729df28062153f4364c65484eacdaf73f705d9'
+    )
+      throw Error(
+        'Licensed animation source checksum changed; review and version the donor before use.',
+      );
+    const dimosSources = {
+      idle: 'idle_normal_1.001',
+      walk: 'evt2_walk_normal_1',
+      run: 'run_normal_1',
+      'run-alt': 'evt2_run_01',
+      attack: 'att_battle_1_01',
+      'attack-alt': 'att_battle_2_01',
+      charge: 'evt2_run_battle_1',
+      leap: 'sk_moving',
+      cast: 'sk_howling',
+      spawn: 'on',
+      'idle-event': 'evt2_idle_normal_1',
+      'idle-absurd': 'evt2_sc_absurd_loop_1',
+      'idle-calm': 'idle_normal_1',
+      'idle-alert': 'idle_normal_1_1',
+      'idle-alert-alt': 'idle_normal_1_1.001',
+      greet: 'sc_greet_1',
+      'greet-alt': 'sc_greet_2',
+      talk: 'sc_talk_1',
+    };
+    const provenance = {};
+    for (const [name, sourceClip] of Object.entries(dimosSources)) {
+      const result = retargetCanine(
+        dimosBytes,
+        bytes,
+        { ...calibration, secondaryMotion: false },
+        {
+          sourceClip,
+          clipName: name,
+          loop: CREATURE_MOTIONS[name].loop,
+          donorProfile: DIMOS_WOLF_DONOR,
+        },
+      );
+      bytes = result.bytes;
+      diagnostics[name] = result.report;
+      provenance[name] = {
+        source: sourceClip,
+        sourcePack: DIMOS_WOLF_DONOR.id,
+        loop: CREATURE_MOTIONS[name].loop,
+      };
+    }
+    const fallbackBytes = await readFile(
       new URL('./animations/quaternius-wolf-actions.gltf', import.meta.url),
     );
     if (
-      createHash('sha256').update(sourceBytes).digest('hex') !==
+      createHash('sha256').update(fallbackBytes).digest('hex') !==
       '90001d38562205c58cea21cf355a540ad2c595c5c1997be20497a42f87c7289f'
     )
       throw Error(
         'Animation source checksum changed; review the library before use.',
       );
-    const donor = JSON.parse(sourceBytes);
-    const sources = {
-      idle: 'Idle',
-      run: 'Gallop',
-      attack: 'Attack',
+    const fallback = JSON.parse(fallbackBytes);
+    const fallbackSources = {
       hit: 'Idle_HitReact1',
       death: 'Death',
-      charge: 'Gallop',
-      leap: 'Gallop_Jump',
       stagger: 'Idle_HitReact2',
       jump: 'Gallop_Jump',
       land: 'Jump_ToIdle',
     };
-    const provenance = { walk: { source: 'reviewed canine profile v3' } };
-    for (const [name, sourceClip] of Object.entries(sources)) {
+    for (const [name, sourceClip] of Object.entries(fallbackSources)) {
       const loop = CREATURE_MOTIONS[name].loop;
       const result = retargetCanine(
-        donor,
+        fallback,
         bytes,
         { ...calibration, secondaryMotion: false },
         { sourceClip, clipName: name, loop: false },
@@ -173,13 +203,7 @@ export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
       // Looping sources have authored end poses. Record loop policy independently of the retarget gate.
       provenance[name] = { source: sourceClip, loop };
     }
-    for (const name of [
-      'turn-left',
-      'turn-right',
-      'turn-around',
-      'cast',
-      'spawn',
-    ]) {
+    for (const name of ['turn-left', 'turn-right', 'turn-around']) {
       bytes = procedural(bytes, name);
       provenance[name] = { source: 'procedural canine pose/step sequence' };
     }
@@ -211,15 +235,27 @@ export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
       bytes,
       report: {
         status: 'animation-set',
-        version: 1,
+        version: 2,
         profile: diagnostics.idle.profile,
         revision: diagnostics.idle.revision,
         calibration,
         tailCalibration: diagnostics.idle.tailCalibration,
         diagnostics,
-        walkClip: 1,
+        walkClip: final.doc.animations.findIndex(
+          (clip) => clip.name === 'walk',
+        ),
         clips: final.doc.animations.map((c) => ({ name: c.name, ...c.extras })),
-        sourceSha256: createHash('sha256').update(sourceBytes).digest('hex'),
+        sourceSha256: {
+          licensed: dimosSha256,
+          fallback: createHash('sha256').update(fallbackBytes).digest('hex'),
+        },
+        licensedSource: {
+          contributor: 'DIMOS',
+          sourceTitle: 'Lost Ark Wolf',
+          url: 'https://p3dm.ru/files/beasts/20003-wolfs.html',
+          permissionBasis:
+            'Direct permission for this project, reported by the repository owner on 2026-09-14.',
+        },
         visualReview: 'unverified',
         warnings: [
           ...new Set(Object.values(diagnostics).flatMap((r) => r.warnings)),

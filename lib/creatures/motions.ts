@@ -2,7 +2,9 @@ export const CREATURE_MOTIONS = {
   idle: { label: 'Idle', loop: true },
   walk: { label: 'Walk', loop: true },
   run: { label: 'Run / chase', loop: true },
+  'run-alt': { label: 'Alternate run', loop: true },
   attack: { label: 'Basic attack', loop: false },
+  'attack-alt': { label: 'Alternate attack', loop: false },
   hit: { label: 'Hit reaction', loop: false },
   death: { label: 'Death', loop: false },
   'turn-left': { label: 'Pivot left', loop: true },
@@ -15,5 +17,13 @@ export const CREATURE_MOTIONS = {
   jump: { label: 'Jump', loop: false },
   land: { label: 'Landing', loop: false },
   spawn: { label: 'Spawn / rise', loop: false },
+  'idle-event': { label: 'Event idle', loop: true },
+  'idle-absurd': { label: 'Playful idle', loop: true },
+  'idle-calm': { label: 'Calm idle', loop: true },
+  'idle-alert': { label: 'Alert idle', loop: true },
+  'idle-alert-alt': { label: 'Alternate alert idle', loop: true },
+  greet: { label: 'Greeting', loop: false },
+  'greet-alt': { label: 'Alternate greeting', loop: false },
+  talk: { label: 'Talk / vocalize', loop: true },
 } as const;
 export type CreatureMotion = keyof typeof CREATURE_MOTIONS;

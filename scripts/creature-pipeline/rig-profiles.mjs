@@ -41,7 +41,63 @@ for (const [side, suffix] of [
   }
 }
 
-export function resolveCanineProfile(targetDoc, target, source) {
+// Animation-only donor exported from the licensed Lost Ark wolf pack. The
+// target side remains provider-independent; these names exist only in the
+// donor adapter. Tail blends spread three authored joints across five targets.
+export const DIMOS_WOLF_DONOR = {
+  id: 'dimos-lost-ark-wolf',
+  roles: {
+    root: 'bip001-pelvis',
+    pelvis: 'bip001-pelvis',
+    spine: 'bip001-spine',
+    chest: 'bip001-spine2',
+    shoulders: 'bip001-neck',
+    neck: 'bip001-neck1',
+    upperNeck: 'bip001-head',
+    head: 'bip001-head',
+  },
+  tail: [
+    'bip001-tail',
+    { names: ['bip001-tail', 'bip001-tail1'], alpha: 0.5 },
+    'bip001-tail1',
+    { names: ['bip001-tail1', 'bip001-tail2'], alpha: 0.5 },
+    'bip001-tail2',
+  ],
+};
+for (const [side, suffix] of [
+  ['Left', 'l'],
+  ['Right', 'r'],
+]) {
+  for (const [end, { names }] of Object.entries({
+    front: {
+      names: ['upperarm', 'forearm', 'hand', 'finger0'],
+    },
+    rear: {
+      names: ['thigh', 'calf', 'horselink', 'foot'],
+    },
+  }))
+    for (let i = 0; i < 4; i++)
+      DIMOS_WOLF_DONOR.roles[`${end}${side}${i}`] =
+        `bip001-${suffix}-${names[i]}`;
+}
+
+function donorPair(source, spec, role) {
+  const blend = typeof spec === 'object' ? spec : { names: [spec], alpha: 0 };
+  const names = blend.names || [];
+  const from = source.byName.get(names[0]);
+  const fromB = names[1] ? source.byName.get(names[1]) : undefined;
+  if (!from || (names[1] && !fromB))
+    throw new RigCompatibilityError(`Donor missing role: ${role}.`);
+  return {
+    from,
+    si: source.nodes.indexOf(from),
+    ...(fromB
+      ? { fromB, siB: source.nodes.indexOf(fromB), alpha: blend.alpha }
+      : {}),
+  };
+}
+
+export function resolveCanineProfile(targetDoc, target, source, donorProfile) {
   const joints = new Set(targetDoc.skins?.flatMap((s) => s.joints) || []);
   const pairs = Object.entries(CANINE_PROFILE.roles).map(
     ([role, [name, donor]]) => {
@@ -53,10 +109,13 @@ export function resolveCanineProfile(targetDoc, target, source) {
           `Missing or ambiguous skinned role: ${role} (${name}).`,
         );
       const to = target.nodes[matches[0]],
-        from = source.byName.get(donor);
-      if (!from)
-        throw new RigCompatibilityError(`Donor missing role: ${role}.`);
-      return { role, to, from, ti: matches[0], si: source.nodes.indexOf(from) };
+        donorSpec = donorProfile?.roles?.[role] || donor;
+      return {
+        role,
+        to,
+        ti: matches[0],
+        ...donorPair(source, donorSpec, role),
+      };
     },
   );
   const roles = Object.fromEntries(pairs.map((p) => [p.role, p]));
@@ -96,15 +155,18 @@ export function resolveCanineProfile(targetDoc, target, source) {
           .distanceTo(target.rest[hip.ti].position) < 1e-6,
     );
     if (candidates.length === 1) {
-      const to = candidates[0],
-        from = source.byName.get(`BackShoulder.${suffix}`);
-      pairs.push({
-        role: `hipHelper${side}`,
-        to,
-        from,
-        ti: target.nodes.indexOf(to),
-        si: source.nodes.indexOf(from),
-      });
+      const spec = donorProfile
+        ? donorProfile.hipHelpers?.[side]
+        : `BackShoulder.${suffix}`;
+      if (spec) {
+        const to = candidates[0];
+        pairs.push({
+          role: `hipHelper${side}`,
+          to,
+          ti: target.nodes.indexOf(to),
+          ...donorPair(source, spec, `hipHelper${side}`),
+        });
+      }
     }
   }
   const tail = target.byName.get('tripo::Tail_1');
@@ -117,15 +179,14 @@ export function resolveCanineProfile(targetDoc, target, source) {
     }
     if (n === roles.root.to && chain.length === 5)
       chain.forEach((to, i) => {
-        const from = source.byName.get(
-          ['Tail1', 'Tail3', 'Tail5', 'Tail7', 'Tail8'][i],
-        );
+        const spec =
+          donorProfile?.tail?.[i] ||
+          ['Tail1', 'Tail3', 'Tail5', 'Tail7', 'Tail8'][i];
         pairs.push({
           role: `tail${i}`,
           to,
-          from,
           ti: target.nodes.indexOf(to),
-          si: source.nodes.indexOf(from),
+          ...donorPair(source, spec, `tail${i}`),
         });
       });
   }

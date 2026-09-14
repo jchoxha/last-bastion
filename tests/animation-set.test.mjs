@@ -9,7 +9,16 @@ import {
   values,
 } from '../scripts/creature-pipeline/animation-gltf.mjs';
 
-test('full set keeps the latest walk exactly, drops old walks, and gives every role a valid clip', async () => {
+test('full set uses every licensed donor clip and gives every game role a valid clip', async () => {
+  const donor = unpackGlb(
+    await readFile(
+      'scripts/creature-pipeline/animations/dimos-lost-ark-wolf-actions.glb',
+    ),
+  ).doc;
+  assert.equal(donor.animations.length, 18);
+  assert.equal(donor.meshes, undefined);
+  assert.equal(donor.materials, undefined);
+  assert.equal(donor.images, undefined);
   const original = await readFile(
     'tests/fixtures/creatures/asset_5e52d8f0e5c7b0eba09dd923.glb',
   );
@@ -27,7 +36,12 @@ test('full set keeps the latest walk exactly, drops old walks, and gives every r
     b.doc.animations.map((c) => c.name),
     Object.keys(CREATURE_MOTIONS),
   );
-  assert.equal(b.doc.animations.filter((c) => /walk/i.test(c.name)).length, 1);
+  assert.equal(
+    b.doc.animations.filter(
+      (c) => c.extras.sourcePack === 'dimos-lost-ark-wolf',
+    ).length,
+    18,
+  );
   assert.deepEqual(b.doc.nodes, a.doc.nodes);
   assert.deepEqual(b.doc.materials, a.doc.materials);
   function sameView(i, j) {
@@ -60,20 +74,6 @@ test('full set keeps the latest walk exactly, drops old walks, and gives every r
     );
   for (let i = 0; i < a.doc.images.length; i++)
     sameView(a.doc.images[i].bufferView, b.doc.images[i].bufferView);
-  const before = a.doc.animations.at(-1),
-    after = b.doc.animations.find((c) => c.name === 'walk');
-  for (let i = 0; i < before.channels.length; i++) {
-    const old = before.samplers[before.channels[i].sampler],
-      next = after.samplers[after.channels[i].sampler];
-    assert.deepEqual(
-      values(a.doc, a.bin, old.input),
-      values(b.doc, b.bin, next.input),
-    );
-    assert.deepEqual(
-      values(a.doc, a.bin, old.output),
-      values(b.doc, b.bin, next.output),
-    );
-  }
   for (const clip of b.doc.animations.filter((c) => c.extras.loop))
     for (const c of clip.channels.filter((c) => c.target.path === 'rotation')) {
       const v = values(b.doc, b.bin, clip.samplers[c.sampler].output);
@@ -92,7 +92,7 @@ test('full set keeps the latest walk exactly, drops old walks, and gives every r
     0.4,
   );
   assert.ok(
-    result.bytes.length < original.length + 1024 * 1024,
+    result.bytes.length < original.length + 8 * 1024 * 1024,
     'set stays within a modest asset budget',
   );
 });

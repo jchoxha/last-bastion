@@ -20,7 +20,7 @@ The editable source is [docs/GAME-WIKI.md](docs/GAME-WIKI.md). Run `npm run buil
 
 ## Creature generation
 
-Open **Creature forge** on the main menu. The local model pipeline uses Chimera Cards' actual forge and art, generates a textured mesh and body-specific rig through Tripo, adds walk animation, validates the GLB, and installs it in the game library and ordinary wilderness spawns. Start it with `npm run dev:creature-pipeline`; a Tripo API key/credits are required. The integration has passed simulated-provider and synthetic-asset tests; live generated rig quality still needs verification. Offline procedural prototypes remain available. See [docs/CREATURE-PIPELINE.md](docs/CREATURE-PIPELINE.md) for setup and precise limits.
+Open **Creature forge** on the main menu. The local model pipeline uses Chimera Cards' actual forge and art, generates a textured mesh and body-specific rig through Tripo, adds the matching animation library, validates the GLB, and installs it in the game library and ordinary wilderness spawns. Compatible canines receive 26 motions, including all 18 licensed DIMOS wolf clips plus gameplay fallbacks. Start it with `npm run dev:creature-pipeline`; a Tripo API key/credits are required. The integration has passed simulated-provider and synthetic-asset tests; live generated rig quality still needs verification. Offline procedural prototypes remain available. See [docs/CREATURE-PIPELINE.md](docs/CREATURE-PIPELINE.md) for setup and precise limits.
 
 ## Development setup
 

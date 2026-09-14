@@ -7,6 +7,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { createCreatureActor } from '../lib/creatures/actor.ts';
 import { DEFAULT_INPUT, generateLocal } from '../lib/creatures/core.ts';
+import { CREATURE_MOTIONS } from '../lib/creatures/motions.ts';
 import { createTripo } from '../scripts/creature-pipeline/tripo.mjs';
 import { createPipeline } from '../scripts/creature-pipeline/jobs.mjs';
 import { validateRiggedGlb } from '../scripts/creature-pipeline/validate.mjs';
@@ -247,7 +248,7 @@ test('generation installs the full canine animation set without extra provider c
   const asset = manifest.assets[0];
   assert.equal(asset.walkClip, 1);
   assert.equal(asset.source.animationTrial.status, 'animation-set');
-  assert.equal(asset.report.clips.length, 16);
+  assert.deepEqual(asset.report.clips, Object.keys(CREATURE_MOTIONS));
   assert.equal(asset.report.clips[asset.walkClip], 'walk');
   const saved = JSON.parse(
     await readFile(
@@ -259,7 +260,7 @@ test('generation installs the full canine animation set without extra provider c
       ),
     ),
   );
-  assert.equal(saved.version, 1);
+  assert.equal(saved.version, 2);
   const installed = await readFile(
     path.join(root, 'public/creatures', asset.model),
   );

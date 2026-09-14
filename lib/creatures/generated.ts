@@ -72,7 +72,7 @@ export async function refreshGeneratedAssets(
       !Number.isFinite(raw.yaw) ||
       !Number.isInteger(raw.walkClip) ||
       raw.walkClip < 0 ||
-      raw.walkClip > 23
+      raw.walkClip > 31
     )
       throw Error('Invalid generated asset entry.');
     return { ...raw, creature };

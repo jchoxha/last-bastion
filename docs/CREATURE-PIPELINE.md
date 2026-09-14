@@ -1,6 +1,6 @@
 # Creature generation pipeline
 
-Status: automated Chimera → text or image → mesh → rig → animation → game installation is implemented, alongside the older procedural prototype. Open **Creature forge** on the main menu, or `#forge`. The first live Voltfang text-to-3D job passed technical validation and was installed on September 13, 2026: 18,896 triangles, 31 bones and one quadruped walk clip. Its original 20-credit mesh task was reused after fixing a storage-host download rejection. Anatomical rig quality remains unverified. A Tripo API key and credits are required; jobs start only on explicit generation/resume actions.
+Status: automated Chimera → text or image → mesh → rig → animation → game installation is implemented, alongside the older procedural prototype. Open **Creature forge** on the main menu, or `#forge`. The first live Voltfang text-to-3D job passed technical validation and was installed on September 13, 2026: 18,896 triangles and 31 bones. On September 14 its animation set was upgraded to 26 clips: all 18 licensed DIMOS wolf animations plus eight gameplay fallbacks. Its original 20-credit mesh task was reused after fixing a storage-host download rejection. Anatomical rig quality remains under visual review. A Tripo API key and credits are required; jobs start only on explicit generation/resume actions.
 
 ## Automated model pipeline
 
@@ -10,7 +10,7 @@ The worker executes Chimera Cards' actual `forgeCreature` and validators from pi
 2. Derive a neutral modeling reference from that art, preserving identity while separating limbs and removing scenery/effects.
 3. Generate a textured PBR mesh with a target of 20,000 faces.
 4. Ask the provider to check the mesh's riggability. Reject a body-type mismatch. Explicitly request the quadruped or biped rig using `v2.5-20260210`; never rely on the API's biped default for a wolf.
-5. Retarget an in-place provider walk and download the embedded GLB. Compatible canine rigs then receive the shared 16-animation set offline, without additional provider calls.
+5. Retarget an in-place provider walk and download the embedded GLB. Compatible canine rigs then receive the shared 26-animation set offline, without additional provider calls.
 6. Validate the GLB and write immutable assets under `public/creatures/`, then update the manifest atomically. The browser refreshes the library and selects a completed creature automatically.
 7. Installed creatures automatically replace ordinary wilderness **grunt** spawn slots. They also support the forge's explicit test-spawn action. Scripted raids and explicit enemy selections retain their species. Spawned definitions are saved with the run, subject to the existing 64-species limit.
 
@@ -68,7 +68,7 @@ Provider contracts checked against the official [image-to-model API](https://dev
 
 ### Animation set and inspection
 
-Compatible Tripo canine rigs receive 16 named clips: **idle, walk, run, attack, hit, death, turn-left, turn-right, turn-around, charge, leap, cast, stagger, jump, land and spawn**. The shared builder preserves the latest corrected canine-profile v3 walk and removes all older walk clips and their unused animation data. Voltfang now uses this set; historical assets live in `tests/fixtures/creatures/` and are not published to Pages.
+Compatible Tripo canine rigs receive 26 named clips. The core gameplay set remains **idle, walk, run, attack, hit, death, turn-left, turn-right, turn-around, charge, leap, cast, stagger, jump, land and spawn**. The forge also exposes an alternate attack and run, five additional idle performances, two greetings and a talk/vocalization clip. The shared builder removes older embedded animation sets before rebuilding the current set. Voltfang now uses this set; historical assets live in `tests/fixtures/creatures/` and are not published to Pages.
 
 Use the single **Preview motion** selector in the forge. **Rest** shows the imported bind pose; all other entries play the selected clip. Toggle the skeleton and orbit around joints to inspect deformation. Playback supports pause, restart, 1/30-second frame stepping and 0.1×/0.25×/0.5×/1× speed. Loops wrap; one-shot actions hold their final pose. Playing an ended one-shot restarts it. Preview changes do not alter gameplay speed or consume API credits.
 
@@ -80,7 +80,7 @@ Charge, leap, cast, jump and land are available clips for future abilities and f
 
 ### Shared canine animation adapter
 
-`scripts/creature-pipeline/animation-set.mjs` builds set version 1 using the canine rig profile revision 3. Donor clips come from Quaternius's CC0 Wolf animations: Walk, Idle, Gallop, Attack, Death, Idle_HitReact1, Idle_HitReact2, Gallop_Jump and Jump_ToIdle. The builder adds procedural pivot steps, a cast crouch/nod and a spawn rise. The donor mesh is not included. Checksummed animation-only donors are bundled for offline jobs; provenance is in `public/creatures/ANIMATION-CREDITS.md`.
+`scripts/creature-pipeline/animation-set.mjs` builds set version 2 using the canine rig profile revision 3. The primary donor is the 18-clip DIMOS Lost Ark wolf pack, used with direct project permission reported by the repository owner on September 14, 2026. Quaternius's CC0 wolf supplies hit, death, stagger, jump and landing fallbacks; Last Bastion supplies three procedural pivot clips. Donor meshes and textures are not included. Checksummed animation-only donors are bundled for offline jobs; precise provenance and the permission record are in `public/creatures/ANIMATION-CREDITS.md`.
 
 The shared profile measures heading and proportions, maps all four paw controls, and preserves the generated mesh, skin weights and rest transforms. The latest walk keeps its procedural head/tail secondary motion and neutral-pose corrections. Other transferred clips use the same neutral calibration with their own donor movement. Voltfang's calibration is `headYawDegrees: -10`, with approximately +25.46° automatic tail centering. The head offset belongs to that asset; future generated faces still need visual calibration. Rest continues to show the unmodified imported pose.
 
@@ -93,7 +93,7 @@ node scripts/creature-pipeline/retarget.mjs INPUT.glb OUTPUT.glb CALIBRATION.jso
 
 The command writes a new GLB and `OUTPUT.glb.report.json`, refusing to overwrite the input or an existing output. It builds the full set without provider calls or publishing. Generation jobs use the same builder and retain the historical artifact filenames `animation-trial.glb` and `animation-trial.json`; the report now has status `animation-set`, version, clip sources, calibration and review warnings. The manifest records available semantic clips and the retained walk index. Incompatible body plans/rigs keep the provider output and an explicit skip reason.
 
-Validation covers the full GLB and each clip independently, preserving mesh data and checking loops and animation budgets (up to 24 clips). Tests cover one real generated canine and synthetic proportion/heading variants. This is not validation across independently generated species. **Foot IK, foot locking, terrain adaptation and automatic visual approval are not implemented.** The new set needs artistic review during play, especially foot contact, turning and one-shot transitions. Different body plans/providers need their own adapters.
+Validation covers the full GLB and each clip independently, preserving mesh data and checking loops and animation budgets (up to 32 clips). Tests cover one real generated canine and synthetic proportion/heading variants. This is not validation across independently generated species. **Foot IK, foot locking, terrain adaptation and automatic visual approval are not implemented.** The new set needs artistic review during play, especially foot contact, turning and one-shot transitions. Different body plans/providers need their own adapters.
 
 ### Generate a procedural prototype
 

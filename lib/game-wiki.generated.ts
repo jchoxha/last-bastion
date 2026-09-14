@@ -1311,7 +1311,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "Installed models load automatically in the preview and game. They become eligible for ordinary wilderness grunt slots and can also be spawned explicitly for testing; scripted enemy selections remain unchanged. Technical validation catches malformed assets and body-type mismatches, but cannot certify anatomical joint placement. Inspect the actual walk and skeleton before considering a model finished. The first live Voltfang text-to-3D job was installed on September 13, 2026 with 18,896 triangles, 31 bones and a quadruped walk animation. Its mesh was reused after fixing a provider-storage download rejection; anatomical rig quality remains unverified. Compatible canine rigs now receive the shared 16-animation set; other rigs retain their provider walk."
+            "text": "Installed models load automatically in the preview and game. They become eligible for ordinary wilderness grunt slots and can also be spawned explicitly for testing; scripted enemy selections remain unchanged. Technical validation catches malformed assets and body-type mismatches, but cannot certify anatomical joint placement. Inspect the actual walk and skeleton before considering a model finished. The first live Voltfang text-to-3D job was installed on September 13, 2026 with 18,896 triangles and 31 bones. Its mesh was reused after fixing a provider-storage download rejection. On September 14 it received the shared 26-animation canine set; other body plans retain their provider animation until they have a compatible library."
           },
           {
             "type": "paragraph",
@@ -1327,11 +1327,11 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "The **Preview motion** selector now offers **idle, walk, run, attack, hit, death, turn left, turn right, turn around, charge, leap, cast, stagger, jump, land and spawn** for compatible generated canines. Only our latest corrected v3 walk remains; older walking renditions have been removed from the published assets and selector. Rest still shows the original bind pose."
+            "text": "The **Preview motion** selector offers the 16 core gameplay motions: **idle, walk, run, attack, hit, death, turn left, turn right, turn around, charge, leap, cast, stagger, jump, land and spawn**. The 26-clip canine library also exposes an alternate attack and run, five additional idle performances, two greetings and talk/vocalization. Rest still shows the original bind pose."
           },
           {
             "type": "paragraph",
-            "text": "The set reuses Quaternius's CC0 wolf animation data, with our shared canine retargeting and procedural pivot, cast and spawn motions. The latest walk retains its head motion, tail sway and neutral-pose corrections. Voltfang's reviewed head calibration is applied to the other clips too; future generated faces still need their own calibration. Compatible generation jobs build the set automatically without additional Tripo calls."
+            "text": "Eighteen clips come from the DIMOS Lost Ark wolf pack, used with direct project permission reported by the repository owner on September 14, 2026. They supply locomotion, attacks, a howl, spawn and social/idle performances. Quaternius's CC0 wolf supplies hit, death, stagger, jump and landing fallbacks; Last Bastion supplies the three initial pivot clips. Donor meshes and textures are excluded. Voltfang's reviewed head and tail calibration is applied across the set; future generated faces still need their own calibration. Compatible generation jobs build the same set automatically without additional Tripo calls."
           },
           {
             "type": "paragraph",
@@ -1339,7 +1339,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "Charge, leap, cast, jump and landing are available for animation review and future abilities. They do not yet add new enemy abilities or jump navigation. Charge currently shares run's gallop, and leap shares jump's motion. Pivots, casting and spawning are initial procedural animations. Foot locking and terrain contact remain unfinished; inspect the actual feet and transitions before considering a generated creature complete. Incompatible rigs keep their provider animation with a recorded skip reason. Testing currently covers one real generated canine and synthetic rig variants. The forge does not yet offer arbitrary animation imports or a calibration editor."
+            "text": "Charge, leap, cast, jump and landing are available for animation review and future abilities. They do not yet add new enemy abilities or jump navigation. Charge, leap, casting/howling and spawning now use the licensed authored wolf motions; pivots remain initial procedural animations. Foot locking and terrain contact remain unfinished, so inspect the actual feet and transitions before considering a generated creature complete. Incompatible rigs keep their provider animation with a recorded skip reason. Testing currently covers one real generated canine and synthetic rig variants. The forge does not yet offer arbitrary animation imports or a calibration editor."
           },
           {
             "type": "paragraph",
