@@ -141,8 +141,9 @@ function installForgePlayerTesting() {
     for (const creature of creatures) {
       const option = document.createElement('option');
       option.value = creature.id;
+      const generated=bridge.creatures.generatedAsset?.(creature.id),coverage=generated?.report?.clips?.includes('attack')?'full animations':'provider walk only';
       option.textContent =
-        creature.spec.name + ' — ' + (creature.spec.seed || creature.id);
+        creature.spec.name + ' — ' + (creature.spec.seed || creature.id) + ' — ' + coverage;
       creatureSelect.appendChild(option);
     }
     if (creatures.length) {
@@ -525,6 +526,15 @@ jumpPlayer = function () {
 const forgeCombatUIBase = updateCombatUI;
 updateCombatUI = function (...args) {
   const result = forgeCombatUIBase(...args);
+  const target =
+      livingTarget() ||
+      (!G.buildMode && combatMode() === 'free' ? sceneAim().enemy : null),
+    targetArt = target && bridge.creatures.generatedPortrait?.(target.type);
+  if (targetArt && $('targetPortrait')) {
+    $('targetPortrait').replaceChildren(
+      Object.assign(document.createElement('img'), { src: targetArt, alt: '' }),
+    );
+  }
   if (forgePlayer && $('playerUnitName'))
     $('playerUnitName').textContent =
       forgePlayer.creature.spec.name + ' · TEST';

@@ -12,7 +12,9 @@ import {
 } from '@/lib/creatures/core';
 import {
   createRuntimeCreatureActor as createCreatureActor,
+  generatedAsset,
   generatedCreatures,
+  generatedPortrait,
   initializeGeneratedAssets,
 } from '@/lib/creatures/generated';
 import { CREATURE_MOTIONS } from '@/lib/creatures/motions';
@@ -141,7 +143,9 @@ export default function Bastion() {
         makeCreature,
         parseCreature,
         createCreatureActor,
+        generatedAsset,
         generatedCreatures,
+        generatedPortrait,
         ready: initializeGeneratedAssets,
         motions: CREATURE_MOTIONS,
       },

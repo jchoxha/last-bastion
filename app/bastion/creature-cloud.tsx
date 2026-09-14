@@ -56,8 +56,8 @@ export default function CreatureCloud({
   const [rosterId, setRosterId] = useState('voltfang');
   const [bodyPlan, setBodyPlan] = useState('canine-v1'),
     [form, setForm] = useState('regular');
-  const [mode, setMode] = useState('text'),
-    [seed, setSeed] = useState('voltfang-text-1');
+  const [mode, setMode] = useState('image'),
+    [seed, setSeed] = useState('voltfang-card-spec-1');
   const [description, setDescription] = useState(
     'Slate-blue wolf with cyan mane highlights, yellow eyes, muscular shoulders, pointed ears and a single bushy tail. Compact sculpted fur clumps.',
   );
@@ -181,8 +181,8 @@ export default function CreatureCloud({
     >
       <h2>Generate creatures on GitHub</h2>
       <p>
-        Chimera definition → textured 3D mesh → matching rig → animation library
-        → game. Compare text, direct source art and normalized source art.
+        Chimera definition → card illustration → low-poly modeling reference →
+        textured 3D mesh → matching rig → animation library → game.
       </p>
       <details>
         <summary>One-time setup</summary>
@@ -269,12 +269,12 @@ export default function CreatureCloud({
             <label>
               Model source
               <select value={mode} onChange={(e) => setMode(e.target.value)}>
-                <option value="text">Text to 3D</option>
-                <option value="image-direct">
-                  Source art directly to 3D (0 new images)
-                </option>
                 <option value="image">
-                  Normalize source art, then 3D (1 new image)
+                  Card art → low-poly spec → 3D (recommended)
+                </option>
+                <option value="text">Experimental: text directly to 3D</option>
+                <option value="image-direct">
+                  Experimental: card art directly to 3D
                 </option>
               </select>
             </label>
@@ -324,7 +324,7 @@ export default function CreatureCloud({
               ? 'Estimated Tripo cost: $0.55 for standard textured mesh, rig and one walk.'
               : mode === 'image-direct'
                 ? 'Estimated Tripo cost: $0.60 for direct image-to-model, rig and one walk.'
-                : 'Estimated Tripo cost: $0.70 including one neutral-reference image, standard textured mesh, rig and one walk.'}{' '}
+                : 'Estimated Tripo cost: $0.70 with existing card art, including one low-poly specification image, standard textured mesh, rig and one walk. New concepts also generate the card illustration.'}{' '}
             Each new job can incur charges, including repeated seeds. Failed
             stages may already have consumed credits. Prices can change.
           </p>

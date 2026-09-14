@@ -78,8 +78,16 @@ export const wikiChapters: WikiChapter[] = [
                 "Sprint; climb faster while attached to a wall"
               ],
               [
-                "Mouse / hold right mouse",
-                "Look in first person; hold right mouse to turn the camera in other views"
+                "Left mouse drag",
+                "Orbit freely around the character in third person without changing its facing"
+              ],
+              [
+                "Right mouse drag",
+                "Turn the third-person camera and character together; rotate the overhead camera"
+              ],
+              [
+                "Hold both mouse buttons",
+                "Move forward in third person"
               ],
               [
                 "Mouse wheel",
@@ -155,7 +163,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "First-person mouse capture may depend on browser permissions. Clicking back into the game recaptures the cursor when available. The third-person camera follows the character and shortens its distance when terrain or props obstruct it. In overhead view, the pointer is used for ground aiming. A menu that merely opens a cursor is not necessarily a simulation pause."
+            "text": "First-person mouse capture may depend on browser permissions. Clicking back into the game recaptures the cursor when available. Third person follows World of Warcraft's core camera convention: left-drag is free look, right-drag steers the character with the camera, both buttons move forward, A/D turn without right mouse and strafe while right mouse is held. A click without a drag still selects or casts. The third-person camera shortens its distance when terrain or props obstruct it. In overhead view, the pointer is used for ground aiming. A menu that merely opens a cursor is not necessarily a simulation pause."
           },
           {
             "type": "paragraph",
@@ -1299,7 +1307,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "Choose an existing Chimera roster ID (start with `voltfang`), a compatible body plan, form and seed. **Text to 3D** uses no artwork. **Source art directly to 3D** uses a Last Bastion or Chimera portrait without generating another image. **Normalize source art, then 3D** spends one image task to enforce the neutral pose before modeling. All routes share bold cartoon identity, chunky faceted geometry, matte colors and a clean silhouette suited to the generated terrain. The worker checks riggability, rigs and animates the result, validates the asset, commits it to `main` and requests Pages deployment. The September 13, 2026 estimates are $0.55 for text, $0.60 for direct image and $0.70 for normalized image, including rig and one provider walk. Each new job can incur charges even with a repeated seed. After deployment, click **Refresh published creatures** to inspect the model; normal game startup also loads published assets."
+            "text": "Choose an existing Chimera roster ID (start with `voltfang`), a compatible body plan, form and seed. The default **Card art → low-poly spec → 3D** route preserves or generates a full-bleed flat Chimera illustration, then spends one image task on a neutral, anatomy-separated low-poly specification before modeling. **Text directly to 3D** and **card art directly to 3D** remain labeled experiments because the Voltfang comparison lost either identity, anatomical consistency or full animation compatibility. The worker checks riggability, rigs and animates the result, validates the asset, commits it to `main` and requests Pages deployment. The September 13, 2026 estimates are $0.55 for text, $0.60 for direct image and $0.70 for an existing card plus one specification image, including rig and one provider walk. New concepts also need the card image task. Each new job can incur charges even with a repeated seed. After deployment, click **Refresh published creatures** to inspect the model; normal game startup also loads published assets. The testing menu labels rigs as **full animations** or **provider walk only**."
           },
           {
             "type": "paragraph",
@@ -1307,7 +1315,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "The optional local **Chimera model pipeline** reads Chimera Cards' definitions and available artwork, then applies Last Bastion's own low-poly art and modeling prompts. Project-owned source portraits under `public/creatures/source-art/` can replace a Chimera portrait without changing the Chimera repository. The pipeline creates a neutral reference, generates a textured mesh, requests the matching quadruped or biped rig, adds provider animation and the shared full set for compatible canine rigs, validates the GLB and installs it in the local game library. This worker requires separately configured text inference for new concepts and Tripo API credentials/credits. With no key, it can prepare existing Chimera inputs and display the blocked stage. Local jobs persist on the PC and continue while the menu is closed; resume after restarting the worker."
+            "text": "The optional local **Chimera model pipeline** reads Chimera Cards' definitions and available artwork while keeping all integration code and overrides in Last Bastion. Project-owned card illustrations under `public/creatures/card-art/` can replace an imported portrait. The default route preserves or generates the original flat, outlined Chimera card illustration, derives a second neutral low-poly specification image with separated anatomy, then generates the textured mesh from that specification. The first image is retained as card art; the second is retained as the target portrait and model provenance. The worker requests the matching quadruped or biped rig, adds provider animation and the shared full set only for compatible canine rigs, validates the GLB and installs it in the local game library. Text inference is required only for new concepts; Tripo credentials/credits are required for image/model tasks. Jobs persist while the menu is closed and can resume from saved task IDs after a worker restart."
           },
           {
             "type": "paragraph",

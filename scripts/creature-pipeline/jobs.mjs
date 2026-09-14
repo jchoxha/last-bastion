@@ -75,7 +75,7 @@ export function normalizeRequest(value) {
     bodyPlan: value.bodyPlan,
     form: value.form,
     seed: value.seed.trim(),
-    ...(value.mode ? { mode: value.mode } : {}),
+    mode: value.mode || 'image',
     ...(value.modelDescription
       ? { modelDescription: value.modelDescription.trim() }
       : {}),
@@ -299,9 +299,15 @@ export async function createPipeline({
       const temp = path.join(assetRoot, `${assetId}.glb.tmp`);
       await writeFile(temp, bytes);
       await rename(temp, path.join(assetRoot, `${assetId}.glb`));
+      const targetPortrait =
+        job.request.mode === 'image' ? 'reference.png' : 'art.png';
+      await copyFile(
+        path.join(dir, targetPortrait),
+        path.join(assetRoot, `${assetId}.png`),
+      );
       await copyFile(
         path.join(dir, 'art.png'),
-        path.join(assetRoot, `${assetId}.png`),
+        path.join(assetRoot, `${assetId}-card.png`),
       );
       const manifest = await json(path.join(assetRoot, 'index.json'), {
         version: 1,
@@ -312,6 +318,7 @@ export async function createPipeline({
         creature: job.creature,
         model: `${assetId}.glb`,
         portrait: `${assetId}.png`,
+        cardPortrait: `${assetId}-card.png`,
         sha256: hash(bytes),
         walkClip: job.report.walkClip,
         yaw: -Math.PI / 2,

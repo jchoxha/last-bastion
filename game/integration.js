@@ -89,7 +89,7 @@ restoreSave=function(...args){placementCache.clear();return plainRestore(...args
 newRun=function(...args){placementCache.clear();return plainNew(...args);};
 window.bastion.restoreSave=restoreSave;
 const baseHud=updateHud;
-updateHud=function(){baseHud();const primary=$('missionPrimary');if(!primary)return;primary.textContent=G.phase==='explore'?'Place bastion core (B)':G.phase==='build'?'Start wave '+G.wave+' (Enter)':'Hold the line';primary.disabled=G.phase==='fight'||G.phase==='over';primary.style.display=G.site?'':'none';const b=BUILDS[G.selected];$('missionHint').textContent=G.phase==='build'?b.name+' · '+buildCost(b)+' gold'+(b.range?' · '+b.range+' m range':'')+' · B build · F place / X sell':'Space jump · Shift sprint · B build · wheel zoom · RMB camera · 1–6 moves';};
+updateHud=function(){baseHud();const primary=$('missionPrimary');if(!primary)return;primary.textContent=G.phase==='explore'?'Place bastion core (B)':G.phase==='build'?'Start wave '+G.wave+' (Enter)':'Hold the line';primary.disabled=G.phase==='fight'||G.phase==='over';primary.style.display=G.site?'':'none';const b=BUILDS[G.selected];$('missionHint').textContent=G.phase==='build'?b.name+' · '+buildCost(b)+' gold'+(b.range?' · '+b.range+' m range':'')+' · B build · F place / X sell':'Space jump · Shift sprint · B build · wheel zoom · LMB look · RMB steer · 1–6 moves';};
 
 // Player-only vertical physics; enemies continue to follow connected terrain routes.
 function jumpPlayer(){if(!G||menuPaused||G.player.dead>0)return;const p=G.player;if(p.pos.y<=heightAt(p.pos.x,p.pos.z)+.08){p.vy=9;p.pos.y+=.09;}}

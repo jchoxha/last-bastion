@@ -37,11 +37,12 @@ test('Last Bastion owns model-ready creature art prompts', () => {
     { name: 'Voltfang', description: 'a slate-blue electric wolf' },
     'regular',
   );
-  assert.match(art, /chunky faceted geometry/i);
-  assert.match(art, /matte colors/i);
-  assert.match(art, /every limb and foot clearly visible/i);
+  assert.match(art, /original Chimera Cards style/i);
+  assert.match(art, /thick confident black outlines/i);
+  assert.match(art, /full-bleed composition/i);
   assert.doesNotMatch(art, /Adventure Time|MegaBonk/i);
   const reference = modelingReferencePrompt('canine-v1');
+  assert.match(reference, /chunky retro low-poly/i);
   assert.match(reference, /exactly four separated legs/i);
   assert.match(reference, /head facing in the same direction/i);
   assert.match(reference, /tail separated from the hind legs/i);
@@ -235,6 +236,11 @@ test('actual Tripo adapter drives all stages and atomically installs a verified 
   assert.deepEqual(
     await readFile(path.join(root, 'public/creatures', asset.model)),
     bytes,
+  );
+  assert.equal(asset.cardPortrait, `${asset.id}-card.png`);
+  assert.deepEqual(
+    await readFile(path.join(root, 'public/creatures', asset.cardPortrait)),
+    png,
   );
   assert.equal(
     calls.find((c) => c.route.endsWith('/rig')).body.rig_type,

@@ -59,7 +59,7 @@ export default function CreaturePipeline({
     [concept, setConcept] = useState(''),
     [bodyPlan, setBodyPlan] = useState('canine-v1'),
     [form, setForm] = useState('regular'),
-    [seed, setSeed] = useState('voltfang-1');
+    [seed, setSeed] = useState('voltfang-card-spec-1');
   const [busy, setBusy] = useState(false),
     [base, setBase] = useState('');
   const seen = useRef(new Set<string>()),
@@ -163,6 +163,7 @@ export default function CreaturePipeline({
         bodyPlan,
         form,
         seed,
+        mode: 'image',
       });
       if (mounted.current) {
         setJobs((old) => [...old.filter((j) => j.id !== job.id), job]);
@@ -304,6 +305,27 @@ export default function CreaturePipeline({
             <ul>
               {assets.map((asset) => (
                 <li key={asset.id}>
+                  {asset.cardPortrait && (
+                    <div className="forge-art-pair">
+                      <figure>
+                        {/* Dynamic local-worker URLs cannot use the framework image proxy. */}
+                        {/* oxlint-disable-next-line next/no-img-element */}
+                        <img
+                          src={`${base}${asset.cardPortrait}`}
+                          alt={`${asset.creature.spec.name} card illustration`}
+                        />
+                        <figcaption>Card art</figcaption>
+                      </figure>
+                      <figure>
+                        {/* oxlint-disable-next-line next/no-img-element */}
+                        <img
+                          src={`${base}${asset.portrait}`}
+                          alt={`${asset.creature.spec.name} target portrait`}
+                        />
+                        <figcaption>3D spec / target portrait</figcaption>
+                      </figure>
+                    </div>
+                  )}
                   <button
                     onClick={() => {
                       void preloadGeneratedAsset(asset.creature)
@@ -312,6 +334,9 @@ export default function CreaturePipeline({
                     }}
                   >
                     {asset.creature.spec.name} · {asset.creature.spec.seed} ·
+                    {asset.report.clips?.includes('attack')
+                      ? ' full animations · '
+                      : ' provider walk only · '}
                     inspect mesh
                   </button>{' '}
                   <a href={`${base}${asset.model}`} download>

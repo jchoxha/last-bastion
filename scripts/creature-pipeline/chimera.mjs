@@ -130,7 +130,7 @@ export async function loadChimera(
         const suffix = request.form === 'regular' ? '' : `-${request.form}`;
         const localArt = path.join(
           root,
-          'public/creatures/source-art',
+          'public/creatures/card-art',
           `${found.id}${suffix}.png`,
         );
         try {
@@ -143,7 +143,7 @@ export async function loadChimera(
           } catch {
             if (request.mode !== 'text')
               throw new PipelineError(
-                'Neither Last Bastion nor Chimera has a readable portrait for this creature/form.',
+                'Neither Last Bastion nor Chimera has readable card art for this creature/form.',
               );
           }
         }

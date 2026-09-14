@@ -10,6 +10,7 @@ export type GeneratedAsset = {
   creature: Creature;
   model: string;
   portrait: string;
+  cardPortrait?: string;
   sha256: string;
   walkClip: number;
   yaw: number;
@@ -33,6 +34,14 @@ export function generatedCreatures() {
   return [...records.values()]
     .map((entry) => entry.asset.creature)
     .sort((a, b) => a.id.localeCompare(b.id));
+}
+export function generatedPortrait(id: string, card = false) {
+  const record = records.get(id);
+  if (!record) return '';
+  const file = card
+    ? record.asset.cardPortrait || record.asset.portrait
+    : record.asset.portrait;
+  return new URL(file, record.base).href;
 }
 export function assetBase() {
   return new URL(
@@ -68,6 +77,8 @@ export async function refreshGeneratedAssets(
       !/^asset_[a-f0-9]{24}$/.test(raw.id) ||
       raw.model !== `${raw.id}.glb` ||
       raw.portrait !== `${raw.id}.png` ||
+      (raw.cardPortrait !== undefined &&
+        raw.cardPortrait !== `${raw.id}-card.png`) ||
       !/^[a-f0-9]{64}$/.test(raw.sha256) ||
       !Number.isFinite(raw.yaw) ||
       !Number.isInteger(raw.walkClip) ||

@@ -11,7 +11,7 @@ updateCamera=function(){if(!G)return;const p=G.player.pos;G.cameraYaw??=G.player
 const cameraMovement=updatePlayer;
 updatePlayer=function(dt){const P=G.player;G.cameraYaw??=P.yaw;G.cameraPitch??=-.18;
  const saved={};for(const k of ['KeyQ','KeyE','ArrowLeft','ArrowRight']){saved[k]=keys[k];keys[k]=false;}
- P.yaw=G.cameraYaw;P.baseYaw=P.yaw;cameraMovement(dt);Object.assign(keys,saved);
+ const cameraYaw=G.cameraYaw;if(G.view==='third'&&!keys.MouseR)G.cameraYaw=P.yaw;cameraMovement(dt);G.cameraYaw=cameraYaw;Object.assign(keys,saved);
  // A falling capsule is pushed out of scenery, including tree crowns, rather than embedded.
  for(const b of nearbyBodies(P.pos.x,P.pos.z,3)){if(b.depleted||b.source?.taken||b.walkable)continue;const tree=b.source==='tree',radius=tree?Math.max(b.r,P.pos.y>b.y+1.2?1.15:b.r):b.r;
  if(P.pos.y>=b.y+b.h||P.pos.y+1.6<=b.y||!overlapsBody({...b,r:radius},P.pos.x,P.pos.z,.35))continue;
