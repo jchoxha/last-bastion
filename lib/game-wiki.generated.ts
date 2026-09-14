@@ -1347,7 +1347,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "During a run, open **Testing** with F2 and use **Play as a creature** to replace the class hero's appearance with any installed 3D creature. Movement, sprinting, turning, jumping, landing and combat select the matching creature animations while class statistics and abilities remain active. The animation override can play every installed clip directly, including one-shot and looping performances; **Use movement animations** returns control to gameplay. **Restore class hero** removes the testing form. Possession is session-only and is not written to the save."
+            "text": "During a run, open **Testing** with F2 and use **Play as a creature** to replace the class hero's appearance with any installed 3D creature. Movement, sprinting, turning, jumping, landing and combat select the matching creature animations while class statistics and abilities remain active. The animation override can play every installed clip directly, including one-shot and looping performances; **Use movement animations** returns control to gameplay. **Restore class hero** removes the testing form. Possession is session-only and is not written to the save. Close the testing panel with its pinned **Close testing menu** button, Escape, F2, or a click on the dark backdrop."
           },
           {
             "type": "paragraph",

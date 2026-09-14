@@ -343,7 +343,9 @@ const {
     await gameUi
       .getByRole('button', { name: 'Play selected animation', exact: true })
       .click();
-    await gameUi.getByRole('button', { name: 'Return to game' }).click();
+    await gameUi
+      .getByRole('button', { name: 'Close testing menu', exact: true })
+      .click();
     await game.waitForFunction(
       () =>
         forgePlayer?.actor.state === 'generated' &&
@@ -354,7 +356,10 @@ const {
     await gameUi
       .getByRole('button', { name: 'Use movement animations', exact: true })
       .click();
-    await gameUi.getByRole('button', { name: 'Return to game' }).click();
+    await gameUi.locator('body').press('Escape');
+    await game.waitForFunction(() =>
+      $('adminPanel').classList.contains('hidden'),
+    );
     const possessedMotion = await game.evaluate(() => {
       G.player.pos.z += 0.5;
       updateForgePlayer(0.1);

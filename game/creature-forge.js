@@ -120,11 +120,17 @@ function installForgePlayerTesting() {
   const section = $('adminPanel').querySelector('section'),
     status = $('adminStatus'),
     fragment = document.createDocumentFragment(),
+    close = document.createElement('button'),
     title = document.createElement('h3'),
     creatureLabel = document.createElement('label'),
     creatureSelect = document.createElement('select'),
     motionLabel = document.createElement('label'),
     motionSelect = document.createElement('select');
+  close.type = 'button';
+  close.className = 'admin-close-sticky';
+  close.textContent = 'Close testing menu';
+  close.onclick = toggleAdmin;
+  section.insertBefore(close, section.firstChild);
   title.textContent = 'Play as a creature';
   fragment.appendChild(title);
   creatureLabel.textContent = 'Installed 3D creature';
@@ -207,6 +213,23 @@ function installForgePlayerTesting() {
     'Close this menu to move, turn, jump and attack in the selected form. This testing form is not saved.';
   fragment.appendChild(note);
   section.insertBefore(fragment, status);
+  $('adminPanel').addEventListener('pointerdown', (event) => {
+    if (event.target === $('adminPanel')) toggleAdmin();
+  });
+  addEventListener(
+    'keydown',
+    (event) => {
+      if (
+        !$('adminPanel').classList.contains('hidden') &&
+        ['Escape', 'F2'].includes(event.code)
+      ) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        toggleAdmin();
+      }
+    },
+    true,
+  );
   void bridge.creatures.ready().then(fillCreatures, () => {
     fillCreatures();
     status.textContent = 'Generated creature library could not be loaded.';
