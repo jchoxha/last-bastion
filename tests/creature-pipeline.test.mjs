@@ -554,3 +554,50 @@ test('downloads accept the live Tripo storage host without credentials and rejec
     await assert.rejects(provider.download(url, 10), /unexpected asset host/);
   assert.equal(requests.length, 1);
 });
+
+test('definitive Tripo submission rejection remains safe to resume', async () => {
+  const rejected = createTripo({
+    key: 'test-key-never-real',
+    async fetchImpl() {
+      return Response.json(
+        { code: 2010, message: 'Insufficient balance.' },
+        { status: 403 },
+      );
+    },
+  });
+  const first = { tasks: {} };
+  await assert.rejects(
+    rejected.task(first, 'rig', '/animations/rig', {}, async () => {}),
+    /HTTP 403, code 2010.*Insufficient balance/,
+  );
+  assert.deepEqual(first.tasks, {});
+
+  let requests = 0;
+  const resumed = createTripo({
+    key: 'test-key-never-real',
+    pollMs: 0,
+    async fetchImpl(_url, init = {}) {
+      requests++;
+      if (init.method === 'POST')
+        return Response.json({ code: 0, data: { task_id: 'task_recovered' } });
+      return Response.json({
+        code: 0,
+        data: { status: 'success', output: { model_url: 'fixture' } },
+      });
+    },
+  });
+  const legacy = {
+    tasks: { rig: { submitting: true } },
+    error: 'Provider download failed (HTTP 403).',
+  };
+  const state = await resumed.task(
+    legacy,
+    'rig',
+    '/animations/rig',
+    {},
+    async () => {},
+  );
+  assert.equal(state.taskId, 'task_recovered');
+  assert.equal(requests, 2);
+  assert.equal(legacy.error, undefined);
+});

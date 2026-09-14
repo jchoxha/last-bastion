@@ -6,8 +6,9 @@ export const TRIPO_MODELS = {
   rig: 'v2.5-20260210',
 };
 export class PipelineError extends Error {}
-export async function boundedBytes(response, max) {
-  if (!response.ok || !response.body)
+class ProviderRejectedError extends PipelineError {}
+async function responseBytes(response, max) {
+  if (!response.body)
     throw new PipelineError(
       `Provider download failed (HTTP ${response.status}).`,
     );
@@ -24,6 +25,13 @@ export async function boundedBytes(response, max) {
     if (!response.body.locked) await response.body.cancel().catch(() => {});
   }
   return Buffer.concat(chunks);
+}
+export async function boundedBytes(response, max) {
+  if (!response.ok)
+    throw new PipelineError(
+      `Provider download failed (HTTP ${response.status}).`,
+    );
+  return responseBytes(response, max);
 }
 export function createTripo({ key, fetchImpl = fetch, pollMs = 5000 } = {}) {
   const base = 'https://openapi.tripo3d.ai/v3';
@@ -43,12 +51,28 @@ export function createTripo({ key, fetchImpl = fetch, pollMs = 5000 } = {}) {
       },
       ...(body ? { body: form ? body : JSON.stringify(body) } : {}),
     });
-    const data = JSON.parse(
-      (await boundedBytes(response, 1024 * 1024)).toString(),
-    );
+    const raw = (await responseBytes(response, 1024 * 1024)).toString();
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      if (!response.ok)
+        throw new ProviderRejectedError(
+          `Tripo rejected the request (HTTP ${response.status}). Check the provider console.`,
+        );
+      throw new PipelineError('Tripo returned an invalid response.');
+    }
+    const detail =
+      typeof data.message === 'string'
+        ? data.message.replace(/[^\w .,:;()/-]/g, '').slice(0, 160)
+        : '';
+    if (!response.ok)
+      throw new ProviderRejectedError(
+        `Tripo rejected the request (HTTP ${response.status}${data.code !== undefined ? `, code ${String(data.code).replace(/[^\w.-]/g, '')}` : ''})${detail ? `: ${detail}` : '.'}`,
+      );
     if (data.code !== 0)
-      throw new PipelineError(
-        `Tripo returned error code ${Number(data.code) || 'unknown'}. Check the provider console.`,
+      throw new ProviderRejectedError(
+        `Tripo rejected the request (code ${Number(data.code) || 'unknown'})${detail ? `: ${detail}` : '. Check the provider console.'}`,
       );
     return data.data;
   }
@@ -64,12 +88,31 @@ export function createTripo({ key, fetchImpl = fetch, pollMs = 5000 } = {}) {
     },
     async task(job, stage, route, body, persist) {
       let state = job.tasks[stage];
+      if (
+        state?.submitting &&
+        !state.taskId &&
+        /^Provider download failed \(HTTP 4\d\d\)\.$/.test(job.error || '')
+      ) {
+        delete job.tasks[stage];
+        delete job.error;
+        state = undefined;
+        await persist();
+      }
       if (state?.output) return state;
       if (!state) {
         // Persist intent BEFORE POST. A lost response must never automatically incur another charge.
         state = job.tasks[stage] = { submitting: true };
         await persist();
-        const data = await call(route, body);
+        let data;
+        try {
+          data = await call(route, body);
+        } catch (error) {
+          if (error instanceof ProviderRejectedError) {
+            delete job.tasks[stage];
+            await persist();
+          }
+          throw error;
+        }
         if (typeof data.task_id !== 'string' || !/^[\w-]+$/.test(data.task_id))
           throw new PipelineError(
             'Provider returned no valid task ID. Check the console before creating another job.',
