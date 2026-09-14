@@ -4,7 +4,7 @@ Status: automated Chimera → text or image → mesh → rig → animation → g
 
 ## Automated model pipeline
 
-The worker executes Chimera Cards' actual `forgeCreature` and validators from pinned commit `fb431b8ac6c4246e9f736d3c60cc120dde701f57`. It bundles that code locally and replaces only its text-provider transport. It does not replace the forge with Last Bastion's seeded name generator. Existing creatures use Chimera's `ROSTER`, bestiary and `public/art/gen/<id>[-<form>].png`. New concepts use Chimera's forge and canonical `creatureArtPrompt`, rendered by the configured Tripo image endpoint. The shared art direction translates Chimera's bold cartoon identity into chunky, faceted low-poly characters with matte materials, restrained colors, clean separated anatomy and a neutral three-quarter view so portraits, generated meshes and Last Bastion's terrain belong to one visual language. A heuristic fallback is treated as a failed production job, not a successful AI generation.
+The worker executes Chimera Cards' actual `forgeCreature` and validators from pinned commit `38a3f180eabe0c2684590ac7956cb489ea545c04`. It bundles that code locally and replaces only its text-provider transport. Chimera supplies definitions and its existing roster art; Last Bastion owns the model-facing art style in `scripts/creature-pipeline/art-prompt.mjs`. A matching image placed at `public/creatures/source-art/<id>[-<form>].png` overrides Chimera's baked portrait without modifying the Chimera repository. New concepts use Chimera's forge with Last Bastion's local low-poly art prompt. The direction translates bold cartoon identity into chunky, faceted characters with matte materials, restrained colors, separated anatomy and a neutral three-quarter view so portraits, generated meshes and terrain belong to one visual language. A heuristic fallback is treated as a failed production job, not a successful AI generation.
 
 1. Resolve an existing Chimera creature and its art, or forge a new definition and portrait.
 2. Derive a neutral modeling reference from that art, preserving identity while separating limbs and removing scenery/effects.
@@ -108,7 +108,7 @@ Generated enemies currently use role-based health, speed, and melee damage, with
 
 ## Definition and body plan are separate
 
-The vocabulary is based on Chimera Cards at commit `fb431b8ac6c4246e9f736d3c60cc120dde701f57`, particularly `docs/biology-kits.md` section 9 and the current kit data. It is an explicit snapshot, not a live synchronization of the repositories. No Chimera combat engine or save format was copied.
+The vocabulary is based on Chimera Cards at commit `38a3f180eabe0c2684590ac7956cb489ea545c04`, particularly `docs/biology-kits.md` section 9 and the current kit data. It is an explicit snapshot, not a live synchronization of the repositories. No Chimera combat engine or save format was copied.
 
 - Body types: Humanoid, Beast, Aberration; up to two per creature.
 - Beast families: Mammalian, Reptilian, Avian, Piscine, Insectoid, Amphibian, Draconic.

@@ -1307,7 +1307,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "The optional local **Chimera model pipeline** reads Chimera Cards' definitions and artwork, creates a neutral reference, generates a textured mesh, requests the matching quadruped or biped rig, adds provider animation and the shared full set for compatible canine rigs, validates the GLB and installs it in the local game library. New concepts use Chimera's AI forge and art prompts. This worker requires separately configured text inference for new concepts and Tripo API credentials/credits. With no key, it can prepare existing Chimera inputs and display the blocked stage. Local jobs persist on the PC and continue while the menu is closed; resume after restarting the worker."
+            "text": "The optional local **Chimera model pipeline** reads Chimera Cards' definitions and available artwork, then applies Last Bastion's own low-poly art and modeling prompts. Project-owned source portraits under `public/creatures/source-art/` can replace a Chimera portrait without changing the Chimera repository. The pipeline creates a neutral reference, generates a textured mesh, requests the matching quadruped or biped rig, adds provider animation and the shared full set for compatible canine rigs, validates the GLB and installs it in the local game library. This worker requires separately configured text inference for new concepts and Tripo API credentials/credits. With no key, it can prepare existing Chimera inputs and display the blocked stage. Local jobs persist on the PC and continue while the menu is closed; resume after restarting the worker."
           },
           {
             "type": "paragraph",

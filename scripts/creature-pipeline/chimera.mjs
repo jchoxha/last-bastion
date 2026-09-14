@@ -5,9 +5,10 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { rolldown } from 'rolldown';
 import { makeCreature, DEFAULT_INPUT } from '../../lib/creatures/core.ts';
+import { creatureArtPrompt } from './art-prompt.mjs';
 import { PipelineError } from './tripo.mjs';
 
-export const CHIMERA_REVISION = 'fb431b8ac6c4246e9f736d3c60cc120dde701f57';
+export const CHIMERA_REVISION = '38a3f180eabe0c2684590ac7956cb489ea545c04';
 export const CHIMERA_REPO = 'https://github.com/jchoxha/chimera_cards.git';
 export async function loadChimera(
   root,
@@ -56,7 +57,7 @@ export async function loadChimera(
   const entry = path.join(cache, 'chimera-entry.mjs');
   await writeFile(
     entry,
-    `export {forgeCreature} from ${file('data/forgeCreature.js')};\nexport {creatureArtPrompt} from ${file('data/artStyle.js')};\nexport {ROSTER} from ${file('data/roster.js')};\nexport {BESTIARY} from ${file('data/bestiary.js')};\nexport {configureText} from ${file('ai/provider.js')};\n`,
+    `export {forgeCreature} from ${file('data/forgeCreature.js')};\nexport {ROSTER} from ${file('data/roster.js')};\nexport {BESTIARY} from ${file('data/bestiary.js')};\nexport {configureText} from ${file('ai/provider.js')};\n`,
   );
   const bundle = await rolldown({
     input: entry,
@@ -127,15 +128,24 @@ export async function loadChimera(
           lore: api.BESTIARY[found.id]?.lore?.join('\n\n') || '',
         };
         const suffix = request.form === 'regular' ? '' : `-${request.form}`;
+        const localArt = path.join(
+          root,
+          'public/creatures/source-art',
+          `${found.id}${suffix}.png`,
+        );
         try {
-          art = await readFile(
-            path.join(source, 'public/art/gen', `${found.id}${suffix}.png`),
-          );
+          art = await readFile(localArt);
         } catch {
-          if (request.mode !== 'text')
-            throw new PipelineError(
-              'Chimera has no readable baked portrait for this creature/form. Select a form with existing art or forge a new concept.',
+          try {
+            art = await readFile(
+              path.join(source, 'public/art/gen', `${found.id}${suffix}.png`),
             );
+          } catch {
+            if (request.mode !== 'text')
+              throw new PipelineError(
+                'Neither Last Bastion nor Chimera has a readable portrait for this creature/form.',
+              );
+          }
         }
       } else {
         definition = await api.forgeCreature(
@@ -193,10 +203,7 @@ export async function loadChimera(
         definition,
         creature,
         art,
-        artPrompt: api.creatureArtPrompt(
-          { ...definition, size: request.form },
-          { form: request.form },
-        ),
+        artPrompt: creatureArtPrompt(definition, request.form),
       };
     },
   };

@@ -12,6 +12,7 @@ import { FORMS } from '../../lib/creatures/core.ts';
 import { PipelineError, TRIPO_MODELS } from './tripo.mjs';
 import { validateRiggedGlb } from './validate.mjs';
 import { modelPrompt } from './model-prompt.mjs';
+import { modelingReferencePrompt } from './art-prompt.mjs';
 import { buildAnimationSet } from './animation-set.mjs';
 
 const hash = (value) => createHash('sha256').update(value).digest('hex');
@@ -202,10 +203,6 @@ export async function createPipeline({
             ),
           );
         }
-        const pose =
-          job.request.bodyPlan === 'canine-v1'
-            ? 'A neutral standing canine quadruped: exactly four separated legs, all four paws planted on one level, visible gaps between limbs, straight relaxed spine, tail separated from legs, relaxed closed jaw. Do not turn it into a biped.'
-            : 'A neutral humanoid A-pose: exactly two separated legs and two arms angled away from the torso, both feet planted, relaxed hands.';
         const reference = await task(
           'reference',
           '/generation/image-to-image',
@@ -214,7 +211,7 @@ export async function createPipeline({
             model: TRIPO_MODELS.image,
             size: '2K',
             output_format: 'png',
-            prompt: `Create one full-body 3D modeling reference from this Chimera creature artwork. Preserve its identity, proportions, silhouette, fur, colors and markings. ${pose} Three-quarter view with every limb visible. Plain white background, even light. Remove lightning, smoke, scenery, text, cards, floating particles and cast shadow. No extra limbs and no multiple views.`,
+            prompt: modelingReferencePrompt(job.request.bodyPlan),
           },
         );
         await writeFile(

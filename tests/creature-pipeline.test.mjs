@@ -9,6 +9,10 @@ import { createCreatureActor } from '../lib/creatures/actor.ts';
 import { DEFAULT_INPUT, generateLocal } from '../lib/creatures/core.ts';
 import { CREATURE_MOTIONS } from '../lib/creatures/motions.ts';
 import { createTripo } from '../scripts/creature-pipeline/tripo.mjs';
+import {
+  creatureArtPrompt,
+  modelingReferencePrompt,
+} from '../scripts/creature-pipeline/art-prompt.mjs';
 import { createPipeline } from '../scripts/creature-pipeline/jobs.mjs';
 import { validateRiggedGlb } from '../scripts/creature-pipeline/validate.mjs';
 import { createPipelineServer } from '../scripts/creature-pipeline/server.mjs';
@@ -27,6 +31,22 @@ globalThis.FileReader = class {
   }
 };
 const creature = generateLocal(DEFAULT_INPUT);
+
+test('Last Bastion owns model-ready creature art prompts', () => {
+  const art = creatureArtPrompt(
+    { name: 'Voltfang', description: 'a slate-blue electric wolf' },
+    'regular',
+  );
+  assert.match(art, /chunky faceted geometry/i);
+  assert.match(art, /matte colors/i);
+  assert.match(art, /every limb and foot clearly visible/i);
+  assert.doesNotMatch(art, /Adventure Time|MegaBonk/i);
+  const reference = modelingReferencePrompt('canine-v1');
+  assert.match(reference, /exactly four separated legs/i);
+  assert.match(reference, /head facing in the same direction/i);
+  assert.match(reference, /tail separated from the hind legs/i);
+});
+
 const actor = createCreatureActor(creature);
 const raw = Buffer.from(
   await new GLTFExporter().parseAsync(actor.group, {
