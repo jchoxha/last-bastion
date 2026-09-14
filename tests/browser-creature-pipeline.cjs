@@ -325,6 +325,57 @@ const {
     await page.frameLocator('iframe').locator('#startBtn').click();
     let game = page.frames().find((f) => f.url() === 'about:srcdoc');
     await game.waitForFunction(() => G?.player);
+    const gameUi = page.frameLocator('iframe');
+    await gameUi.locator('body').press('F2');
+    await game.waitForFunction((id) => {
+      const select = document.querySelector('#adminPlayerCreature');
+      return (
+        !select?.disabled && [...select.options].some((o) => o.value === id)
+      );
+    }, asset.creature.id);
+    await gameUi
+      .locator('#adminPlayerCreature')
+      .selectOption(asset.creature.id);
+    await gameUi
+      .getByRole('button', { name: 'Become selected creature', exact: true })
+      .click();
+    await gameUi.locator('#adminPlayerAnimation').selectOption('attack-alt');
+    await gameUi
+      .getByRole('button', { name: 'Play selected animation', exact: true })
+      .click();
+    await gameUi.getByRole('button', { name: 'Return to game' }).click();
+    await game.waitForFunction(
+      () =>
+        forgePlayer?.actor.state === 'generated' &&
+        forgePlayer.actor.motion === 'attack-alt' &&
+        G.playerMesh === forgePlayer.actor.group,
+    );
+    await gameUi.locator('body').press('F2');
+    await gameUi
+      .getByRole('button', { name: 'Use movement animations', exact: true })
+      .click();
+    await gameUi.getByRole('button', { name: 'Return to game' }).click();
+    const possessedMotion = await game.evaluate(() => {
+      G.player.pos.z += 0.5;
+      updateForgePlayer(0.1);
+      return {
+        motion: forgePlayer.actor.motion,
+        name: $('playerUnitName').textContent,
+      };
+    });
+    assert.equal(possessedMotion.motion, 'walk');
+    assert.match(possessedMotion.name, /Voltfang · TEST/);
+    await gameUi.locator('body').press('F2');
+    await gameUi
+      .getByRole('button', { name: 'Restore class hero', exact: true })
+      .click();
+    assert(
+      await game.evaluate(
+        () => !forgePlayer && !!G.playerMesh.userData.voxelParts,
+      ),
+      'Class hero was not restored after possession.',
+    );
+    await gameUi.getByRole('button', { name: 'Return to game' }).click();
     await page.frameLocator('iframe').locator('#menuRun').click();
     await game.evaluate((creature) => {
       for (let i = 0; i < 200; i++) {
@@ -413,7 +464,7 @@ const {
     }, asset.creature.id);
     assert.deepEqual(errors, []);
     console.log(
-      'Generated GLB browser checks passed: animated independent skins, shared geometry, private hit materials, checksum rejection, UI/mobile, actual enemy and fresh save restore.',
+      'Generated GLB browser checks passed: animated independent skins, shared geometry, private hit materials, checksum rejection, UI/mobile, player possession, actual enemy and fresh save restore.',
     );
   } finally {
     await browser?.close();

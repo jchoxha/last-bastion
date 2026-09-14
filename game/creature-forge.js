@@ -5,6 +5,213 @@ const forgeLastPositions = new WeakMap();
 const forgeActions = new WeakMap();
 const forgeAttacks = new Map();
 const forgeCorpses = new Map();
+let forgePlayer = null;
+
+function playForgePlayerAnimation(name, manual = false) {
+  if (!forgePlayer) return false;
+  forgePlayer.actor.setAnimation(name, true);
+  forgePlayer.action = name;
+  forgePlayer.manual = manual;
+  forgePlayer.actionUntil =
+    !manual && bridge.creatures.motions[name]?.loop ? G.time + 0.45 : 0;
+  return true;
+}
+
+function restoreForgePlayer() {
+  if (!forgePlayer) return false;
+  const { actor, hero, world } = forgePlayer;
+  world?.remove(actor.group);
+  actor.dispose();
+  if (G?.world === world) {
+    G.playerMesh = hero;
+    hero.position.copy(G.player.pos);
+    hero.rotation.set(0, G.player.yaw, 0);
+    hero.visible = G.player.dead <= 0;
+    if (hero.parent !== world) world.add(hero);
+  }
+  forgePlayer = null;
+  G.uiNext = 0;
+  updateCombatUI();
+  return true;
+}
+
+function becomeForgeCreature(creature) {
+  if (!G?.player || !G.world) throw Error('Start a run first.');
+  if (G.player.dead > 0) throw Error('Recover your character first.');
+  restoreForgePlayer();
+  const hero = G.playerMesh;
+  const actor = bridge.creatures.createCreatureActor(creature);
+  // The original player controller writes weapon swing values through this hook.
+  // A generated creature handles the visible animation through its own mixer.
+  actor.group.userData.arm = new THREE.Object3D();
+  actor.group.position.copy(G.player.pos);
+  actor.group.rotation.y = G.player.yaw;
+  actor.group.visible = hero.visible;
+  G.world.remove(hero);
+  G.world.add(actor.group);
+  G.playerMesh = actor.group;
+  forgePlayer = {
+    actor,
+    creature,
+    hero,
+    world: G.world,
+    previous: G.player.pos.clone(),
+    lastYaw: G.player.yaw,
+    action: null,
+    manual: false,
+    airborne: false,
+  };
+  actor.setAnimation('idle');
+  G.uiNext = 0;
+  updateCombatUI();
+}
+
+function updateForgePlayer(dt) {
+  if (!forgePlayer || forgePlayer.world !== G.world) return;
+  const form = forgePlayer,
+    actor = form.actor,
+    moved = G.player.pos.distanceTo(form.previous),
+    speed = moved / Math.max(dt, 0.001),
+    yawDelta = Math.atan2(
+      Math.sin(G.player.yaw - form.lastYaw),
+      Math.cos(G.player.yaw - form.lastYaw),
+    ),
+    airborne =
+      G.player.pos.y > heightAt(G.player.pos.x, G.player.pos.z) + 0.08 ||
+      Math.abs(G.player.vy || 0) > 0.05;
+  actor.group.position.copy(G.player.pos);
+  actor.group.rotation.y = G.player.yaw;
+  actor.group.visible = G.player.dead <= 0;
+  form.previous.copy(G.player.pos);
+  form.lastYaw = G.player.yaw;
+  if (!form.manual) {
+    if (airborne && !form.airborne) playForgePlayerAnimation('jump');
+    else if (!airborne && form.airborne) playForgePlayerAnimation('land');
+    form.airborne = airborne;
+    if (
+      form.action &&
+      (actor.playback.finished ||
+        (form.actionUntil > 0 && G.time >= form.actionUntil))
+    ) {
+      form.action = null;
+      form.actionUntil = 0;
+    }
+    if (!form.action && !airborne) {
+      const motion =
+        moved > 0.003
+          ? speed > G.player.speed * 1.2
+            ? 'run'
+            : 'walk'
+          : Math.abs(yawDelta) > 0.015
+            ? yawDelta > 0
+              ? 'turn-right'
+              : 'turn-left'
+            : 'idle';
+      actor.setAnimation(motion);
+    }
+  } else if (form.action && actor.playback.finished) {
+    form.manual = false;
+    form.action = null;
+  }
+  actor.update(dt);
+}
+
+function installForgePlayerTesting() {
+  const section = $('adminPanel').querySelector('section'),
+    status = $('adminStatus'),
+    fragment = document.createDocumentFragment(),
+    title = document.createElement('h3'),
+    creatureLabel = document.createElement('label'),
+    creatureSelect = document.createElement('select'),
+    motionLabel = document.createElement('label'),
+    motionSelect = document.createElement('select');
+  title.textContent = 'Play as a creature';
+  fragment.appendChild(title);
+  creatureLabel.textContent = 'Installed 3D creature';
+  creatureSelect.id = 'adminPlayerCreature';
+  const fillCreatures = () => {
+    creatureSelect.replaceChildren();
+    const creatures = bridge.creatures.generatedCreatures();
+    for (const creature of creatures) {
+      const option = document.createElement('option');
+      option.value = creature.id;
+      option.textContent = creature.spec.name;
+      creatureSelect.appendChild(option);
+    }
+    if (creatures.length) {
+      creatureSelect.disabled = false;
+      become.disabled = false;
+      return;
+    }
+    const option = document.createElement('option');
+    option.textContent = 'No generated creatures installed';
+    creatureSelect.appendChild(option);
+    creatureSelect.disabled = true;
+    become.disabled = true;
+  };
+  const loading = document.createElement('option');
+  loading.textContent = 'Loading installed creatures…';
+  creatureSelect.appendChild(loading);
+  creatureSelect.disabled = true;
+  creatureLabel.appendChild(creatureSelect);
+  fragment.appendChild(creatureLabel);
+  const become = uiButton(fragment, 'Become selected creature', () => {
+    try {
+      const creature = bridge.creatures
+        .generatedCreatures()
+        .find((entry) => entry.id === creatureSelect.value);
+      if (!creature) throw Error('The selected creature is unavailable.');
+      becomeForgeCreature(creature);
+      status.textContent =
+        'Now playing as ' + creature.spec.name + '. Class combat is unchanged.';
+    } catch (error) {
+      status.textContent = error.message;
+    }
+  });
+  become.disabled = true;
+  uiButton(fragment, 'Restore class hero', () => {
+    status.textContent = restoreForgePlayer()
+      ? 'Class hero restored.'
+      : 'You are already using the class hero.';
+  });
+  motionLabel.textContent = 'Animation override';
+  motionSelect.id = 'adminPlayerAnimation';
+  for (const [name, motion] of Object.entries(bridge.creatures.motions)) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.textContent = motion.label;
+    motionSelect.appendChild(option);
+  }
+  motionLabel.appendChild(motionSelect);
+  fragment.appendChild(motionLabel);
+  uiButton(fragment, 'Play selected animation', () => {
+    if (!playForgePlayerAnimation(motionSelect.value, true)) {
+      status.textContent = 'Become a creature before selecting an animation.';
+      return;
+    }
+    status.textContent =
+      'Playing ' + motionSelect.options[motionSelect.selectedIndex].text + '.';
+  });
+  uiButton(fragment, 'Use movement animations', () => {
+    if (!forgePlayer) {
+      status.textContent = 'Become a creature first.';
+      return;
+    }
+    forgePlayer.manual = false;
+    forgePlayer.action = null;
+    forgePlayer.actor.setAnimation('idle', true);
+    status.textContent = 'Movement and combat now control animations.';
+  });
+  const note = document.createElement('p');
+  note.textContent =
+    'Close this menu to move, turn, jump and attack in the selected form. This testing form is not saved.';
+  fragment.appendChild(note);
+  section.insertBefore(fragment, status);
+  void bridge.creatures.ready().then(fillCreatures, () => {
+    fillCreatures();
+    status.textContent = 'Generated creature library could not be loaded.';
+  });
+}
 function forgeAction(enemy, name) {
   const rig = forgeModels.get(enemy.mesh);
   if (!rig?.hasAnimation(name)) return false;
@@ -195,6 +402,7 @@ animateVoxelActor = function (actor, dt) {
 const forgeUpdateBase = updatePlayer;
 updatePlayer = function (dt) {
   forgeUpdateBase(dt);
+  updateForgePlayer(dt);
   for (const [enemy, attack] of forgeAttacks) {
     if (enemy.dead) {
       forgeAttacks.delete(enemy);
@@ -262,13 +470,56 @@ pushEnemy = function (enemy, from, power) {
   if (!enemy.dead && power >= 10 && forgeAction(enemy, 'stagger'))
     forgeAttacks.delete(enemy);
 };
+const forgeCastBase = castAbility;
+castAbility = function (index) {
+  const used = forgeCastBase(index);
+  if (!used || !forgePlayer) return used;
+  const type = ABILITIES[G.classId][index][2];
+  playForgePlayerAnimation(
+    type === 'dash'
+      ? 'charge'
+      : type === 'heal' ||
+          ['shot', 'pushShot', 'fireShot', 'area'].includes(type)
+        ? 'cast'
+        : 'attack',
+  );
+  return used;
+};
+const forgeJumpBase = jumpPlayer;
+jumpPlayer = function () {
+  const before = G?.player?.vy || 0;
+  forgeJumpBase();
+  if ((G?.player?.vy || 0) > before && forgePlayer) {
+    forgePlayer.airborne = true;
+    playForgePlayerAnimation('jump');
+  }
+};
+const forgeCombatUIBase = updateCombatUI;
+updateCombatUI = function (...args) {
+  const result = forgeCombatUIBase(...args);
+  if (forgePlayer && $('playerUnitName'))
+    $('playerUnitName').textContent =
+      forgePlayer.creature.spec.name + ' · TEST';
+  return result;
+};
 const forgeDiscardBase = discardWorld;
 discardWorld = function () {
+  restoreForgePlayer();
   for (const actor of forgeModels.values()) actor.dispose();
   forgeModels.clear();
   forgeAttacks.clear();
   forgeCorpses.clear();
   return forgeDiscardBase();
+};
+const forgeNewRunBase = newRun;
+newRun = function (...args) {
+  restoreForgePlayer();
+  return forgeNewRunBase(...args);
+};
+const forgeInstallBase = installIntegration;
+installIntegration = function () {
+  forgeInstallBase();
+  installForgePlayerTesting();
 };
 window.bastion.spawnForgedCreature = function (value) {
   if (!G?.player || !bridge.creatures)

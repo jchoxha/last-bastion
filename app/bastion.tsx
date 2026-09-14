@@ -15,6 +15,7 @@ import {
   generatedCreatures,
   initializeGeneratedAssets,
 } from '@/lib/creatures/generated';
+import { CREATURE_MOTIONS } from '@/lib/creatures/motions';
 import { generateWorld, generateWorldSteps, type Settings } from '@/lib/world';
 import { bastionSource } from '@/lib/bastion-source';
 import { parseSave, SAVE_KEY, type SaveGame } from '@/lib/save-game';
@@ -141,6 +142,8 @@ export default function Bastion() {
         parseCreature,
         createCreatureActor,
         generatedCreatures,
+        ready: initializeGeneratedAssets,
+        motions: CREATURE_MOTIONS,
       },
       generateWorld,
       generateWorldSteps,

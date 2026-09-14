@@ -1347,6 +1347,10 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
+            "text": "During a run, open **Testing** with F2 and use **Play as a creature** to replace the class hero's appearance with any installed 3D creature. Movement, sprinting, turning, jumping, landing and combat select the matching creature animations while class statistics and abilities remain active. The animation override can play every installed clip directly, including one-shot and looping performances; **Use movement animations** returns control to gameplay. **Restore class hero** removes the testing form. Possession is session-only and is not written to the save."
+          },
+          {
+            "type": "paragraph",
             "text": "Generated enemies currently use basic melee behavior and role-based health, damage and speed; form affects health, damage and physical scale. They award no gold. Attunements, subtypes and archetypes are identity metadata in this prototype, not additional spells or resistances. Companions are not implemented. Removing a device-library entry does not remove an enemy already in a run or uninstall a model from the generated asset manifest."
           },
           {
