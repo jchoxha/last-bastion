@@ -86,12 +86,14 @@ export function createTripo({ key, fetchImpl = fetch, pollMs = 5000 } = {}) {
         throw new PipelineError('Tripo upload returned no file token.');
       return data.file_token;
     },
-    async task(job, stage, route, body, persist) {
+    async task(job, stage, route, body, persist, previousError = '') {
       let state = job.tasks[stage];
       if (
         state?.submitting &&
         !state.taskId &&
-        /^Provider download failed \(HTTP 4\d\d\)\.$/.test(job.error || '')
+        /^Provider download failed \(HTTP 4\d\d\)\.$/.test(
+          previousError || job.error || '',
+        )
       ) {
         delete job.tasks[stage];
         delete job.error;

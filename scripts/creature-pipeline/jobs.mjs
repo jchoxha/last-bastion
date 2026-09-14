@@ -120,12 +120,13 @@ export async function createPipeline({
   });
   async function run(job) {
     const dir = path.join(jobRoot, job.id);
+    const previousError = job.error || '';
     const save = () => persist(job);
     const task = async (stage, route, body) => {
       job.stage = stage;
       job.progress = 0;
       await save();
-      return provider.task(job, stage, route, body, save);
+      return provider.task(job, stage, route, body, save, previousError);
     };
     try {
       job.status = 'running';

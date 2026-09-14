@@ -596,6 +596,7 @@ test('definitive Tripo submission rejection remains safe to resume', async () =>
     '/animations/rig',
     {},
     async () => {},
+    legacy.error,
   );
   assert.equal(state.taskId, 'task_recovered');
   assert.equal(requests, 2);
