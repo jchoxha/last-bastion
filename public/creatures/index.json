@@ -1816,6 +1816,78 @@
           "reason": "Missing or ambiguous skinned role: frontRight2 (tripo::0_Right_Limb_2)."
         }
       }
+    },
+    {
+      "id": "asset_64d00d75c42deef23a45f4ba",
+      "creature": {
+        "version": 1,
+        "id": "cf_7b5fa08a3354934a",
+        "spec": {
+          "seed": "voltfang-lowpoly-direct-image-1",
+          "concept": "A feral skirmisher whose strikes shock and tax the foe.",
+          "bodies": [
+            "Beast"
+          ],
+          "family": "Mammalian",
+          "manifestation": "",
+          "archetype": "",
+          "subtypes": [],
+          "attunements": [
+            "Energy",
+            "Physical"
+          ],
+          "form": "regular",
+          "role": "skirmisher",
+          "bodyPlan": "canine-v1",
+          "name": "Voltfang",
+          "description": "A wolf that was struck by lightning on a storm-peak and refused to die. Now arcs of blue current crawl through Voltfang’s fur, and the air bristles where it pads.\n\nIt runs with no pack but the thunder. Where it bites, the storm follows.",
+          "color": "#506c8e",
+          "accent": "#73dded"
+        },
+        "stats": {
+          "hp": 55,
+          "speed": 3.4,
+          "damage": 8,
+          "radius": 0.55
+        },
+        "assets": {
+          "model": "prototype",
+          "rig": "canine-v1",
+          "rigVersion": 1
+        }
+      },
+      "model": "asset_64d00d75c42deef23a45f4ba.glb",
+      "portrait": "asset_64d00d75c42deef23a45f4ba.png",
+      "sha256": "64d00d75c42deef23a45f4baefac96696073cbaa5bc88f11a8c74f87d46bef2c",
+      "walkClip": 0,
+      "yaw": -1.5707963267948966,
+      "report": {
+        "triangles": 18951,
+        "vertices": 11798,
+        "bones": 33,
+        "primitives": 1,
+        "clips": [
+          "preset:quadruped:walk"
+        ],
+        "walkClip": 0,
+        "warnings": 2,
+        "visualReview": "unverified"
+      },
+      "source": {
+        "repository": "jchoxha/chimera_cards",
+        "revision": "38a3f180eabe0c2684590ac7956cb489ea545c04",
+        "rosterId": "voltfang",
+        "jobId": "job_b49bf38e8e7d3f3dc5fd5961",
+        "models": {
+          "image": "seedream_v5",
+          "mesh": "v3.1-20260211",
+          "rig": "v2.5-20260210"
+        },
+        "animationTrial": {
+          "status": "skipped",
+          "reason": "Missing or ambiguous skinned role: shoulders (tripo::Spine_3)."
+        }
+      }
     }
   ]
 }
