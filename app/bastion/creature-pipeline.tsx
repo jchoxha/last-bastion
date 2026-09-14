@@ -311,7 +311,8 @@ export default function CreaturePipeline({
                         .catch((e) => setStatus(e.message));
                     }}
                   >
-                    {asset.creature.spec.name} · inspect mesh
+                    {asset.creature.spec.name} · {asset.creature.spec.seed} ·
+                    inspect mesh
                   </button>{' '}
                   <a href={`${base}${asset.model}`} download>
                     Download rigged GLB

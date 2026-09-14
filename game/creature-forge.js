@@ -141,7 +141,8 @@ function installForgePlayerTesting() {
     for (const creature of creatures) {
       const option = document.createElement('option');
       option.value = creature.id;
-      option.textContent = creature.spec.name;
+      option.textContent =
+        creature.spec.name + ' — ' + (creature.spec.seed || creature.id);
       creatureSelect.appendChild(option);
     }
     if (creatures.length) {
@@ -169,7 +170,11 @@ function installForgePlayerTesting() {
       if (!creature) throw Error('The selected creature is unavailable.');
       becomeForgeCreature(creature);
       status.textContent =
-        'Now playing as ' + creature.spec.name + '. Class combat is unchanged.';
+        'Now playing as ' +
+        creature.spec.name +
+        ' — ' +
+        (creature.spec.seed || creature.id) +
+        '. Class combat is unchanged.';
     } catch (error) {
       status.textContent = error.message;
     }
