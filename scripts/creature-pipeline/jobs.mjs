@@ -53,8 +53,13 @@ export function normalizeRequest(value) {
     value.seed.length > 80
   )
     throw new PipelineError('A seed of 1–80 characters is required.');
-  if (value.mode !== undefined && !['text', 'image'].includes(value.mode))
-    throw new PipelineError('Choose text or image modeling.');
+  if (
+    value.mode !== undefined &&
+    !['text', 'image-direct', 'image'].includes(value.mode)
+  )
+    throw new PipelineError(
+      'Choose text, direct-image or normalized-image modeling.',
+    );
   if (
     value.modelDescription !== undefined &&
     (typeof value.modelDescription !== 'string' ||
@@ -203,26 +208,29 @@ export async function createPipeline({
             ),
           );
         }
-        const reference = await task(
-          'reference',
-          '/generation/image-to-image',
-          {
-            input: artSource,
-            model: TRIPO_MODELS.image,
-            size: '2K',
-            output_format: 'png',
-            prompt: modelingReferencePrompt(job.request.bodyPlan),
-          },
-        );
-        await writeFile(
-          path.join(dir, 'reference.png'),
-          await provider.download(
-            reference.output.generated_image_url,
-            20 * 1024 * 1024,
-          ),
-        );
+        if (job.request.mode !== 'image-direct') {
+          const reference = await task(
+            'reference',
+            '/generation/image-to-image',
+            {
+              input: artSource,
+              model: TRIPO_MODELS.image,
+              size: '2K',
+              output_format: 'png',
+              prompt: modelingReferencePrompt(job.request.bodyPlan),
+            },
+          );
+          await writeFile(
+            path.join(dir, 'reference.png'),
+            await provider.download(
+              reference.output.generated_image_url,
+              20 * 1024 * 1024,
+            ),
+          );
+          artSource = reference.taskId;
+        }
         mesh = await task('mesh', '/generation/image-to-model', {
-          input: reference.taskId,
+          input: artSource,
           model: TRIPO_MODELS.mesh,
           texture: true,
           pbr: true,

@@ -8,7 +8,7 @@ The worker executes Chimera Cards' actual `forgeCreature` and validators from pi
 
 1. Resolve an existing Chimera creature and its art, or forge a new definition and portrait.
 2. Derive a neutral modeling reference from that art, preserving identity while separating limbs and removing scenery/effects.
-3. Generate a textured PBR mesh with a target of 20,000 faces.
+3. Generate a textured PBR mesh with a target of 20,000 faces. Source art that already follows the neutral low-poly schema can go directly to this stage with no additional image generation; less controlled art can use one normalization pass first.
 4. Ask the provider to check the mesh's riggability. Reject a body-type mismatch. Explicitly request the quadruped or biped rig using `v2.5-20260210`; never rely on the API's biped default for a wolf.
 5. Retarget an in-place provider walk and download the embedded GLB. Compatible canine rigs then receive the shared 26-animation set offline, without additional provider calls.
 6. Validate the GLB and write immutable assets under `public/creatures/`, then update the manifest atomically. The browser refreshes the library and selects a completed creature automatically.
@@ -27,7 +27,7 @@ Open **Creature forge → Generate creatures on GitHub**. Generation runs on Git
 
 No GitHub token in the game is necessary if you prefer the linked **Run workflow on GitHub** form with your GitHub login. Its default request is a text-based Voltfang generation; it uses the same secret and publishing path. The in-game cloud form starts from existing roster definitions; new concepts remain available through the local worker, or advanced workflow JSON with hosted `CREATURE_AI_URL`/`CREATURE_AI_MODEL` repository variables and optional `CREATURE_AI_KEY` secret. GitHub runners cannot use this PC's local Ollama.
 
-At the published September 13, 2026 standard rates, text mesh + texture + rig + one walk is approximately **$0.55**; existing art + neutral reference + mesh + rig + walk is approximately **$0.70**. Failed tasks may consume credits. Every new workflow dispatch is a separate job, even with the same seed. Inspect the run list before dispatching again if submission was not confirmed. No automatic paid retries occur. Prices and technical output quality are not guaranteed.
+At the published September 13, 2026 standard rates, text mesh + texture + rig + one walk is approximately **$0.55**; direct source art + mesh + rig + walk is approximately **$0.60**; adding one neutral-reference image makes the existing-art route approximately **$0.70**. Failed tasks may consume credits. Every new workflow dispatch is a separate job, even with the same seed. Inspect the run list before dispatching again if submission was not confirmed. No automatic paid retries occur. Prices and technical output quality are not guaranteed.
 
 Failed jobs retain `creature-job` artifacts, including provider task IDs and intermediate models, for **30 days**. Use **Resume saved tasks** to dispatch a new workflow that restores the selected artifact. The GitHub **Re-run jobs** action is deliberately rejected before paid work. Missing/expired artifacts fail closed, and unknown submission outcomes are never automatically resubmitted. Hard interruption can prevent artifact upload: inspect the Tripo console before starting another job. A provider-reported failed task is retained rather than silently regenerated. GitHub serializes generation; avoid queuing many jobs because GitHub may replace an older pending run.
 

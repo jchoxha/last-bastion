@@ -367,6 +367,29 @@ test('new concepts render Chimera art before reference and mesh generation', asy
   assert.equal(calls[0].body.prompt, 'Chimera canonical prompt');
   assert.equal(calls[1].body.input, 'task_1');
 });
+test('direct-image mode sends source art to the mesh without another image generation', async () => {
+  const root = await temporary(),
+    { provider, calls } = fakeTripo();
+  const pipeline = await createPipeline({ root, chimera, provider });
+  const job = await pipeline.submit({
+    ...input,
+    mode: 'image-direct',
+    seed: 'direct-image-test',
+  });
+  const done = await finished(pipeline, job.id);
+  assert.equal(done.status, 'ready', done.error);
+  assert.deepEqual(
+    calls.map((call) => call.route),
+    [
+      '/generation/image-to-model',
+      '/animations/rig-check',
+      '/animations/rig',
+      '/animations/retarget',
+    ],
+  );
+  assert.equal(calls[0].body.input, 'file_fixture');
+  assert.equal(calls.filter((call) => call.route.includes('image')).length, 1);
+});
 test('restart after a download failure resumes the saved generation task', async () => {
   const root = await temporary(),
     { provider, calls } = fakeTripo();
@@ -484,7 +507,7 @@ test('text mode without source artwork uses the provider model preview as portra
   );
   await assert.rejects(
     pipeline.submit({ ...input, mode: 'bad' }),
-    /text or image/,
+    /text, direct-image or normalized-image/,
   );
   await assert.rejects(
     pipeline.submit({

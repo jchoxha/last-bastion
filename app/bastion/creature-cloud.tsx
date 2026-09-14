@@ -182,7 +182,7 @@ export default function CreatureCloud({
       <h2>Generate creatures on GitHub</h2>
       <p>
         Chimera definition → textured 3D mesh → matching rig → animation library
-        → game. Text mode skips separate artwork generation.
+        → game. Compare text, direct source art and normalized source art.
       </p>
       <details>
         <summary>One-time setup</summary>
@@ -270,7 +270,12 @@ export default function CreatureCloud({
               Model source
               <select value={mode} onChange={(e) => setMode(e.target.value)}>
                 <option value="text">Text to 3D</option>
-                <option value="image">Existing art to 3D</option>
+                <option value="image-direct">
+                  Source art directly to 3D (0 new images)
+                </option>
+                <option value="image">
+                  Normalize source art, then 3D (1 new image)
+                </option>
               </select>
             </label>
             <label>
@@ -317,7 +322,9 @@ export default function CreatureCloud({
           <p>
             {mode === 'text'
               ? 'Estimated Tripo cost: $0.55 for standard textured mesh, rig and one walk.'
-              : 'Estimated Tripo cost: $0.70 including neutral reference, standard textured mesh, rig and one walk.'}{' '}
+              : mode === 'image-direct'
+                ? 'Estimated Tripo cost: $0.60 for direct image-to-model, rig and one walk.'
+                : 'Estimated Tripo cost: $0.70 including one neutral-reference image, standard textured mesh, rig and one walk.'}{' '}
             Each new job can incur charges, including repeated seeds. Failed
             stages may already have consumed credits. Prices can change.
           </p>
