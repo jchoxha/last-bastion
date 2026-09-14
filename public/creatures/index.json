@@ -9,12 +9,17 @@
         "spec": {
           "seed": "voltfang-text-1",
           "concept": "A feral skirmisher whose strikes shock and tax the foe.",
-          "bodies": ["Beast"],
+          "bodies": [
+            "Beast"
+          ],
           "family": "Mammalian",
           "manifestation": "",
           "archetype": "",
           "subtypes": [],
-          "attunements": ["Energy", "Physical"],
+          "attunements": [
+            "Energy",
+            "Physical"
+          ],
           "form": "regular",
           "role": "skirmisher",
           "bodyPlan": "canine-v1",
@@ -124,7 +129,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.02901998840778619,
@@ -181,7 +190,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.20319363505945537,
@@ -238,7 +251,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.34630807459996166,
@@ -296,7 +313,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.7108258231925667,
@@ -354,7 +375,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 3.50377753654603,
@@ -412,7 +437,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.6418072434398199,
@@ -470,7 +499,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.25320914037865944,
@@ -528,7 +561,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 3.7386172486050118,
@@ -586,7 +623,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.23208015245396613,
@@ -644,7 +685,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.0290122653381496,
@@ -701,7 +746,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.15036932375468998,
@@ -759,7 +808,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.10312125076093553,
@@ -816,7 +869,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.028994207149046547,
@@ -873,7 +930,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.14961052479774473,
@@ -931,7 +992,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.14962031876281962,
@@ -989,7 +1054,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.26303675023617634,
@@ -1046,7 +1115,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.0755145706355217,
@@ -1104,7 +1177,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.051006637451067594,
@@ -1161,7 +1238,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.007995870538778788,
@@ -1218,7 +1299,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.11008767997400709,
@@ -1276,7 +1361,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.006278166676019242,
@@ -1333,7 +1422,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.618411710753076,
@@ -1390,7 +1483,11 @@
                 "rearLeft": 0.4602203733466708,
                 "rearRight": 0.462285137781604
               },
-              "forward": [0.9998151402045397, 0, 0.019227205147314755],
+              "forward": [
+                0.9998151402045397,
+                0,
+                0.019227205147314755
+              ],
               "feet": {
                 "frontLeft2": {
                   "excursion": 0.6158243840761629,
@@ -1645,6 +1742,78 @@
             "Paw control drops more than 10% of leg length below its rest height.",
             "Procedural pivots need contact review; special clips do not grant combat abilities."
           ]
+        }
+      }
+    },
+    {
+      "id": "asset_8b33f2fb217bb2382f102cdf",
+      "creature": {
+        "version": 1,
+        "id": "cf_cd92a0fe43c6e03e",
+        "spec": {
+          "seed": "voltfang-lowpoly-image-1",
+          "concept": "A feral skirmisher whose strikes shock and tax the foe.",
+          "bodies": [
+            "Beast"
+          ],
+          "family": "Mammalian",
+          "manifestation": "",
+          "archetype": "",
+          "subtypes": [],
+          "attunements": [
+            "Energy",
+            "Physical"
+          ],
+          "form": "regular",
+          "role": "skirmisher",
+          "bodyPlan": "canine-v1",
+          "name": "Voltfang",
+          "description": "A wolf that was struck by lightning on a storm-peak and refused to die. Now arcs of blue current crawl through Voltfang’s fur, and the air bristles where it pads.\n\nIt runs with no pack but the thunder. Where it bites, the storm follows.",
+          "color": "#506c8e",
+          "accent": "#73dded"
+        },
+        "stats": {
+          "hp": 55,
+          "speed": 3.4,
+          "damage": 8,
+          "radius": 0.55
+        },
+        "assets": {
+          "model": "prototype",
+          "rig": "canine-v1",
+          "rigVersion": 1
+        }
+      },
+      "model": "asset_8b33f2fb217bb2382f102cdf.glb",
+      "portrait": "asset_8b33f2fb217bb2382f102cdf.png",
+      "sha256": "8b33f2fb217bb2382f102cdf8d5112292ee9b2e535a525cb6a38793c72fe6d8d",
+      "walkClip": 0,
+      "yaw": -1.5707963267948966,
+      "report": {
+        "triangles": 19830,
+        "vertices": 12307,
+        "bones": 33,
+        "primitives": 1,
+        "clips": [
+          "preset:quadruped:walk"
+        ],
+        "walkClip": 0,
+        "warnings": 2,
+        "visualReview": "unverified"
+      },
+      "source": {
+        "repository": "jchoxha/chimera_cards",
+        "revision": "38a3f180eabe0c2684590ac7956cb489ea545c04",
+        "rosterId": "voltfang",
+        "jobId": "job_32a5582eb02fb6377bd402e8",
+        "models": {
+          "image": "seedream_v5",
+          "mesh": "v3.1-20260211",
+          "rig": "v2.5-20260210"
+        },
+        "animationTrial": {
+          "status": "skipped",
+          "reason": "Missing or ambiguous skinned role: frontRight2 (tripo::0_Right_Limb_2)."
         }
       }
     }
