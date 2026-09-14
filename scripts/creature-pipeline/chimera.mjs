@@ -7,7 +7,7 @@ import { rolldown } from 'rolldown';
 import { makeCreature, DEFAULT_INPUT } from '../../lib/creatures/core.ts';
 import { PipelineError } from './tripo.mjs';
 
-export const CHIMERA_REVISION = '38a3f180eabe0c2684590ac7956cb489ea545c04';
+export const CHIMERA_REVISION = 'fb431b8ac6c4246e9f736d3c60cc120dde701f57';
 export const CHIMERA_REPO = 'https://github.com/jchoxha/chimera_cards.git';
 export async function loadChimera(
   root,

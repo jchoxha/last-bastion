@@ -428,6 +428,8 @@ test('text mode skips paid image stages and shares the validated rig/install pat
   );
   assert.match(calls[0].body.prompt, /four distinct legs/);
   assert.match(calls[0].body.prompt, /Slate-blue wolf/);
+  assert.match(calls[0].body.prompt, /Chunky faceted geometry/);
+  assert.match(calls[0].body.prompt, /earthy low-poly terrain/);
   assert.equal(calls[0].body.image_seed, calls[0].body.model_seed);
   assert.equal(calls[0].body.texture_seed, calls[0].body.model_seed);
   assert(calls[0].body.prompt.length <= 1024);
