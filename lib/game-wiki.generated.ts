@@ -1323,6 +1323,10 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
+            "text": "The first live card-to-spec Voltfang test on September 14 preserved the original card illustration and produced a much cleaner low-poly target portrait with four separated legs, level feet, a straight body/head alignment and one isolated tail. Its 1.14 MB textured mesh has 19,684 triangles, one mesh, one material and three textures; Tripo's rig check explicitly accepted it as a quadruped. It is intentionally not installed yet: Tripo stopped before rig creation because the account lacked enough credits, so the saved job contains no skin or animation. [Run 8](https://github.com/jchoxha/last-bastion/actions/runs/34883079449) records the exact provider result and can be resumed from its retained artifact after credits are available without repeating the completed art, specification, mesh or rig-check stages."
+          },
+          {
+            "type": "paragraph",
             "text": "The separate **Creature blueprint** tools remain available offline. Choose body types, a family or manifestation, attunements, descriptive subtypes, a size form, combat role and physical body plan. Generate locally produces the same definition for identical inputs; it retains concept text as a description rather than making a detailed mesh. Optional AI authoring in that older section authors names, descriptions and colors only."
           },
           {

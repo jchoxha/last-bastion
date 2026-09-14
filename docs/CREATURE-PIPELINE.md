@@ -35,6 +35,8 @@ If generation finished but committing/deploying failed, recover the `installed-a
 
 Automated regression tests use mocked provider responses and synthetic assets. Separately, [live recovery run 34767650714](https://github.com/jchoxha/last-bastion/actions/runs/34767650714) completed generation, rigging, animation, technical validation and asset publishing for Voltfang. Passing technical validation does not certify anatomical quality.
 
+The first live card-to-spec run generated `public/creatures/target-art/voltfang-card-spec-1.png` and a 19,684-triangle textured mesh that Tripo accepted as a quadruped. The unrigged mesh is retained only in the workflow artifact and is not installed in the game. [Run 8](https://github.com/jchoxha/last-bastion/actions/runs/34883079449) stopped at rig submission with Tripo code 2010 (insufficient credits); resume that run after credits are available to reuse every completed paid stage. Definitive provider rejections clear the pending submission marker, while network-uncertain submissions remain locked against accidental double charges.
+
 ### Start on this PC
 
 Copy `creature-pipeline.env.example` to the untracked `.env.creatures` and set `TRIPO_API_KEY` locally. For **new concepts**, also set `CREATURE_AI_MODEL` and optionally `CREATURE_AI_URL`/`CREATURE_AI_KEY`. The default text endpoint is local Ollama's OpenAI-compatible endpoint; no model is downloaded or selected automatically. Existing roster creatures, including Voltfang, do not need text inference. Never paste keys into the app, source files, or a public manifest.
