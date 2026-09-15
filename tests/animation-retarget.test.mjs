@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { validateRiggedGlb } from '../scripts/creature-pipeline/validate.mjs';
+import { buildHumanoidWalk } from '../scripts/creature-pipeline/retarget-humanoid.mjs';
 
 function unpack(bytes) {
   const length = bytes.readUInt32LE(12);
@@ -49,4 +50,23 @@ test('retargeted walk preserves Voltfang geometry, weights, bind pose and origin
   assert.equal(report.bones, 31);
   assert.equal(report.triangles, 18896);
   assert.match(report.clips[0], /Quaternius/);
+});
+
+test('humanoid adapter replaces Tripo’s destructive preset with rotation-only locomotion', async () => {
+  const original = await readFile(
+    'tests/fixtures/creatures/cinderbound-provider-walk.glb',
+  );
+  const result = buildHumanoidWalk(original);
+  const { doc } = unpack(result.bytes);
+  assert.equal(result.report.profile, 'tripo-humanoid-procedural');
+  assert.deepEqual(doc.animations.map((clip) => clip.name), ['walk']);
+  assert.ok(doc.animations[0].channels.length >= 10);
+  for (const channel of doc.animations[0].channels)
+    assert.ok(
+      channel.target.path === 'rotation' ||
+        doc.nodes[channel.target.node].name === 'tripo::Root',
+      `unexpected ${channel.target.path} channel on ${doc.nodes[channel.target.node].name}`,
+    );
+  const report = await validateRiggedGlb(result.bytes, 'humanoid-v1');
+  assert.equal(report.walkClip, 0);
 });

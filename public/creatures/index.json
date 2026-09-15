@@ -2133,7 +2133,7 @@
       }
     },
     {
-      "id": "asset_a8a30db1725c9e3027c624a5",
+      "id": "asset_ea6bd1a2c364dbdaabc6cc38",
       "creature": {
         "version": 1,
         "id": "cf_a819209592afd8d5",
@@ -2173,10 +2173,10 @@
           "rigVersion": 1
         }
       },
-      "model": "asset_a8a30db1725c9e3027c624a5.glb",
-      "portrait": "asset_a8a30db1725c9e3027c624a5.png",
-      "cardPortrait": "asset_a8a30db1725c9e3027c624a5-card.png",
-      "sha256": "a8a30db1725c9e3027c624a534231eb83aa08318c344961858fd0a273e5f8852",
+      "model": "asset_ea6bd1a2c364dbdaabc6cc38.glb",
+      "portrait": "asset_ea6bd1a2c364dbdaabc6cc38.png",
+      "cardPortrait": "asset_ea6bd1a2c364dbdaabc6cc38-card.png",
+      "sha256": "ea6bd1a2c364dbdaabc6cc3842f58e2091c7428100b0ff159a3d7519326c81fa",
       "walkClip": 0,
       "yaw": -1.5707963267948966,
       "report": {
@@ -2185,7 +2185,7 @@
         "bones": 78,
         "primitives": 1,
         "clips": [
-          "preset:walk"
+          "walk"
         ],
         "walkClip": 0,
         "warnings": 2,
@@ -2203,8 +2203,11 @@
           "rig": "v2.5-20260210"
         },
         "animationTrial": {
-          "status": "skipped",
-          "reason": "No animation set for this body plan."
+          "status": "animation-set",
+          "profile": "tripo-humanoid-procedural",
+          "revision": 1,
+          "walkClip": 0,
+          "visualReview": "required"
         }
       }
     }

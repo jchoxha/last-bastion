@@ -273,32 +273,43 @@ export async function createPipeline({
         path.join(dir, 'rig.glb'),
         await provider.download(rig.output.model_url, 32 * 1024 * 1024),
       );
-      const animation = await task('animation', '/animations/retarget', {
-        input: rig.taskId,
-        animation:
-          rigType === 'quadruped' ? 'preset:quadruped:walk' : 'preset:walk',
-        out_format: 'glb',
-        bake_animation: true,
-        export_with_geometry: true,
-        animate_in_place: true,
-      });
-      let bytes = await provider.download(
-        animation.output.model_url,
-        32 * 1024 * 1024,
-      );
+      let bytes;
+      if (job.request.bodyPlan === 'canine-v1') {
+        const animation = await task('animation', '/animations/retarget', {
+          input: rig.taskId,
+          animation: 'preset:quadruped:walk',
+          out_format: 'glb',
+          bake_animation: true,
+          export_with_geometry: true,
+          animate_in_place: true,
+        });
+        bytes = await provider.download(
+          animation.output.model_url,
+          32 * 1024 * 1024,
+        );
+      } else {
+        // The provider's generic biped preset writes scale/translation tracks
+        // to helper bones. The local adapter starts from the clean rig instead.
+        bytes = await readFile(path.join(dir, 'rig.glb'));
+      }
       await writeFile(path.join(dir, 'animated.glb'), bytes);
       job.stage = 'validation';
       await save();
-      job.report = await validate(bytes, job.request.bodyPlan);
       const trial = await buildAnimationSet(bytes, job.request.bodyPlan);
       job.animationTrial = trial.report;
-      if (trial.report.status === 'animation-set') {
-        bytes = trial.bytes;
-        const defaultWalk = trial.report.walkClip;
-        job.report = await validate(bytes, job.request.bodyPlan);
-        job.report.walkClip = defaultWalk;
+      if (
+        trial.report.status !== 'animation-set' &&
+        job.request.bodyPlan === 'humanoid-v1'
+      )
+        throw new PipelineError(
+          `No verified animation profile for ${job.request.bodyPlan}; mesh retained but not installed.`,
+        );
+      bytes = trial.bytes;
+      const defaultWalk = trial.report.walkClip;
+      job.report = await validate(bytes, job.request.bodyPlan);
+      if (Number.isInteger(defaultWalk)) job.report.walkClip = defaultWalk;
+      if (trial.report.status === 'animation-set')
         await writeFile(path.join(dir, 'animation-trial.glb'), bytes);
-      }
       await atomicJson(path.join(dir, 'animation-trial.json'), trial.report);
       await save();
       const assetId = `asset_${hash(bytes).slice(0, 24)}`;

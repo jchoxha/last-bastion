@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 import * as THREE from 'three';
 import { CREATURE_MOTIONS } from '../../lib/creatures/motions.ts';
 import { retargetCanine } from './retarget-canine.mjs';
+import { buildHumanoidWalk } from './retarget-humanoid.mjs';
 import { unpackGlb, packGlb, appendClip, values } from './animation-gltf.mjs';
 import { compactGlb } from './compact-glb.mjs';
 import { validateRiggedGlb } from './validate.mjs';
@@ -106,6 +107,11 @@ function procedural(bytes, name) {
 }
 
 export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
+  if (bodyPlan === 'humanoid-v1') {
+    const result = buildHumanoidWalk(input);
+    await validateRiggedGlb(result.bytes, bodyPlan);
+    return result;
+  }
   if (bodyPlan !== 'canine-v1')
     return {
       bytes: input,
