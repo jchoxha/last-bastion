@@ -336,7 +336,7 @@ export default function CreaturePipeline({
                     {asset.creature.spec.name} · {asset.creature.spec.seed} ·
                     {asset.report.clips?.includes('attack')
                       ? ' full animations · '
-                      : ' provider walk only · '}
+                      : ' walk only · '}
                     inspect mesh
                   </button>{' '}
                   <a href={`${base}${asset.model}`} download>
