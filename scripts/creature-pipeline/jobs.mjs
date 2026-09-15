@@ -302,7 +302,7 @@ export async function createPipeline({
         job.request.bodyPlan === 'humanoid-v1'
       )
         throw new PipelineError(
-          `No verified animation profile for ${job.request.bodyPlan}; mesh retained but not installed.`,
+          `No verified animation profile for ${job.request.bodyPlan}: ${trial.report.reason || 'the rig did not meet the motion contract.'} Mesh retained but not installed.`,
         );
       bytes = trial.bytes;
       const defaultWalk = trial.report.walkClip;

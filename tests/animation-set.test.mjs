@@ -96,3 +96,19 @@ test('full set uses every primary donor clip and gives every game role a valid c
     'set stays within a modest asset budget',
   );
 });
+
+test('humanoid pipeline rejects a provider biped with a missing limb role', async () => {
+  const original = await readFile(
+    'tests/fixtures/creatures/cinderbound-provider-walk.glb',
+  );
+  const broken = Buffer.from(original);
+  const required = Buffer.from('tripo::1_Right_Limb_1');
+  const replacement = Buffer.from('tripo::1_Right_Limb_x');
+  const offset = broken.indexOf(required);
+  assert.ok(offset >= 0, 'fixture contains the required right-leg role');
+  replacement.copy(broken, offset);
+
+  const result = await buildAnimationSet(broken, 'humanoid-v1');
+  assert.equal(result.report.status, 'skipped');
+  assert.match(result.report.reason, /tripo::1_Right_Limb_1/);
+});

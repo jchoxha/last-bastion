@@ -108,9 +108,24 @@ function procedural(bytes, name) {
 
 export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
   if (bodyPlan === 'humanoid-v1') {
-    const result = buildHumanoidWalk(input);
-    await validateRiggedGlb(result.bytes, bodyPlan);
-    return result;
+    try {
+      const result = buildHumanoidWalk(input);
+      await validateRiggedGlb(result.bytes, bodyPlan);
+      return result;
+    } catch (error) {
+      // A provider can label a result as a biped while omitting a connected
+      // leg or arm chain. Keep that model out of the game and preserve the
+      // exact structural reason for the retained-job review.
+      if (error instanceof RigCompatibilityError)
+        return {
+          bytes: input,
+          report: {
+            status: 'skipped',
+            reason: error.message,
+          },
+        };
+      throw error;
+    }
   }
   if (bodyPlan !== 'canine-v1')
     return {
@@ -129,7 +144,9 @@ export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
     const primaryBytes = await readFile(
       new URL('./animations/canine-action-donor.glb', import.meta.url),
     );
-    const primarySha256 = createHash('sha256').update(primaryBytes).digest('hex');
+    const primarySha256 = createHash('sha256')
+      .update(primaryBytes)
+      .digest('hex');
     if (
       primarySha256 !==
       '37bb55237896c6cad81c47b718729df28062153f4364c65484eacdaf73f705d9'
