@@ -192,3 +192,41 @@ export function resolveCanineProfile(targetDoc, target, source, donorProfile) {
   }
   return { pairs, roles };
 }
+
+export const HUMANOID_ACTION_DONOR = {
+  id: 'humanoid-action-donor-v1',
+  sha256: 'f4d5682496c9d3b8b815e98edb73d0c5760e8e612e3a40fc344361f55e079f84',
+  bones: 65,
+  clips: [
+    'attack',
+    'attack-alt',
+    'death',
+    'hit',
+    'idle',
+    'run',
+    'run-alt',
+    'walk',
+  ],
+};
+
+export const HUMANOID_V1_PROFILE = {
+  id: 'canonical-humanoid-v1',
+  revision: 1,
+  bodyPlan: 'humanoid-v1',
+  bones: 65,
+  rootBone: 'root',
+  pelvisBone: 'pelvis',
+  spineBones: ['spine_01', 'spine_02', 'spine_03'],
+  neckBone: 'neck_01',
+  headBone: 'Head',
+  clavicleBones: { left: 'clavicle_l', right: 'clavicle_r' },
+  armBones: {
+    left: ['upperarm_l', 'lowerarm_l', 'hand_l'],
+    right: ['upperarm_r', 'lowerarm_r', 'hand_r'],
+  },
+  legBones: {
+    left: ['thigh_l', 'calf_l', 'foot_l', 'ball_l'],
+    right: ['thigh_r', 'calf_r', 'foot_r', 'ball_r'],
+  },
+};
+
