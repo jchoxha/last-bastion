@@ -2176,7 +2176,7 @@
       "model": "asset_ea6bd1a2c364dbdaabc6cc38.glb",
       "portrait": "asset_ea6bd1a2c364dbdaabc6cc38.png",
       "cardPortrait": "asset_ea6bd1a2c364dbdaabc6cc38-card.png",
-      "sha256": "9faa6d2a7a1a5f7a568012743b284a81b34903ed785dd515552eab32ac80a64d",
+      "sha256": "ea6bd1a2c364dbdaabc6cc3842f58e2091c7428100b0ff159a3d7519326c81fa",
       "walkClip": 0,
       "yaw": -1.5707963267948966,
       "report": {
@@ -2185,32 +2185,7 @@
         "bones": 78,
         "primitives": 1,
         "clips": [
-          "idle",
-          "walk",
-          "run",
-          "run-alt",
-          "attack",
-          "attack-alt",
-          "hit",
-          "death",
-          "charge",
-          "leap",
-          "cast",
-          "stagger",
-          "jump",
-          "land",
-          "idle-event",
-          "idle-calm",
-          "idle-alert",
-          "greet",
-          "talk",
-          "turn-left",
-          "turn-right",
-          "turn-around",
-          "spawn",
-          "idle-absurd",
-          "idle-alert-alt",
-          "greet-alt"
+          "walk"
         ],
         "walkClip": 0,
         "warnings": 2,
@@ -2229,8 +2204,8 @@
         },
         "animationTrial": {
           "status": "animation-set",
-          "profile": "tripo-humanoid-role-retarget",
-          "revision": 2,
+          "profile": "tripo-humanoid-procedural",
+          "revision": 1,
           "walkClip": 0,
           "visualReview": "required"
         }

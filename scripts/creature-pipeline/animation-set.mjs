@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import * as THREE from 'three';
 import { CREATURE_MOTIONS } from '../../lib/creatures/motions.ts';
 import { retargetCanine } from './retarget-canine.mjs';
-import { buildHumanoidAnimationSet } from './retarget-humanoid.mjs';
+import { buildHumanoidWalk } from './retarget-humanoid.mjs';
 import { unpackGlb, packGlb, appendClip, values } from './animation-gltf.mjs';
 import { compactGlb } from './compact-glb.mjs';
 import { validateRiggedGlb } from './validate.mjs';
@@ -108,7 +108,7 @@ function procedural(bytes, name) {
 
 export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
   if (bodyPlan === 'humanoid-v1') {
-    const result = await buildHumanoidAnimationSet(input);
+    const result = buildHumanoidWalk(input);
     await validateRiggedGlb(result.bytes, bodyPlan);
     return result;
   }
@@ -129,9 +129,7 @@ export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
     const primaryBytes = await readFile(
       new URL('./animations/canine-action-donor.glb', import.meta.url),
     );
-    const primarySha256 = createHash('sha256')
-      .update(primaryBytes)
-      .digest('hex');
+    const primarySha256 = createHash('sha256').update(primaryBytes).digest('hex');
     if (
       primarySha256 !==
       '37bb55237896c6cad81c47b718729df28062153f4364c65484eacdaf73f705d9'

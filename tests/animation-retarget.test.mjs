@@ -2,10 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { validateRiggedGlb } from '../scripts/creature-pipeline/validate.mjs';
-import {
-  buildHumanoidAnimationSet,
-  buildHumanoidWalk,
-} from '../scripts/creature-pipeline/retarget-humanoid.mjs';
+import { buildHumanoidWalk } from '../scripts/creature-pipeline/retarget-humanoid.mjs';
 
 function unpack(bytes) {
   const length = bytes.readUInt32LE(12);
@@ -62,10 +59,7 @@ test('humanoid adapter replaces Tripo’s destructive preset with rotation-only 
   const result = buildHumanoidWalk(original);
   const { doc } = unpack(result.bytes);
   assert.equal(result.report.profile, 'tripo-humanoid-procedural');
-  assert.deepEqual(
-    doc.animations.map((clip) => clip.name),
-    ['walk'],
-  );
+  assert.deepEqual(doc.animations.map((clip) => clip.name), ['walk']);
   assert.ok(doc.animations[0].channels.length >= 10);
   for (const channel of doc.animations[0].channels)
     assert.ok(
@@ -74,56 +68,5 @@ test('humanoid adapter replaces Tripo’s destructive preset with rotation-only 
       `unexpected ${channel.target.path} channel on ${doc.nodes[channel.target.node].name}`,
     );
   const report = await validateRiggedGlb(result.bytes, 'humanoid-v1');
-  assert.equal(report.walkClip, 0);
-});
-
-test('humanoid library retargets every game motion onto Cinder-style joints without donor translation', async () => {
-  const original = await readFile(
-    'tests/fixtures/creatures/cinderbound-provider-walk.glb',
-  );
-  const result = await buildHumanoidAnimationSet(original);
-  const { doc } = unpack(result.bytes);
-  assert.equal(result.report.profile, 'tripo-humanoid-role-retarget');
-  assert.equal(result.report.clips.length, 26);
-  assert.deepEqual(
-    doc.animations.map((clip) => clip.name),
-    [
-      'idle',
-      'walk',
-      'run',
-      'run-alt',
-      'attack',
-      'attack-alt',
-      'hit',
-      'death',
-      'charge',
-      'leap',
-      'cast',
-      'stagger',
-      'jump',
-      'land',
-      'idle-event',
-      'idle-calm',
-      'idle-alert',
-      'greet',
-      'talk',
-      'turn-left',
-      'turn-right',
-      'turn-around',
-      'spawn',
-      'idle-absurd',
-      'idle-alert-alt',
-      'greet-alt',
-    ],
-  );
-  for (const animation of doc.animations)
-    for (const channel of animation.channels)
-      assert.ok(
-        channel.target.path === 'rotation' ||
-          doc.nodes[channel.target.node].name === 'tripo::Root',
-        `unexpected ${channel.target.path} channel in ${animation.name}`,
-      );
-  const report = await validateRiggedGlb(result.bytes, 'humanoid-v1');
-  assert.equal(report.clips.length, 26);
   assert.equal(report.walkClip, 0);
 });
