@@ -2210,6 +2210,84 @@
           "visualReview": "required"
         }
       }
+    },
+    {
+      "id": "asset_2cb2b3400dfde3a118be89b6",
+      "creature": {
+        "version": 1,
+        "id": "cf_9ed7b6adf074fd6d",
+        "spec": {
+          "seed": "ironhide-tail-free-v1",
+          "concept": "A broad armored fire-ogre guardian with a square horned helm, orange-brown skin, charcoal armor with brass-orange trim, no weapon, and no tail.",
+          "bodies": [
+            "Humanoid"
+          ],
+          "family": "",
+          "manifestation": "",
+          "archetype": "Warrior",
+          "subtypes": [
+            "Elemental"
+          ],
+          "attunements": [
+            "Fire",
+            "Stone"
+          ],
+          "form": "regular",
+          "role": "bulwark",
+          "bodyPlan": "humanoid-v1",
+          "name": "Ironhide",
+          "description": "A tail-free armored fire-ogre guardian built for a stable humanoid rig test.",
+          "color": "#d95727",
+          "accent": "#ef8b25"
+        },
+        "stats": {
+          "hp": 130,
+          "speed": 1.3,
+          "damage": 12,
+          "radius": 0.55
+        },
+        "assets": {
+          "model": "prototype",
+          "rig": "humanoid-v1",
+          "rigVersion": 1
+        }
+      },
+      "model": "asset_2cb2b3400dfde3a118be89b6.glb",
+      "portrait": "asset_2cb2b3400dfde3a118be89b6.png",
+      "cardPortrait": "asset_2cb2b3400dfde3a118be89b6-card.png",
+      "sha256": "2cb2b3400dfde3a118be89b6421e992f113fd2917ba4d02b50a3ef6e60f34b1f",
+      "walkClip": 7,
+      "yaw": -1.5707963267948966,
+      "report": {
+        "triangles": 19472,
+        "vertices": 11941,
+        "bones": 65,
+        "primitives": 1,
+        "clips": [
+          "attack",
+          "attack-alt",
+          "death",
+          "hit",
+          "idle",
+          "run",
+          "run-alt",
+          "walk"
+        ],
+        "walkClip": 7,
+        "warnings": 2,
+        "visualReview": "unverified"
+      },
+      "source": {
+        "repository": "jchoxha/last-bastion",
+        "inputId": "ironhide",
+        "kind": "canonical-rebind",
+        "rosterId": "ironhide",
+        "jobId": "job_7c1a39d3ae72f738af7308dc",
+        "models": {
+          "mesh": "v3.1-20260211",
+          "rig": "canonical-humanoid-v1"
+        }
+      }
     }
   ]
 }
