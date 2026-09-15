@@ -2131,6 +2131,82 @@
           "visualReview": "unverified"
         }
       }
+    },
+    {
+      "id": "asset_a8a30db1725c9e3027c624a5",
+      "creature": {
+        "version": 1,
+        "id": "cf_a819209592afd8d5",
+        "spec": {
+          "seed": "cinderbound-warden-spec-1",
+          "concept": "A red-orange fire lizard warden in charcoal-and-brass armor, with pale horns and a long tail.",
+          "bodies": [
+            "Humanoid"
+          ],
+          "family": "",
+          "manifestation": "",
+          "archetype": "Warrior",
+          "subtypes": [
+            "Elemental"
+          ],
+          "attunements": [
+            "Fire",
+            "Stone"
+          ],
+          "form": "regular",
+          "role": "bulwark",
+          "bodyPlan": "humanoid-v1",
+          "name": "Cinderbound Warden",
+          "description": "A red-orange fire lizard warden whose charcoal-and-brass armor survives the caldera heat. Its horns and mottled tail mark a guardian bred for the furnace roads.",
+          "color": "#e84a24",
+          "accent": "#f3bc52"
+        },
+        "stats": {
+          "hp": 130,
+          "speed": 1.3,
+          "damage": 12,
+          "radius": 0.55
+        },
+        "assets": {
+          "model": "prototype",
+          "rig": "humanoid-v1",
+          "rigVersion": 1
+        }
+      },
+      "model": "asset_a8a30db1725c9e3027c624a5.glb",
+      "portrait": "asset_a8a30db1725c9e3027c624a5.png",
+      "cardPortrait": "asset_a8a30db1725c9e3027c624a5-card.png",
+      "sha256": "a8a30db1725c9e3027c624a534231eb83aa08318c344961858fd0a273e5f8852",
+      "walkClip": 0,
+      "yaw": -1.5707963267948966,
+      "report": {
+        "triangles": 19682,
+        "vertices": 12558,
+        "bones": 78,
+        "primitives": 1,
+        "clips": [
+          "preset:walk"
+        ],
+        "walkClip": 0,
+        "warnings": 2,
+        "visualReview": "unverified"
+      },
+      "source": {
+        "repository": "jchoxha/last-bastion",
+        "inputId": "cinderbound-warden",
+        "kind": "packaged-card-and-mesh-spec",
+        "rosterId": "cinderbound-warden",
+        "jobId": "job_33737c8b7a38b41ef0a23638",
+        "models": {
+          "image": "seedream_v5",
+          "mesh": "v3.1-20260211",
+          "rig": "v2.5-20260210"
+        },
+        "animationTrial": {
+          "status": "skipped",
+          "reason": "No animation set for this body plan."
+        }
+      }
     }
   ]
 }
