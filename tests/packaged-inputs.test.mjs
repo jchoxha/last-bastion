@@ -13,6 +13,11 @@ test('packaged creature input preserves approved card/spec art and rig contract'
       name: 'Cinderbound Warden',
       source: 'packaged',
     },
+    {
+      id: 'ironhide',
+      name: 'Ironhide',
+      source: 'packaged',
+    },
   ]);
   const source = await inputs.resolve({
     rosterId: 'cinderbound-warden',
@@ -24,6 +29,14 @@ test('packaged creature input preserves approved card/spec art and rig contract'
   assert.equal(source.creature.spec.bodyPlan, 'humanoid-v1');
   assert(source.art.length > 1000);
   assert(source.cardArt.length > 1000);
+  const ironhide = await inputs.resolve({
+    rosterId: 'ironhide',
+    bodyPlan: 'humanoid-v1',
+    form: 'regular',
+  });
+  assert.equal(ironhide.creature.spec.name, 'Ironhide');
+  assert(ironhide.art.length > 1000);
+  assert(ironhide.cardArt.length > 1000);
   await assert.rejects(
     inputs.resolve({
       rosterId: 'cinderbound-warden',

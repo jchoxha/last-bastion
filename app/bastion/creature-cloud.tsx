@@ -62,7 +62,9 @@ export default function CreatureCloud({
     'Slate-blue wolf with cyan mane highlights, yellow eyes, muscular shoulders, pointed ears and a single bushy tail. Compact sculpted fur clumps.',
   );
   const [submitted, setSubmitted] = useState(false);
-  const packagedInput = rosterId.trim() === 'cinderbound-warden';
+  const packagedInput = ['cinderbound-warden', 'ironhide'].includes(
+    rosterId.trim(),
+  );
   const mounted = useRef(true);
   useEffect(() => {
     mounted.current = true;
