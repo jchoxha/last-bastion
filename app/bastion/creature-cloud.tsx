@@ -62,6 +62,7 @@ export default function CreatureCloud({
     'Slate-blue wolf with cyan mane highlights, yellow eyes, muscular shoulders, pointed ears and a single bushy tail. Compact sculpted fur clumps.',
   );
   const [submitted, setSubmitted] = useState(false);
+  const packagedInput = rosterId.trim() === 'cinderbound-warden';
   const mounted = useRef(true);
   useEffect(() => {
     mounted.current = true;
@@ -256,7 +257,7 @@ export default function CreatureCloud({
           </button>
           <div className="forge-fields">
             <label>
-              Chimera roster ID
+              Creature source ID
               <input
                 value={rosterId}
                 maxLength={60}
@@ -320,11 +321,13 @@ export default function CreatureCloud({
             </label>
           )}
           <p>
-            {mode === 'text'
-              ? 'Estimated Tripo cost: $0.55 for standard textured mesh, rig and one walk.'
-              : mode === 'image-direct'
-                ? 'Estimated Tripo cost: $0.60 for direct image-to-model, rig and one walk.'
-                : 'Estimated Tripo cost: $0.70 with existing card art, including one low-poly specification image, standard textured mesh, rig and one walk. New concepts also generate the card illustration.'}{' '}
+            {packagedInput
+              ? 'This approved card/spec pair goes directly to mesh generation; no replacement reference image is purchased.'
+              : mode === 'text'
+                ? 'Estimated Tripo cost: $0.55 for standard textured mesh, rig and one walk.'
+                : mode === 'image-direct'
+                  ? 'Estimated Tripo cost: $0.60 for direct image-to-model, rig and one walk.'
+                  : 'Estimated Tripo cost: $0.70 with existing card art, including one low-poly specification image, standard textured mesh, rig and one walk. New concepts also generate the card illustration.'}{' '}
             Each new job can incur charges, including repeated seeds. Failed
             stages may already have consumed credits. Prices can change.
           </p>

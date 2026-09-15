@@ -85,6 +85,7 @@ export async function createPipeline({
   root,
   chimera,
   provider,
+  packaged,
   validate = validateRiggedGlb,
 }) {
   const jobRoot = path.join(root, 'work/creature-pipeline/jobs');
@@ -135,9 +136,16 @@ export async function createPipeline({
       if (!job.creature) {
         job.stage = 'chimera';
         await save();
-        const source = await chimera.resolve(job.request);
+        const source =
+          (await packaged?.resolve(job.request)) ||
+          (await chimera.resolve(job.request));
         if (source.art) await writeFile(path.join(dir, 'art.png'), source.art);
         job.hasArt = Boolean(source.art);
+        if (source.cardArt)
+          await writeFile(path.join(dir, 'card.png'), source.cardArt);
+        job.hasCardArt = Boolean(source.cardArt);
+        job.directModelInput = Boolean(source.directModelInput);
+        job.provenance = source.provenance;
         job.creature = source.creature;
         job.artPrompt = source.artPrompt;
         await atomicJson(path.join(dir, 'chimera.json'), source.definition);
@@ -209,7 +217,7 @@ export async function createPipeline({
             ),
           );
         }
-        if (job.request.mode !== 'image-direct') {
+        if (job.request.mode !== 'image-direct' && !job.directModelInput) {
           const reference = await task(
             'reference',
             '/generation/image-to-image',
@@ -300,14 +308,17 @@ export async function createPipeline({
       const temp = path.join(assetRoot, `${assetId}.glb.tmp`);
       await writeFile(temp, bytes);
       await rename(temp, path.join(assetRoot, `${assetId}.glb`));
-      const targetPortrait =
-        job.request.mode === 'image' ? 'reference.png' : 'art.png';
+      const targetPortrait = job.directModelInput
+        ? 'art.png'
+        : job.request.mode === 'image'
+          ? 'reference.png'
+          : 'art.png';
       await copyFile(
         path.join(dir, targetPortrait),
         path.join(assetRoot, `${assetId}.png`),
       );
       await copyFile(
-        path.join(dir, 'art.png'),
+        path.join(dir, job.hasCardArt ? 'card.png' : 'art.png'),
         path.join(assetRoot, `${assetId}-card.png`),
       );
       const manifest = await json(path.join(assetRoot, 'index.json'), {
@@ -325,8 +336,8 @@ export async function createPipeline({
         yaw: -Math.PI / 2,
         report: job.report,
         source: {
-          repository: 'jchoxha/chimera_cards',
-          revision: chimera.revision,
+          repository: job.provenance?.repository || 'jchoxha/chimera_cards',
+          ...(job.provenance || { revision: chimera.revision }),
           rosterId: job.request.rosterId,
           jobId: job.id,
           models: TRIPO_MODELS,

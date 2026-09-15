@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "id": "cinderbound-warden",
+  "card": "cinderbound-warden-card.png",
+  "specification": "cinderbound-warden-spec.png",
+  "creature": {
+    "seed": "cinderbound-warden-spec-1",
+    "concept": "A red-orange fire lizard warden in charcoal-and-brass armor, with pale horns and a long tail.",
+    "bodies": ["Humanoid"],
+    "family": "",
+    "manifestation": "",
+    "archetype": "Warrior",
+    "subtypes": ["Elemental"],
+    "attunements": ["Fire", "Stone"],
+    "form": "regular",
+    "bodyPlan": "humanoid-v1",
+    "role": "bulwark",
+    "name": "Cinderbound Warden",
+    "description": "A red-orange fire lizard warden whose charcoal-and-brass armor survives the caldera heat. Its horns and mottled tail mark a guardian bred for the furnace roads.",
+    "color": "#e84a24",
+    "accent": "#f3bc52"
+  }
+}

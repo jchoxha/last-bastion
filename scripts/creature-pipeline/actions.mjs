@@ -3,6 +3,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { loadChimera } from './chimera.mjs';
+import { loadPackagedInputs } from './packaged-inputs.mjs';
 import { createPipeline, normalizeRequest } from './jobs.mjs';
 import { createTripo } from './tripo.mjs';
 
@@ -45,9 +46,11 @@ try {
       );
   }
   const chimera = await loadChimera(root);
+  const packaged = await loadPackagedInputs(root);
   const pipeline = await createPipeline({
     root,
     chimera,
+    packaged,
     provider: createTripo({ key: process.env.TRIPO_API_KEY }),
   });
   const job = resume

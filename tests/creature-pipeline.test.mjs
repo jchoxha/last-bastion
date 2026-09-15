@@ -396,6 +396,57 @@ test('direct-image mode sends source art to the mesh without another image gener
   assert.equal(calls[0].body.input, 'file_fixture');
   assert.equal(calls.filter((call) => call.route.includes('image')).length, 1);
 });
+test('approved packaged specs go directly to mesh and retain card art separately', async () => {
+  const root = await temporary(),
+    { provider, calls } = fakeTripo();
+  const packagedSpec = Buffer.from('approved-low-poly-spec'),
+    packagedCard = Buffer.from('approved-card-art');
+  const packaged = {
+    async resolve(request) {
+      if (request.rosterId !== 'approved-fixture') return null;
+      return {
+        creature,
+        definition: { name: creature.spec.name },
+        art: packagedSpec,
+        cardArt: packagedCard,
+        directModelInput: true,
+        provenance: {
+          repository: 'jchoxha/last-bastion',
+          inputId: 'approved-fixture',
+        },
+      };
+    },
+  };
+  const pipeline = await createPipeline({ root, chimera, packaged, provider });
+  const job = await pipeline.submit({
+    ...input,
+    rosterId: 'approved-fixture',
+    mode: 'image',
+    seed: 'packaged-spec-test',
+  });
+  const done = await finished(pipeline, job.id);
+  assert.equal(done.status, 'ready', done.error);
+  assert.deepEqual(
+    calls.map((call) => call.route),
+    [
+      '/generation/image-to-model',
+      '/animations/rig-check',
+      '/animations/rig',
+      '/animations/retarget',
+    ],
+  );
+  assert.deepEqual(
+    await readFile(path.join(root, 'public/creatures', done.asset.portrait)),
+    packagedSpec,
+  );
+  assert.deepEqual(
+    await readFile(
+      path.join(root, 'public/creatures', done.asset.cardPortrait),
+    ),
+    packagedCard,
+  );
+  assert.equal(done.asset.source.inputId, 'approved-fixture');
+});
 test('restart after a download failure resumes the saved generation task', async () => {
   const root = await temporary(),
     { provider, calls } = fakeTripo();

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { loadChimera } from './chimera.mjs';
+import { loadPackagedInputs } from './packaged-inputs.mjs';
 import { createTripo, PipelineError } from './tripo.mjs';
 import { createPipeline } from './jobs.mjs';
 
@@ -10,6 +11,7 @@ export function createPipelineServer({
   root,
   pipeline,
   chimera,
+  packaged = { catalog: [] },
   provider,
   origins = [],
 }) {
@@ -59,7 +61,7 @@ export function createPipelineServer({
           return;
         }
         if (url.pathname === '/catalog') {
-          send(200, chimera.catalog);
+          send(200, [...packaged.catalog, ...chimera.catalog]);
           return;
         }
         if (url.pathname === '/jobs') {
@@ -136,12 +138,14 @@ if (
 ) {
   const root = fileURLToPath(new URL('../../', import.meta.url));
   const chimera = await loadChimera(root, process.env.CHIMERA_SOURCE_DIR);
+  const packaged = await loadPackagedInputs(root);
   const provider = createTripo({ key: process.env.TRIPO_API_KEY });
-  const pipeline = await createPipeline({ root, chimera, provider });
+  const pipeline = await createPipeline({ root, chimera, packaged, provider });
   const server = createPipelineServer({
     root,
     pipeline,
     chimera,
+    packaged,
     provider,
     origins: (process.env.CREATURE_ALLOWED_ORIGINS || '')
       .split(',')
