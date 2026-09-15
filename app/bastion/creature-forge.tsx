@@ -10,6 +10,7 @@ import {
   generatedAsset,
 } from '@/lib/creatures/generated';
 import CreaturePipeline from './creature-pipeline';
+import MotionLibrary from './motion-library';
 import {
   ARCHETYPES,
   ATTUNEMENTS,
@@ -469,6 +470,7 @@ export default function CreatureForge({
           }
         }}
       />
+      <MotionLibrary />
       <div className="forge-layout">
         <section className="forge-panel">
           <h2>Creature blueprint</h2>

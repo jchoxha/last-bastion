@@ -180,6 +180,42 @@
   text-align: center;
   padding: 30px;
 }
+.motion-library {
+  margin: 18px 0;
+}
+.motion-library > label {
+  max-width: 360px;
+}
+.motion-library-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+.motion-library-summary span {
+  border: 1px solid #5b735b;
+  border-radius: 20px;
+  color: #bed0c0;
+  font-size: 12px;
+  padding: 5px 10px;
+}
+.motion-preview {
+  height: 390px;
+}
+.motion-contract {
+  min-height: 180px;
+  display: grid;
+  align-content: center;
+  gap: 6px;
+  padding: 22px;
+  margin: 16px 0;
+  border: 1px solid #3c5147;
+  border-radius: 12px;
+  background: radial-gradient(ellipse, #324a3b, #10231c);
+}
+.motion-contract p {
+  margin: 0;
+}
 .forge-tools {
   display: flex;
   align-items: center;

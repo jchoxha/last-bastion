@@ -1320,6 +1320,20 @@ export const wikiChapters: WikiChapter[] = [
           {
             "type": "paragraph",
             "text": "Installed models load automatically in the preview and game. They become eligible for ordinary wilderness grunt slots and can also be spawned explicitly for testing; scripted enemy selections remain unchanged. When several versions share a creature name, inspection and play-as-creature controls show the generation seed so each model remains identifiable. Technical validation catches malformed assets and body-type mismatches, but cannot certify anatomical joint placement. Inspect the actual walk and skeleton before considering a model finished. The first live Voltfang text-to-3D job was installed on September 13, 2026 with 18,896 triangles and 31 bones. Its mesh was reused after fixing a provider-storage download rejection. On September 14 it received the shared 26-animation canine set. Two validated motion-library test creatures are also installed: **Sky Talon** has a 61-bone avian rig and 22 clips, while **Dawnrunner** has a 37-bone hoofed quadruped rig and 29 clips. They are available in the forge and F2 testing controls; they are test assets, not yet templates for the automated generator."
+          }
+        ]
+      },
+      {
+        "id": "creature-motion-library",
+        "title": "Creature motion library",
+        "blocks": [
+          {
+            "type": "paragraph",
+            "text": "The Forge includes a **Creature motion library** for inspecting the imported skeletons and clips behind every current body family: humanoid bipeds, taurics, canine and hoofed quadrupeds, reptiles, shellbacks, ground dragons, avians, membrane-winged flyers, winged dragons, serpentine creatures, arachnids, insects, decapods, marine creatures, tentacled creatures, amorphous creatures, radial creatures, and hovering creatures. Select a family to orbit its donor mesh, play any imported clip, adjust playback speed, or show its skeleton. Each donor file is checksum-verified before it is displayed."
+          },
+          {
+            "type": "paragraph",
+            "text": "The two humanoid entries expose the full 86-clip shared library on its 65-bone skeleton. Families with an authored donor show their actual available clips. Tauric, tentacled, radial, and hovering entries instead show their planned runtime motion states, because those families are assembled or animated procedurally rather than supplied by one reusable donor mesh. A library entry makes its rig and motion contract available for inspection; it does not by itself make every generated mesh compatible. The automatic installer currently has reliable adapters for the canine full set and the verified humanoid walk. Each remaining body family needs its own anatomy validation and retargeting adapter before generated creatures can automatically receive its library animations."
           },
           {
             "type": "paragraph",
