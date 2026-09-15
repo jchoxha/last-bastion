@@ -1954,6 +1954,183 @@
           "reason": "Missing or ambiguous skinned role: spine (tripo::Spine_1)."
         }
       }
+    },
+    {
+      "id": "asset_71bb0792107088e28bccf7e6",
+      "creature": {
+        "version": 1,
+        "id": "cf_82c2ee6eecefa12e",
+        "spec": {
+          "seed": "flight-library-eagle-1",
+          "concept": "A broad-winged sky hunter used to validate the avian motion contract.",
+          "bodies": [
+            "Beast"
+          ],
+          "family": "Avian",
+          "manifestation": "",
+          "archetype": "",
+          "subtypes": [],
+          "attunements": [
+            "Air",
+            "Physical"
+          ],
+          "form": "regular",
+          "role": "skirmisher",
+          "bodyPlan": "avian-draft",
+          "name": "Sky Talon",
+          "description": "A broad-winged hunter whose flight, landing, and ground movement test the avian animation library.",
+          "color": "#6f7e8b",
+          "accent": "#d5b56d"
+        },
+        "stats": {
+          "hp": 55,
+          "speed": 3.4,
+          "damage": 8,
+          "radius": 0.55
+        },
+        "assets": {
+          "model": "awaiting-rig",
+          "rig": "avian-draft",
+          "rigVersion": 1
+        }
+      },
+      "model": "asset_71bb0792107088e28bccf7e6.glb",
+      "portrait": "asset_71bb0792107088e28bccf7e6.png",
+      "sha256": "71bb0792107088e28bccf7e6954a886619a937d7712528a047dadb1c5b6e4666",
+      "walkClip": 13,
+      "yaw": 0,
+      "report": {
+        "triangles": 9130,
+        "vertices": 7277,
+        "bones": 61,
+        "primitives": 2,
+        "clips": [
+          "idle",
+          "death",
+          "eagle-abn-sky-fall-00",
+          "eagle-abn-sky-fall-die-00",
+          "jump",
+          "run",
+          "run-alt",
+          "eagle-move-sky-wing-02",
+          "eagle-move-sky-wing-03",
+          "eagle-move-sky-wing-04",
+          "eagle-move-sky-wing-05",
+          "eagle-move-sky-wing-l-00",
+          "eagle-move-sky-wing-r-00",
+          "walk",
+          "land",
+          "eagle-sky-idle-00",
+          "eagle-sky-idle-01",
+          "eagle-stand-idle-01",
+          "eagle-stand-idle-02",
+          "eagle-stand-idle-03",
+          "eagle-stand-idle-04",
+          "attack"
+        ],
+        "walkClip": 13,
+        "warnings": 2,
+        "visualReview": "unverified"
+      },
+      "source": {
+        "kind": "local-library-import",
+        "animationTrial": {
+          "status": "verified-import",
+          "visualReview": "unverified"
+        }
+      }
+    },
+    {
+      "id": "asset_2146f33be9c37256b0bfb8ed",
+      "creature": {
+        "version": 1,
+        "id": "cf_385161c8207ddb08",
+        "spec": {
+          "seed": "quadruped-library-horse-1",
+          "concept": "A sure-footed herd runner used to validate the hoofed quadruped motion contract.",
+          "bodies": [
+            "Beast"
+          ],
+          "family": "Mammalian",
+          "manifestation": "",
+          "archetype": "",
+          "subtypes": [],
+          "attunements": [
+            "Nature",
+            "Physical"
+          ],
+          "form": "regular",
+          "role": "balanced",
+          "bodyPlan": "canine-v1",
+          "name": "Dawnrunner",
+          "description": "A sure-footed herd runner whose full locomotion, hit, recovery, and attack set tests the hoofed quadruped library.",
+          "color": "#845a43",
+          "accent": "#f0d2a1"
+        },
+        "stats": {
+          "hp": 85,
+          "speed": 2.2,
+          "damage": 10,
+          "radius": 0.55
+        },
+        "assets": {
+          "model": "prototype",
+          "rig": "canine-v1",
+          "rigVersion": 1
+        }
+      },
+      "model": "asset_2146f33be9c37256b0bfb8ed.glb",
+      "portrait": "asset_2146f33be9c37256b0bfb8ed.png",
+      "sha256": "2146f33be9c37256b0bfb8edb0c7646baa75b6a27f28b138f7101587a7997ef5",
+      "walkClip": 28,
+      "yaw": 0,
+      "report": {
+        "triangles": 3194,
+        "vertices": 9580,
+        "bones": 37,
+        "primitives": 1,
+        "clips": [
+          "horse-abn-bug-1",
+          "horse-abn-earthquake-1",
+          "horse-abn-fear-1",
+          "horse-abn-stun-1",
+          "attack",
+          "attack-alt",
+          "horse-att-battle-3-01",
+          "jump",
+          "horse-bound-hit-land",
+          "land",
+          "death",
+          "horse-dmg-ground-1-001",
+          "hit",
+          "horse-dmg-idle-2-001",
+          "horse-down",
+          "horse-ground-1",
+          "stagger",
+          "horse-groundknockback-land-1",
+          "horse-idle-battle-1-003",
+          "idle",
+          "horse-idle-normal-1-1-003",
+          "horse-knockdown",
+          "horse-knockdown-land",
+          "charge",
+          "run",
+          "spawn",
+          "horse-twistknockdown",
+          "horse-twistknockdown-land",
+          "walk"
+        ],
+        "walkClip": 28,
+        "warnings": 1,
+        "visualReview": "unverified"
+      },
+      "source": {
+        "kind": "local-library-import",
+        "animationTrial": {
+          "status": "verified-import",
+          "visualReview": "unverified"
+        }
+      }
     }
   ]
 }
