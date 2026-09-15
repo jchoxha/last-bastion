@@ -9,10 +9,10 @@ import {
   values,
 } from '../scripts/creature-pipeline/animation-gltf.mjs';
 
-test('full set uses every licensed donor clip and gives every game role a valid clip', async () => {
+test('full set uses every primary donor clip and gives every game role a valid clip', async () => {
   const donor = unpackGlb(
     await readFile(
-      'scripts/creature-pipeline/animations/dimos-lost-ark-wolf-actions.glb',
+      'scripts/creature-pipeline/animations/canine-action-donor.glb',
     ),
   ).doc;
   assert.equal(donor.animations.length, 18);
@@ -38,7 +38,7 @@ test('full set uses every licensed donor clip and gives every game role a valid 
   );
   assert.equal(
     b.doc.animations.filter(
-      (c) => c.extras.sourcePack === 'dimos-lost-ark-wolf',
+      (c) => c.extras.sourcePack === 'canine-action-donor-v1',
     ).length,
     18,
   );

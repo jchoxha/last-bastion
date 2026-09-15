@@ -1528,7 +1528,7 @@
               "label": "Idle",
               "loop": true,
               "source": "idle_normal_1.001",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1536,7 +1536,7 @@
               "label": "Walk",
               "loop": true,
               "source": "evt2_walk_normal_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1544,7 +1544,7 @@
               "label": "Run / chase",
               "loop": true,
               "source": "run_normal_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1552,7 +1552,7 @@
               "label": "Alternate run",
               "loop": true,
               "source": "evt2_run_01",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1560,7 +1560,7 @@
               "label": "Basic attack",
               "loop": false,
               "source": "att_battle_1_01",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "impactFraction": 0.4,
               "visualReview": "unverified"
             },
@@ -1569,7 +1569,7 @@
               "label": "Alternate attack",
               "loop": false,
               "source": "att_battle_2_01",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1612,7 +1612,7 @@
               "label": "Charge",
               "loop": true,
               "source": "evt2_run_battle_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1620,7 +1620,7 @@
               "label": "Leap",
               "loop": false,
               "source": "sk_moving",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1628,7 +1628,7 @@
               "label": "Cast / roar",
               "loop": false,
               "source": "sk_howling",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1657,7 +1657,7 @@
               "label": "Spawn / rise",
               "loop": false,
               "source": "on",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1665,7 +1665,7 @@
               "label": "Event idle",
               "loop": true,
               "source": "evt2_idle_normal_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1673,7 +1673,7 @@
               "label": "Playful idle",
               "loop": true,
               "source": "evt2_sc_absurd_loop_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1681,7 +1681,7 @@
               "label": "Calm idle",
               "loop": true,
               "source": "idle_normal_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1689,7 +1689,7 @@
               "label": "Alert idle",
               "loop": true,
               "source": "idle_normal_1_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1697,7 +1697,7 @@
               "label": "Alternate alert idle",
               "loop": true,
               "source": "idle_normal_1_1.001",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1705,7 +1705,7 @@
               "label": "Greeting",
               "loop": false,
               "source": "sc_greet_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1713,7 +1713,7 @@
               "label": "Alternate greeting",
               "loop": false,
               "source": "sc_greet_2",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             },
             {
@@ -1721,19 +1721,13 @@
               "label": "Talk / vocalize",
               "loop": true,
               "source": "sc_talk_1",
-              "sourcePack": "dimos-lost-ark-wolf",
+              "sourcePack": "canine-action-donor-v1",
               "visualReview": "unverified"
             }
           ],
           "sourceSha256": {
             "licensed": "37bb55237896c6cad81c47b718729df28062153f4364c65484eacdaf73f705d9",
             "fallback": "90001d38562205c58cea21cf355a540ad2c595c5c1997be20497a42f87c7289f"
-          },
-          "licensedSource": {
-            "contributor": "DIMOS",
-            "sourceTitle": "Lost Ark Wolf",
-            "url": "https://p3dm.ru/files/beasts/20003-wolfs.html",
-            "permissionBasis": "Direct permission for this project, reported by the repository owner on 2026-09-14."
           },
           "visualReview": "unverified",
           "warnings": [

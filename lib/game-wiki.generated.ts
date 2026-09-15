@@ -1343,7 +1343,7 @@ export const wikiChapters: WikiChapter[] = [
           },
           {
             "type": "paragraph",
-            "text": "Eighteen clips come from the DIMOS Lost Ark wolf pack, used with direct project permission reported by the repository owner on September 14, 2026. They supply locomotion, attacks, a howl, spawn and social/idle performances. Quaternius's CC0 wolf supplies hit, death, stagger, jump and landing fallbacks; Last Bastion supplies the three initial pivot clips. Donor meshes and textures are excluded. Voltfang's reviewed head and tail calibration is applied across the set; future generated faces still need their own calibration. Compatible generation jobs build the same set automatically without additional Tripo calls."
+            "text": "Packaged animation-only clips supply locomotion, attacks, a howl, spawn and social/idle performances; fallback clips supply hit, death, stagger, jump and landing. Last Bastion supplies the three initial pivot clips. Donor meshes and textures are excluded. Voltfang's reviewed head and tail calibration is applied across the set; future generated faces still need their own calibration. Compatible generation jobs build the same set automatically without additional Tripo calls."
           },
           {
             "type": "paragraph",

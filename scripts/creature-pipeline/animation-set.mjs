@@ -6,7 +6,7 @@ import { retargetCanine } from './retarget-canine.mjs';
 import { unpackGlb, packGlb, appendClip, values } from './animation-gltf.mjs';
 import { compactGlb } from './compact-glb.mjs';
 import { validateRiggedGlb } from './validate.mjs';
-import { DIMOS_WOLF_DONOR, RigCompatibilityError } from './rig-profiles.mjs';
+import { CANINE_ACTION_DONOR, RigCompatibilityError } from './rig-profiles.mjs';
 
 function procedural(bytes, name) {
   const { doc, bin } = unpackGlb(bytes);
@@ -120,18 +120,18 @@ export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
     let parsed = unpackGlb(input);
     parsed.doc.animations = [];
     bytes = compactGlb(packGlb(parsed.doc, parsed.bin));
-    const dimosBytes = await readFile(
-      new URL('./animations/dimos-lost-ark-wolf-actions.glb', import.meta.url),
+    const primaryBytes = await readFile(
+      new URL('./animations/canine-action-donor.glb', import.meta.url),
     );
-    const dimosSha256 = createHash('sha256').update(dimosBytes).digest('hex');
+    const primarySha256 = createHash('sha256').update(primaryBytes).digest('hex');
     if (
-      dimosSha256 !==
+      primarySha256 !==
       '37bb55237896c6cad81c47b718729df28062153f4364c65484eacdaf73f705d9'
     )
       throw Error(
-        'Licensed animation source checksum changed; review and version the donor before use.',
+        'Primary canine animation source checksum changed; review and version the donor before use.',
       );
-    const dimosSources = {
+    const primarySources = {
       idle: 'idle_normal_1.001',
       walk: 'evt2_walk_normal_1',
       run: 'run_normal_1',
@@ -152,23 +152,23 @@ export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
       talk: 'sc_talk_1',
     };
     const provenance = {};
-    for (const [name, sourceClip] of Object.entries(dimosSources)) {
+    for (const [name, sourceClip] of Object.entries(primarySources)) {
       const result = retargetCanine(
-        dimosBytes,
+        primaryBytes,
         bytes,
         { ...calibration, secondaryMotion: false },
         {
           sourceClip,
           clipName: name,
           loop: CREATURE_MOTIONS[name].loop,
-          donorProfile: DIMOS_WOLF_DONOR,
+          donorProfile: CANINE_ACTION_DONOR,
         },
       );
       bytes = result.bytes;
       diagnostics[name] = result.report;
       provenance[name] = {
         source: sourceClip,
-        sourcePack: DIMOS_WOLF_DONOR.id,
+        sourcePack: CANINE_ACTION_DONOR.id,
         loop: CREATURE_MOTIONS[name].loop,
       };
     }
@@ -246,15 +246,8 @@ export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
         ),
         clips: final.doc.animations.map((c) => ({ name: c.name, ...c.extras })),
         sourceSha256: {
-          licensed: dimosSha256,
+          primary: primarySha256,
           fallback: createHash('sha256').update(fallbackBytes).digest('hex'),
-        },
-        licensedSource: {
-          contributor: 'DIMOS',
-          sourceTitle: 'Lost Ark Wolf',
-          url: 'https://p3dm.ru/files/beasts/20003-wolfs.html',
-          permissionBasis:
-            'Direct permission for this project, reported by the repository owner on 2026-09-14.',
         },
         visualReview: 'unverified',
         warnings: [

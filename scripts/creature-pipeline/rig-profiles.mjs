@@ -41,11 +41,11 @@ for (const [side, suffix] of [
   }
 }
 
-// Animation-only donor exported from the licensed Lost Ark wolf pack. The
-// target side remains provider-independent; these names exist only in the
-// donor adapter. Tail blends spread three authored joints across five targets.
-export const DIMOS_WOLF_DONOR = {
-  id: 'dimos-lost-ark-wolf',
+// Animation-only canine donor. The target side remains provider-independent;
+// these names exist only in the donor adapter. Tail blends spread three
+// authored joints across five targets.
+export const CANINE_ACTION_DONOR = {
+  id: 'canine-action-donor-v1',
   roles: {
     root: 'bip001-pelvis',
     pelvis: 'bip001-pelvis',
@@ -77,7 +77,7 @@ for (const [side, suffix] of [
     },
   }))
     for (let i = 0; i < 4; i++)
-      DIMOS_WOLF_DONOR.roles[`${end}${side}${i}`] =
+      CANINE_ACTION_DONOR.roles[`${end}${side}${i}`] =
         `bip001-${suffix}-${names[i]}`;
 }
 
