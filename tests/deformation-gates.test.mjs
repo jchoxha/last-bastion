@@ -10,7 +10,7 @@ import {
   DeformationGateError,
 } from '../scripts/creature-pipeline/deformation-gate.mjs';
 
-const ironhideGlbPath = 'public/creatures/asset_2cb2b3400dfde3a118be89b6.glb';
+const ironhideGlbPath = 'public/creatures/asset_5e973bc739868acfa043c938.glb';
 
 test('valid rebound Ironhide passes all deformation and hierarchy gates', async () => {
   const bytes = await readFile(ironhideGlbPath);

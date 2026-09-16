@@ -3,7 +3,7 @@ import json
 import math
 import os
 import sys
-from mathutils import Vector
+from mathutils import Matrix, Vector
 
 def parse_args():
     argv = sys.argv
@@ -26,6 +26,16 @@ def parse_args():
     return parsed
 
 def get_bbox(obj):
+    if obj.type == 'MESH':
+        coords = [obj.matrix_world @ v.co for v in obj.data.vertices]
+        min_v = Vector((min(c.x for c in coords), min(c.y for c in coords), min(c.z for c in coords)))
+        max_v = Vector((max(c.x for c in coords), max(c.y for c in coords), max(c.z for c in coords)))
+        return min_v, max_v
+    if obj.type == 'ARMATURE':
+        points = [obj.matrix_world @ b.head_local for b in obj.data.bones] + [obj.matrix_world @ b.tail_local for b in obj.data.bones]
+        min_v = Vector((min(c.x for c in points), min(c.y for c in points), min(c.z for c in points)))
+        max_v = Vector((max(c.x for c in points), max(c.y for c in points), max(c.z for c in points)))
+        return min_v, max_v
     bbox = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
     min_v = Vector((min(c.x for c in bbox), min(c.y for c in bbox), min(c.z for c in bbox)))
     max_v = Vector((max(c.x for c in bbox), max(c.y for c in bbox), max(c.z for c in bbox)))
@@ -61,6 +71,28 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
         if obj.type == 'MESH':
             bpy.data.objects.remove(obj, do_unlink=True)
 
+    # Rotate donor arm chains into standard canonical A-pose (45 deg down)
+    bpy.context.view_layer.objects.active = armature
+    bpy.ops.object.mode_set(mode='EDIT')
+
+    def rotate_bone_hierarchy(eb_root, rot_mat, origin):
+        def rec(eb):
+            eb.head = origin + rot_mat @ (eb.head - origin)
+            eb.tail = origin + rot_mat @ (eb.tail - origin)
+            for c in eb.children:
+                rec(c)
+        rec(eb_root)
+
+    if 'upperarm_l' in armature.data.edit_bones:
+        eb_l = armature.data.edit_bones['upperarm_l']
+        rotate_bone_hierarchy(eb_l, Matrix.Rotation(math.radians(45), 3, 'Y'), Vector(eb_l.head))
+
+    if 'upperarm_r' in armature.data.edit_bones:
+        eb_r = armature.data.edit_bones['upperarm_r']
+        rotate_bone_hierarchy(eb_r, Matrix.Rotation(math.radians(-45), 3, 'Y'), Vector(eb_r.head))
+
+    bpy.ops.object.mode_set(mode='OBJECT')
+
     # 2. Import target mesh
     if not os.path.exists(mesh_path):
         raise FileNotFoundError(f"Mesh GLB not found: {mesh_path}")
@@ -87,6 +119,12 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
     bpy.context.view_layer.objects.active = target_mesh
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     target_mesh.vertex_groups.clear()
+
+    # Rotate mesh -90 deg around Z to align Tripo coordinate convention
+    # (+X forward, +Y left) with canonical humanoid UAL2 skeleton (-Y forward, +X left)
+    rot = Matrix.Rotation(-math.pi / 2, 4, 'Z')
+    target_mesh.data.transform(rot)
+    target_mesh.data.update()
 
     # 3. Fit armature to mesh bounding box
     mesh_min, mesh_max = get_bbox(target_mesh)
@@ -122,6 +160,14 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
     except Exception as e:
         print(f"Bone heat parent_set warning: {e}")
 
+    if target_mesh.parent != armature:
+        target_mesh.parent = armature
+    arm_mod = next((m for m in target_mesh.modifiers if m.type == 'ARMATURE'), None)
+    if not arm_mod:
+        arm_mod = target_mesh.modifiers.new(name='Armature', type='ARMATURE')
+    arm_mod.object = armature
+    arm_mod.use_vertex_groups = True
+
     # Ensure all armature bones have vertex groups
     bone_names = [b.name for b in armature.data.bones]
     for bname in bone_names:
@@ -130,18 +176,35 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
 
     vg_indices = {vg.name: vg.index for vg in target_mesh.vertex_groups}
 
-    # Get bone segments in world coordinates
+    # Define active deforming bones for fallback distance weighting
+    # Exclude root motion bone, leaf tip bones (*_leaf_*), and finger phalanges
+    # Hand mesh deforms with hand_l / hand_r; toes deform with ball_l / ball_r
+    excluded_prefixes = ('thumb_', 'index_', 'middle_', 'ring_', 'pinky_')
+    excluded_bones = {'root'}
+
+    def is_deforming_bone(bname):
+        if bname in excluded_bones or '_leaf_' in bname:
+            return False
+        if any(bname.startswith(p) for p in excluded_prefixes):
+            return False
+        return True
+
+    # Get bone segments in world coordinates for active deforming bones
     bone_segments = {}
     for bone in armature.data.bones:
-        head_world = armature.matrix_world @ bone.head_local
-        tail_world = armature.matrix_world @ bone.tail_local
-        bone_segments[bone.name] = (head_world, tail_world)
+        if is_deforming_bone(bone.name):
+            head_world = armature.matrix_world @ bone.head_local
+            tail_world = armature.matrix_world @ bone.tail_local
+            bone_segments[bone.name] = (head_world, tail_world)
 
     # 5. Check weights and fill unweighted / under-weighted vertices with distance fallback
     mesh_data = target_mesh.data
     verts = mesh_data.vertices
     unweighted_count = 0
     fallback_assigned = 0
+
+    arm_bones = {'clavicle_l', 'upperarm_l', 'lowerarm_l', 'hand_l', 'clavicle_r', 'upperarm_r', 'lowerarm_r', 'hand_r'}
+    leg_bones = {'thigh_l', 'calf_l', 'foot_l', 'ball_l', 'thigh_r', 'calf_r', 'foot_r', 'ball_r'}
 
     # Build vertex to groups lookup
     for v in verts:
@@ -152,15 +215,27 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
             v_world = target_mesh.matrix_world @ v.co
             distances = []
             for bname, (head, tail) in bone_segments.items():
+                # Bilateral symmetry isolation: prevent left-side limb bones
+                # from capturing right-side vertices and vice-versa
+                if bname.endswith('_l') and v_world.x < -0.02:
+                    continue
+                if bname.endswith('_r') and v_world.x > 0.02:
+                    continue
+                # Limb isolation: extreme arm vertices cannot take leg bones
+                if abs(v_world.x) > 0.22 and bname in leg_bones:
+                    continue
+                # Extreme leg vertices cannot take arm bones
+                if v_world.z < -0.25 and abs(v_world.x) < 0.25 and bname in arm_bones:
+                    continue
                 d = distance_point_to_segment(v_world, head, tail)
                 distances.append((d, bname))
             
             distances.sort(key=lambda x: x[0])
             # Pick top 4 closest bones
             closest = distances[:4]
-            # Inverse distance weighting: w_i = 1 / (d_i + eps)^2
-            eps = 0.02
-            raw_weights = [1.0 / math.pow(d + eps, 2) for d, _ in closest]
+            # Inverse distance weighting with cubic falloff for localized limb binding: w_i = 1 / (d_i + eps)^3
+            eps = 0.03
+            raw_weights = [1.0 / math.pow(d + eps, 3) for d, _ in closest]
             total_raw = sum(raw_weights)
             for (d, bname), w in zip(closest, raw_weights):
                 norm_w = w / total_raw
@@ -202,7 +277,9 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
         raise RuntimeError(f"Rebind failed: critical bones have 0 weight: {empty_critical}")
 
     # 8. Export GLB
-    os.makedirs(os.path.dirname(out_glb_path), exist_ok=True)
+    out_dir = os.path.dirname(out_glb_path)
+    if out_dir:
+        os.makedirs(out_dir, exist_ok=True)
     bpy.ops.object.select_all(action='DESELECT')
     target_mesh.select_set(True)
     armature.select_set(True)
@@ -240,7 +317,9 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
     }
 
     if report_path:
-        os.makedirs(os.path.dirname(report_path), exist_ok=True)
+        rep_dir = os.path.dirname(report_path)
+        if rep_dir:
+            os.makedirs(rep_dir, exist_ok=True)
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2)
 

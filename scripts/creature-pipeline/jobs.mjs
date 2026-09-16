@@ -349,7 +349,7 @@ export async function createPipeline({
         cardPortrait: `${assetId}-card.png`,
         sha256: hash(bytes),
         walkClip: job.report.walkClip,
-        yaw: -Math.PI / 2,
+        yaw: job.request.bodyPlan === 'humanoid-v1' ? 0 : -Math.PI / 2,
         report: job.report,
         source: {
           repository: job.provenance?.repository || 'jchoxha/chimera_cards',

@@ -101,9 +101,14 @@ export function validateWeightingGate(doc, bin) {
       const jointComponentType = jointsAcc.componentType; // 5121 (UNSIGNED_BYTE) or 5123 (UNSIGNED_SHORT)
       const isByte = jointComponentType === 5121;
 
+      const posAcc = primitive.attributes.POSITION !== undefined ? doc.accessors[primitive.attributes.POSITION] : null;
+      const posView = posAcc ? doc.bufferViews[posAcc.bufferView] : null;
+      const posOffset = posAcc && posView ? (posView.byteOffset || 0) + (posAcc.byteOffset || 0) : 0;
+
       for (let v = 0; v < count; v++) {
         let weightSum = 0;
         let activeWeights = 0;
+        const vx = posAcc ? bin.readFloatLE(posOffset + v * 12) : 0;
 
         for (let comp = 0; comp < 4; comp++) {
           const jVal = isByte
@@ -117,6 +122,9 @@ export function validateWeightingGate(doc, bin) {
             const bName = jointIndexToName.get(jVal);
             if (bName) {
               boneWeightedCounts.set(bName, (boneWeightedCounts.get(bName) || 0) + 1);
+              if (Math.abs(vx) > 0.35 && ['thigh_l', 'thigh_r', 'calf_l', 'calf_r', 'foot_l', 'foot_r', 'ball_l', 'ball_r'].includes(bName)) {
+                throw new DeformationGateError(`Cross-limb bleeding: leg bone ${bName} weighted on arm extremity (x=${vx.toFixed(2)}).`);
+              }
             }
           }
         }
@@ -138,6 +146,16 @@ export function validateWeightingGate(doc, bin) {
 
   if (maxInfluences > 4) {
     throw new DeformationGateError(`Exceeded influence limit: found vertex with ${maxInfluences} influences.`);
+  }
+
+  if ((boneWeightedCounts.get('root') || 0) > 0) {
+    throw new DeformationGateError('Root bone must not deform geometry.');
+  }
+
+  for (const [bName, count] of boneWeightedCounts.entries()) {
+    if (bName.includes('_leaf_') && count > 0) {
+      throw new DeformationGateError(`Leaf bone ${bName} must not have vertex weights (found ${count}).`);
+    }
   }
 
   // Verify critical body region coverage

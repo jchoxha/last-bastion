@@ -2212,7 +2212,7 @@
       }
     },
     {
-      "id": "asset_2cb2b3400dfde3a118be89b6",
+      "id": "asset_5e973bc739868acfa043c938",
       "creature": {
         "version": 1,
         "id": "cf_9ed7b6adf074fd6d",
@@ -2252,12 +2252,12 @@
           "rigVersion": 1
         }
       },
-      "model": "asset_2cb2b3400dfde3a118be89b6.glb",
-      "portrait": "asset_2cb2b3400dfde3a118be89b6.png",
-      "cardPortrait": "asset_2cb2b3400dfde3a118be89b6-card.png",
-      "sha256": "2cb2b3400dfde3a118be89b6421e992f113fd2917ba4d02b50a3ef6e60f34b1f",
+      "model": "asset_5e973bc739868acfa043c938.glb",
+      "portrait": "asset_5e973bc739868acfa043c938.png",
+      "cardPortrait": "asset_5e973bc739868acfa043c938-card.png",
+      "sha256": "5e973bc739868acfa043c938c7d373d58bce2d4a4baca133e89fd6179ff08dd9",
       "walkClip": 7,
-      "yaw": -1.5707963267948966,
+      "yaw": 0,
       "report": {
         "triangles": 19472,
         "vertices": 11941,
