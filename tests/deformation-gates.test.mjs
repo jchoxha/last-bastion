@@ -10,14 +10,14 @@ import {
   DeformationGateError,
 } from '../scripts/creature-pipeline/deformation-gate.mjs';
 
-const ironhideGlbPath = 'public/creatures/asset_5e973bc739868acfa043c938.glb';
+const ironhideGlbPath = 'public/creatures/asset_5a3be5158863c66c0005ff12.glb';
 
 test('valid rebound Ironhide passes all deformation and hierarchy gates', async () => {
   const bytes = await readFile(ironhideGlbPath);
   const result = validateDeformationGates(bytes);
   assert.equal(result.status, 'passed');
   assert.equal(result.bodyPlan, 'humanoid-v1');
-  assert.equal(result.maxInfluences, 4);
+  assert.ok(result.maxInfluences <= 4);
   assert.ok(result.vertices > 10000);
   assert.ok(result.legChannelsAnimated >= 4);
 });

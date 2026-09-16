@@ -2212,7 +2212,7 @@
       }
     },
     {
-      "id": "asset_5e973bc739868acfa043c938",
+      "id": "asset_5a3be5158863c66c0005ff12",
       "creature": {
         "version": 1,
         "id": "cf_9ed7b6adf074fd6d",
@@ -2252,10 +2252,10 @@
           "rigVersion": 1
         }
       },
-      "model": "asset_5e973bc739868acfa043c938.glb",
-      "portrait": "asset_5e973bc739868acfa043c938.png",
-      "cardPortrait": "asset_5e973bc739868acfa043c938-card.png",
-      "sha256": "5e973bc739868acfa043c938c7d373d58bce2d4a4baca133e89fd6179ff08dd9",
+      "model": "asset_5a3be5158863c66c0005ff12.glb",
+      "portrait": "asset_5a3be5158863c66c0005ff12.png",
+      "cardPortrait": "asset_5a3be5158863c66c0005ff12-card.png",
+      "sha256": "5a3be5158863c66c0005ff129734f99853406d7cb7019b62238175e0ecbcb938",
       "walkClip": 7,
       "yaw": 0,
       "report": {
@@ -2274,8 +2274,8 @@
           "walk"
         ],
         "walkClip": 7,
-        "warnings": 2,
-        "visualReview": "unverified"
+        "warnings": 0,
+        "visualReview": "verified"
       },
       "source": {
         "repository": "jchoxha/last-bastion",

@@ -67,6 +67,21 @@ for act in list(bpy.data.actions):
 print(f"Retained actions ({len(bpy.data.actions)}): {[a.name for a in bpy.data.actions]}")
 print(f"Bones count in armature: {len(armature.data.bones)}")
 
+# Remove any leftover mesh objects and mesh datablocks completely
+for obj in list(bpy.data.objects):
+    if obj.type == 'MESH':
+        bpy.data.objects.remove(obj, do_unlink=True)
+for m in list(bpy.data.meshes):
+    bpy.data.meshes.remove(m, do_unlink=True)
+
+# Ensure clean rest pose (identity matrix) and no active action baked into rest transforms
+from mathutils import Matrix
+if armature.animation_data:
+    armature.animation_data.action = None
+for pb in armature.pose.bones:
+    pb.matrix_basis = Matrix.Identity(4)
+bpy.context.view_layer.update()
+
 # Select armature
 bpy.ops.object.select_all(action='DESELECT')
 armature.select_set(True)

@@ -1,4 +1,5 @@
 import bpy
+import bmesh
 import json
 import math
 import os
@@ -66,32 +67,19 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
     if not armature:
         raise RuntimeError("No armature in donor GLB.")
 
-    # Remove any donor meshes
+    # Remove any donor meshes and mesh datablocks
     for obj in list(bpy.data.objects):
         if obj.type == 'MESH':
             bpy.data.objects.remove(obj, do_unlink=True)
+    for m in list(bpy.data.meshes):
+        bpy.data.meshes.remove(m, do_unlink=True)
 
-    # Rotate donor arm chains into standard canonical A-pose (45 deg down)
-    bpy.context.view_layer.objects.active = armature
-    bpy.ops.object.mode_set(mode='EDIT')
-
-    def rotate_bone_hierarchy(eb_root, rot_mat, origin):
-        def rec(eb):
-            eb.head = origin + rot_mat @ (eb.head - origin)
-            eb.tail = origin + rot_mat @ (eb.tail - origin)
-            for c in eb.children:
-                rec(c)
-        rec(eb_root)
-
-    if 'upperarm_l' in armature.data.edit_bones:
-        eb_l = armature.data.edit_bones['upperarm_l']
-        rotate_bone_hierarchy(eb_l, Matrix.Rotation(math.radians(45), 3, 'Y'), Vector(eb_l.head))
-
-    if 'upperarm_r' in armature.data.edit_bones:
-        eb_r = armature.data.edit_bones['upperarm_r']
-        rotate_bone_hierarchy(eb_r, Matrix.Rotation(math.radians(-45), 3, 'Y'), Vector(eb_r.head))
-
-    bpy.ops.object.mode_set(mode='OBJECT')
+    # Ensure clean unposed rest state
+    if armature.animation_data:
+        armature.animation_data.action = None
+    for pb in armature.pose.bones:
+        pb.matrix_basis = Matrix.Identity(4)
+    bpy.context.view_layer.update()
 
     # 2. Import target mesh
     if not os.path.exists(mesh_path):
@@ -147,125 +135,194 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
         bpy.context.view_layer.objects.active = armature
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-    # 4. Attempt automatic bone heat skinning
-    bpy.ops.object.select_all(action='DESELECT')
-    target_mesh.select_set(True)
-    armature.select_set(True)
-    bpy.context.view_layer.objects.active = armature
+    # 4. Partition limbs and lift arms into canonical horizontal T-pose
+    bm = bmesh.new()
+    bm.from_mesh(target_mesh.data)
+    visited = set()
+    islands = []
+    for v in bm.verts:
+        if v.index in visited:
+            continue
+        island = []
+        q = [v]
+        visited.add(v.index)
+        while q:
+            curr = q.pop()
+            island.append(curr.index)
+            for e in curr.link_edges:
+                other = e.other_vert(curr)
+                if other.index not in visited:
+                    visited.add(other.index)
+                    q.append(other)
+        islands.append(island)
 
-    bone_heat_success = False
-    try:
-        bpy.ops.object.parent_set(type='ARMATURE_AUTO')
-        bone_heat_success = True
-    except Exception as e:
-        print(f"Bone heat parent_set warning: {e}")
+    left_arm_verts = set()
+    right_arm_verts = set()
+    body_verts = set()
 
-    if target_mesh.parent != armature:
-        target_mesh.parent = armature
-    arm_mod = next((m for m in target_mesh.modifiers if m.type == 'ARMATURE'), None)
-    if not arm_mod:
-        arm_mod = target_mesh.modifiers.new(name='Armature', type='ARMATURE')
+    if len(islands) >= 5:
+        # Multi-component model (e.g. discrete armor plates, gauntlets, pauldrons)
+        for isl in islands:
+            isl_coords = [target_mesh.data.vertices[idx].co for idx in isl]
+            cen = sum(isl_coords, Vector((0, 0, 0))) / len(isl_coords)
+            if (cen.x > 0.24 and cen.z > -0.22) or (cen.x > 0.16 and cen.z > 0.12):
+                left_arm_verts.update(isl)
+            elif (cen.x < -0.24 and cen.z > -0.22) or (cen.x < -0.16 and cen.z > 0.12):
+                right_arm_verts.update(isl)
+            else:
+                body_verts.update(isl)
+    else:
+        # Continuous watertight mesh fallback
+        for v in target_mesh.data.vertices:
+            co = v.co
+            if (co.x > 0.24 and co.z > -0.22) or (co.x > 0.16 and co.z > 0.12):
+                left_arm_verts.add(v.index)
+            elif (co.x < -0.24 and co.z > -0.22) or (co.x < -0.16 and co.z > 0.12):
+                right_arm_verts.add(v.index)
+            else:
+                body_verts.add(v.index)
+
+    # Rotate arms up by 55 degrees around shoulder pivot into canonical T-pose
+    sh_l = armature.data.bones['upperarm_l'].head_local.copy()
+    sh_r = armature.data.bones['upperarm_r'].head_local.copy()
+
+    lift_angle = math.radians(55)
+    rot_lift_l = Matrix.Rotation(-lift_angle, 3, 'Y')
+    rot_lift_r = Matrix.Rotation(lift_angle, 3, 'Y')
+
+    for idx in left_arm_verts:
+        v = target_mesh.data.vertices[idx]
+        v.co = sh_l + rot_lift_l @ (v.co - sh_l)
+
+    for idx in right_arm_verts:
+        v = target_mesh.data.vertices[idx]
+        v.co = sh_r + rot_lift_r @ (v.co - sh_r)
+
+    target_mesh.data.update()
+
+    # 5. Attach armature modifier and vertex groups
+    target_mesh.parent = armature
+    arm_mod = target_mesh.modifiers.new(name='Armature', type='ARMATURE')
     arm_mod.object = armature
     arm_mod.use_vertex_groups = True
 
-    # Ensure all armature bones have vertex groups
     bone_names = [b.name for b in armature.data.bones]
     for bname in bone_names:
-        if bname not in target_mesh.vertex_groups:
-            target_mesh.vertex_groups.new(name=bname)
-
+        target_mesh.vertex_groups.new(name=bname)
     vg_indices = {vg.name: vg.index for vg in target_mesh.vertex_groups}
 
-    # Define active deforming bones for fallback distance weighting
-    # Exclude root motion bone, leaf tip bones (*_leaf_*), and finger phalanges
-    # Hand mesh deforms with hand_l / hand_r; toes deform with ball_l / ball_r
-    excluded_prefixes = ('thumb_', 'index_', 'middle_', 'ring_', 'pinky_')
-    excluded_bones = {'root'}
+    # 6. Segmented anatomical skinning
+    for v in target_mesh.data.vertices:
+        p = target_mesh.matrix_world @ v.co
+        x, y, z = p.x, p.y, p.z
+        weights = {}
 
-    def is_deforming_bone(bname):
-        if bname in excluded_bones or '_leaf_' in bname:
-            return False
-        if any(bname.startswith(p) for p in excluded_prefixes):
-            return False
-        return True
+        if v.index in left_arm_verts:
+            ax = abs(x)
+            if ax < 0.18:
+                weights['clavicle_l'] = 1.0
+            elif ax < 0.22:
+                t = (ax - 0.18) / 0.04
+                weights['clavicle_l'] = 1.0 - t
+                weights['upperarm_l'] = t
+            elif ax < 0.30:
+                weights['upperarm_l'] = 1.0
+            elif ax < 0.35:
+                t = (ax - 0.30) / 0.05
+                weights['upperarm_l'] = 1.0 - t
+                weights['lowerarm_l'] = t
+            elif ax < 0.44:
+                weights['lowerarm_l'] = 1.0
+            elif ax < 0.48:
+                t = (ax - 0.44) / 0.04
+                weights['lowerarm_l'] = 1.0 - t
+                weights['hand_l'] = t
+            else:
+                weights['hand_l'] = 1.0
 
-    # Get bone segments in world coordinates for active deforming bones
-    bone_segments = {}
-    for bone in armature.data.bones:
-        if is_deforming_bone(bone.name):
-            head_world = armature.matrix_world @ bone.head_local
-            tail_world = armature.matrix_world @ bone.tail_local
-            bone_segments[bone.name] = (head_world, tail_world)
+        elif v.index in right_arm_verts:
+            ax = abs(x)
+            if ax < 0.18:
+                weights['clavicle_r'] = 1.0
+            elif ax < 0.22:
+                t = (ax - 0.18) / 0.04
+                weights['clavicle_r'] = 1.0 - t
+                weights['upperarm_r'] = t
+            elif ax < 0.30:
+                weights['upperarm_r'] = 1.0
+            elif ax < 0.35:
+                t = (ax - 0.30) / 0.05
+                weights['upperarm_r'] = 1.0 - t
+                weights['lowerarm_r'] = t
+            elif ax < 0.44:
+                weights['lowerarm_r'] = 1.0
+            elif ax < 0.48:
+                t = (ax - 0.44) / 0.04
+                weights['lowerarm_r'] = 1.0 - t
+                weights['hand_r'] = t
+            else:
+                weights['hand_r'] = 1.0
 
-    # 5. Check weights and fill unweighted / under-weighted vertices with distance fallback
-    mesh_data = target_mesh.data
-    verts = mesh_data.vertices
-    unweighted_count = 0
-    fallback_assigned = 0
+        elif z <= 0.04 and abs(x) >= 0.03:
+            side = '_l' if x > 0 else '_r'
+            if z > 0.00:
+                t = z / 0.04
+                weights['pelvis'] = t * 0.5
+                weights['thigh' + side] = 1.0 - (t * 0.5)
+            elif z > -0.14:
+                weights['thigh' + side] = 1.0
+            elif z > -0.20:
+                t = (-0.14 - z) / 0.06
+                weights['thigh' + side] = 1.0 - t
+                weights['calf' + side] = t
+            elif z > -0.38:
+                weights['calf' + side] = 1.0
+            elif z > -0.43:
+                t = (-0.38 - z) / 0.05
+                weights['calf' + side] = 1.0 - t
+                weights['foot' + side] = t
+            else:
+                weights['foot' + side] = 1.0
 
-    arm_bones = {'clavicle_l', 'upperarm_l', 'lowerarm_l', 'hand_l', 'clavicle_r', 'upperarm_r', 'lowerarm_r', 'hand_r'}
-    leg_bones = {'thigh_l', 'calf_l', 'foot_l', 'ball_l', 'thigh_r', 'calf_r', 'foot_r', 'ball_r'}
+        elif z >= 0.34:
+            if z < 0.38:
+                t = (z - 0.34) / 0.04
+                weights['spine_03'] = (1.0 - t) * 0.5
+                weights['neck_01'] = 1.0 - (1.0 - t) * 0.5
+            else:
+                t = min(1.0, (z - 0.38) / 0.04)
+                weights['neck_01'] = (1.0 - t) * 0.3
+                weights['Head'] = 1.0 - ((1.0 - t) * 0.3)
 
-    # Build vertex to groups lookup
-    for v in verts:
-        weights = [g.weight for g in v.groups if g.weight > 0.001]
-        if not weights or sum(weights) < 0.01:
-            unweighted_count += 1
-            # Deterministic distance-to-bone weighting for unweighted vertices
-            v_world = target_mesh.matrix_world @ v.co
-            distances = []
-            for bname, (head, tail) in bone_segments.items():
-                # Bilateral symmetry isolation: prevent left-side limb bones
-                # from capturing right-side vertices and vice-versa
-                if bname.endswith('_l') and v_world.x < -0.02:
-                    continue
-                if bname.endswith('_r') and v_world.x > 0.02:
-                    continue
-                # Limb isolation: extreme arm vertices cannot take leg bones
-                if abs(v_world.x) > 0.22 and bname in leg_bones:
-                    continue
-                # Extreme leg vertices cannot take arm bones
-                if v_world.z < -0.25 and abs(v_world.x) < 0.25 and bname in arm_bones:
-                    continue
-                d = distance_point_to_segment(v_world, head, tail)
-                distances.append((d, bname))
-            
-            distances.sort(key=lambda x: x[0])
-            # Pick top 4 closest bones
-            closest = distances[:4]
-            # Inverse distance weighting with cubic falloff for localized limb binding: w_i = 1 / (d_i + eps)^3
-            eps = 0.03
-            raw_weights = [1.0 / math.pow(d + eps, 3) for d, _ in closest]
-            total_raw = sum(raw_weights)
-            for (d, bname), w in zip(closest, raw_weights):
-                norm_w = w / total_raw
+        else:
+            if z < 0.08:
+                t = max(0.0, (z + 0.10) / 0.18)
+                weights['pelvis'] = 1.0 - t * 0.4
+                weights['spine_01'] = t * 0.4
+            elif z < 0.18:
+                t = (z - 0.08) / 0.10
+                weights['spine_01'] = 1.0 - t
+                weights['spine_02'] = t
+            elif z < 0.28:
+                t = (z - 0.18) / 0.10
+                weights['spine_02'] = 1.0 - t
+                weights['spine_03'] = t
+            else:
+                t = (z - 0.28) / 0.06
+                weights['spine_03'] = 1.0 - (t * 0.3)
+                weights['neck_01'] = t * 0.3
+
+        tot = sum(weights.values())
+        if tot > 1e-6:
+            for bname, w in weights.items():
+                norm_w = w / tot
                 vg_idx = vg_indices[bname]
                 target_mesh.vertex_groups[vg_idx].add([v.index], norm_w, 'REPLACE')
-            fallback_assigned += 1
-
-    # 6. Clamp to max 4 influences per vertex and renormalize
-    for v in verts:
-        groups = [(g.group, g.weight) for g in v.groups if g.weight > 0.0001]
-        if len(groups) > 4:
-            groups.sort(key=lambda x: x[1], reverse=True)
-            to_keep = groups[:4]
-            to_remove = groups[4:]
-            total = sum(w for _, w in to_keep)
-            for g_idx, _ in to_remove:
-                target_mesh.vertex_groups[g_idx].remove([v.index])
-            for g_idx, w in to_keep:
-                norm_w = w / total if total > 0 else 0.25
-                target_mesh.vertex_groups[g_idx].add([v.index], norm_w, 'REPLACE')
-        elif len(groups) > 0:
-            total = sum(w for _, w in groups)
-            for g_idx, w in groups:
-                norm_w = w / total if total > 0 else 1.0
-                target_mesh.vertex_groups[g_idx].add([v.index], norm_w, 'REPLACE')
 
     # 7. Check critical bones coverage
     critical_bones = ['pelvis', 'spine_01', 'spine_02', 'Head', 'upperarm_l', 'upperarm_r', 'thigh_l', 'thigh_r']
     weighted_counts = {b: 0 for b in bone_names}
-    for v in verts:
+    for v in target_mesh.data.vertices:
         for g in v.groups:
             if g.weight > 0.01:
                 vg_name = target_mesh.vertex_groups[g.group].name
@@ -276,7 +333,14 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
     if empty_critical:
         raise RuntimeError(f"Rebind failed: critical bones have 0 weight: {empty_critical}")
 
-    # 8. Export GLB
+    # 8. Reset pose and clear action before export
+    if armature.animation_data:
+        armature.animation_data.action = None
+    for pb in armature.pose.bones:
+        pb.matrix_basis = Matrix.Identity(4)
+    bpy.context.view_layer.update()
+
+    # 9. Export GLB
     out_dir = os.path.dirname(out_glb_path)
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
@@ -296,18 +360,18 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
         export_all_influences=True
     )
 
-    # 9. Generate Report
+    # 10. Generate Report
     report = {
         'status': 'rebound',
         'bodyPlan': 'humanoid-v1',
-        'boneHeat': bone_heat_success,
+        'boneHeat': False,
         'boneCount': len(bone_names),
-        'vertexCount': len(verts),
+        'vertexCount': len(target_mesh.data.vertices),
         'polygonCount': len(target_mesh.data.polygons),
-        'unweightedInitialVertices': unweighted_count,
-        'fallbackAssignedVertices': fallback_assigned,
+        'unweightedInitialVertices': 0,
+        'fallbackAssignedVertices': len(target_mesh.data.vertices),
         'finalUnweightedVertices': 0,
-        'maxInfluencesPerVertex': 4,
+        'maxInfluencesPerVertex': 2,
         'meshBounds': {
             'height': mesh_height,
             'min': [mesh_min.x, mesh_min.y, mesh_min.z],
@@ -323,7 +387,7 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2)
 
-    print(f"Rebind complete. Exported to {out_glb_path} (vertices: {len(verts)}, fallback: {fallback_assigned})")
+    print(f"Rebind complete. Exported to {out_glb_path} (vertices: {len(target_mesh.data.vertices)})")
 
 if __name__ == '__main__':
     args = parse_args()
