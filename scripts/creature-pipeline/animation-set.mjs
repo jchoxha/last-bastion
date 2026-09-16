@@ -108,6 +108,26 @@ function procedural(bytes, name) {
 
 export async function buildAnimationSet(input, bodyPlan, calibration = {}) {
   if (bodyPlan === 'humanoid-v1') {
+    const { doc } = unpackGlb(input);
+    if (
+      doc.skins?.[0]?.joints?.length === 65 &&
+      doc.animations?.some((a) => a.name === 'walk')
+    ) {
+      const walkClip = doc.animations.findIndex((a) => a.name === 'walk');
+      return {
+        bytes: input,
+        report: {
+          status: 'animation-set',
+          profile: 'canonical-humanoid-v1',
+          revision: 1,
+          walkClip,
+          clips: doc.animations.map((c) => ({
+            name: c.name,
+            loop: ['idle', 'walk', 'run', 'run-alt'].includes(c.name),
+          })),
+        },
+      };
+    }
     try {
       const result = buildHumanoidWalk(input);
       await validateRiggedGlb(result.bytes, bodyPlan);

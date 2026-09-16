@@ -82,11 +82,11 @@ This cannot certify attractive anatomy. It makes bad output measurable, recovera
 
 ## Build order
 
-1. Extract and version the UAL2 armature plus walk, idle, run, attack, hit, death, and turn clips as `humanoid-v1`.
-2. Implement a local Blender proof against Ironhide's retained mesh. It must produce a GLB and report without a Tripo call or publishing.
-3. Add fixed-frame contact-sheet tests for diverse humanoid meshes, including deliberately broken weights and skeletons.
-4. Add hierarchy, weighting, and deformation gates.
-5. Insert the headless worker into GitHub Actions; publish only after its gates pass.
+1. [x] Extract and version the UAL2 armature plus walk, idle, run, attack, hit, death, and turn clips as `humanoid-v1` (`scripts/creature-pipeline/animations/humanoid-action-donor.glb`, `scripts/creature-pipeline/rig-profiles.mjs`).
+2. [x] Implement a local Blender proof against Ironhide's retained mesh. It must produce a GLB and report without a Tripo call or publishing (`scripts/creature-pipeline/blender-rebind.py`, `scripts/creature-pipeline/rebind-humanoid.mjs`).
+3. [x] Add fixed-frame contact-sheet tests for diverse humanoid meshes, including deliberately broken weights and skeletons (`tests/deformation-gates.test.mjs`).
+4. [x] Add hierarchy, weighting, and deformation gates (`scripts/creature-pipeline/deformation-gate.mjs`).
+5. [x] Insert the headless worker into GitHub Actions; publish only after its gates pass (`.github/workflows/generate-creature.yml`).
 6. Validate a diverse humanoid batch before enabling automatic production installation.
 7. Repeat separately for each other body family.
 

@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { existsSync } from 'node:fs';
 import { validateRiggedGlb } from './validate.mjs';
+import { validateDeformationGates } from './deformation-gate.mjs';
 import { HUMANOID_ACTION_DONOR, RigCompatibilityError } from './rig-profiles.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -92,6 +93,7 @@ export async function rebindHumanoidMesh(
     });
     const reboundBytes = await readFile(outputPath);
     await validateRiggedGlb(reboundBytes, 'humanoid-v1');
+    const deformationReport = validateDeformationGates(reboundBytes);
     return {
       bytes: reboundBytes,
       report: {
@@ -99,6 +101,7 @@ export async function rebindHumanoidMesh(
         bodyPlan: 'humanoid-v1',
         donorSha256: HUMANOID_ACTION_DONOR.sha256,
         blenderReport: report,
+        deformationReport,
       },
     };
   } finally {

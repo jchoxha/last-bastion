@@ -14,6 +14,7 @@ import { validateRiggedGlb } from './validate.mjs';
 import { modelPrompt } from './model-prompt.mjs';
 import { modelingReferencePrompt } from './art-prompt.mjs';
 import { buildAnimationSet } from './animation-set.mjs';
+import { rebindHumanoidMesh } from './rebind-humanoid.mjs';
 
 const hash = (value) => createHash('sha256').update(value).digest('hex');
 async function json(file, fallback) {
@@ -287,6 +288,10 @@ export async function createPipeline({
           animation.output.model_url,
           32 * 1024 * 1024,
         );
+      } else if (job.request.bodyPlan === 'humanoid-v1') {
+        const meshBytes = await readFile(path.join(dir, 'mesh.glb'));
+        const rebound = await rebindHumanoidMesh(meshBytes);
+        bytes = rebound.bytes;
       } else {
         // The provider's generic biped preset writes scale/translation tracks
         // to helper bones. The local adapter starts from the clean rig instead.
