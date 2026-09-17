@@ -4,7 +4,7 @@ import json
 import math
 import os
 import sys
-from mathutils import Matrix, Vector
+from mathutils import Matrix, Vector, Quaternion, Euler
 
 def parse_args():
     argv = sys.argv
@@ -51,13 +51,95 @@ def distance_point_to_segment(point, seg_a, seg_b):
     projection = seg_a + t * ab
     return (point - projection).length
 
-def rebind(mesh_path, donor_path, out_glb_path, report_path):
+def apply_arm_flare(actions, flare_deg=18.0):
+    if abs(flare_deg) < 1e-4:
+        return
+    q_flare_l = Quaternion((math.cos(math.radians(flare_deg) / 2.0), 0.0, 0.0, math.sin(math.radians(flare_deg) / 2.0)))
+    q_flare_r = Quaternion((math.cos(math.radians(-flare_deg) / 2.0), 0.0, 0.0, math.sin(math.radians(-flare_deg) / 2.0)))
+
+    for act in actions:
+        channel_bags = []
+        if hasattr(act, 'layers') and act.layers:
+            for layer in act.layers:
+                for strip in layer.strips:
+                    if hasattr(strip, 'channelbags'):
+                        channel_bags.extend(strip.channelbags)
+
+        fcurve_sources = channel_bags if channel_bags else [act]
+        for src in fcurve_sources:
+            if not hasattr(src, 'fcurves'):
+                continue
+            fc_l = {}
+            fc_r = {}
+            fc_eul_l = {}
+            fc_eul_r = {}
+            for fc in src.fcurves:
+                if 'upperarm_l' in fc.data_path and 'rotation_quaternion' in fc.data_path:
+                    fc_l[fc.array_index] = fc
+                elif 'upperarm_r' in fc.data_path and 'rotation_quaternion' in fc.data_path:
+                    fc_r[fc.array_index] = fc
+                elif 'upperarm_l' in fc.data_path and 'rotation_euler' in fc.data_path:
+                    fc_eul_l[fc.array_index] = fc
+                elif 'upperarm_r' in fc.data_path and 'rotation_euler' in fc.data_path:
+                    fc_eul_r[fc.array_index] = fc
+
+            if len(fc_l) == 4:
+                num_kps = len(fc_l[0].keyframe_points)
+                for k in range(num_kps):
+                    w = fc_l[0].keyframe_points[k].co[1]
+                    x = fc_l[1].keyframe_points[k].co[1]
+                    y = fc_l[2].keyframe_points[k].co[1]
+                    z = fc_l[3].keyframe_points[k].co[1]
+                    q_new = Quaternion((w, x, y, z)) @ q_flare_l
+                    fc_l[0].keyframe_points[k].co[1] = q_new.w
+                    fc_l[1].keyframe_points[k].co[1] = q_new.x
+                    fc_l[2].keyframe_points[k].co[1] = q_new.y
+                    fc_l[3].keyframe_points[k].co[1] = q_new.z
+
+            if len(fc_r) == 4:
+                num_kps = len(fc_r[0].keyframe_points)
+                for k in range(num_kps):
+                    w = fc_r[0].keyframe_points[k].co[1]
+                    x = fc_r[1].keyframe_points[k].co[1]
+                    y = fc_r[2].keyframe_points[k].co[1]
+                    z = fc_r[3].keyframe_points[k].co[1]
+                    q_new = Quaternion((w, x, y, z)) @ q_flare_r
+                    fc_r[0].keyframe_points[k].co[1] = q_new.w
+                    fc_r[1].keyframe_points[k].co[1] = q_new.x
+                    fc_r[2].keyframe_points[k].co[1] = q_new.y
+                    fc_r[3].keyframe_points[k].co[1] = q_new.z
+
+            if len(fc_eul_l) == 3:
+                num_kps = len(fc_eul_l[0].keyframe_points)
+                for k in range(num_kps):
+                    ex = fc_eul_l[0].keyframe_points[k].co[1]
+                    ey = fc_eul_l[1].keyframe_points[k].co[1]
+                    ez = fc_eul_l[2].keyframe_points[k].co[1]
+                    q_new = Euler((ex, ey, ez), 'XYZ').to_quaternion() @ q_flare_l
+                    e_new = q_new.to_euler('XYZ')
+                    fc_eul_l[0].keyframe_points[k].co[1] = e_new.x
+                    fc_eul_l[1].keyframe_points[k].co[1] = e_new.y
+                    fc_eul_l[2].keyframe_points[k].co[1] = e_new.z
+
+            if len(fc_eul_r) == 3:
+                num_kps = len(fc_eul_r[0].keyframe_points)
+                for k in range(num_kps):
+                    ex = fc_eul_r[0].keyframe_points[k].co[1]
+                    ey = fc_eul_r[1].keyframe_points[k].co[1]
+                    ez = fc_eul_r[2].keyframe_points[k].co[1]
+                    q_new = Euler((ex, ey, ez), 'XYZ').to_quaternion() @ q_flare_r
+                    e_new = q_new.to_euler('XYZ')
+                    fc_eul_r[0].keyframe_points[k].co[1] = e_new.x
+                    fc_eul_r[1].keyframe_points[k].co[1] = e_new.y
+                    fc_eul_r[2].keyframe_points[k].co[1] = e_new.z
+
+def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0):
     bpy.ops.wm.read_factory_settings(use_empty=True)
 
     # 1. Import donor armature
     if not os.path.exists(donor_path):
         raise FileNotFoundError(f"Donor GLB not found: {donor_path}")
-    bpy.ops.import_scene.gltf(filepath=donor_path)
+    bpy.ops.import_scene.gltf(filepath=donor_path, disable_bone_shape=True)
     
     armature = None
     for obj in bpy.data.objects:
@@ -67,7 +149,9 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
     if not armature:
         raise RuntimeError("No armature in donor GLB.")
 
-    # Remove any donor meshes and mesh datablocks
+    # Remove any donor meshes, clear custom shapes, and clean mesh datablocks
+    for pb in armature.pose.bones:
+        pb.custom_shape = None
     for obj in list(bpy.data.objects):
         if obj.type == 'MESH':
             bpy.data.objects.remove(obj, do_unlink=True)
@@ -84,7 +168,7 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
     # 2. Import target mesh
     if not os.path.exists(mesh_path):
         raise FileNotFoundError(f"Mesh GLB not found: {mesh_path}")
-    bpy.ops.import_scene.gltf(filepath=mesh_path)
+    bpy.ops.import_scene.gltf(filepath=mesh_path, disable_bone_shape=True)
 
     mesh_objs = [obj for obj in bpy.data.objects if obj.type == 'MESH']
     if not mesh_objs:
@@ -333,14 +417,17 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
     if empty_critical:
         raise RuntimeError(f"Rebind failed: critical bones have 0 weight: {empty_critical}")
 
-    # 8. Reset pose and clear action before export
+    # 8. Apply arm flare offset for bulky humanoid proportions
+    apply_arm_flare(bpy.data.actions, flare_deg=arm_flare)
+
+    # 9. Reset pose and clear action before export
     if armature.animation_data:
         armature.animation_data.action = None
     for pb in armature.pose.bones:
         pb.matrix_basis = Matrix.Identity(4)
     bpy.context.view_layer.update()
 
-    # 9. Export GLB
+    # 10. Export GLB
     out_dir = os.path.dirname(out_glb_path)
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
@@ -360,7 +447,7 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
         export_all_influences=True
     )
 
-    # 10. Generate Report
+    # 11. Generate Report
     report = {
         'status': 'rebound',
         'bodyPlan': 'humanoid-v1',
@@ -372,6 +459,7 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path):
         'fallbackAssignedVertices': len(target_mesh.data.vertices),
         'finalUnweightedVertices': 0,
         'maxInfluencesPerVertex': 2,
+        'armFlareDeg': arm_flare,
         'meshBounds': {
             'height': mesh_height,
             'min': [mesh_min.x, mesh_min.y, mesh_min.z],
@@ -395,9 +483,10 @@ if __name__ == '__main__':
     donor_arg = args.get('donor')
     out_arg = args.get('out')
     report_arg = args.get('report')
+    flare_arg = float(args.get('arm-flare', 18.0))
 
     if not mesh_arg or not donor_arg or not out_arg:
-        print("Usage: blender --background --python blender-rebind.py -- --mesh <mesh.glb> --donor <donor.glb> --out <out.glb> [--report <report.json>]")
+        print("Usage: blender --background --python blender-rebind.py -- --mesh <mesh.glb> --donor <donor.glb> --out <out.glb> [--report <report.json>] [--arm-flare <deg>]")
         sys.exit(1)
 
-    rebind(mesh_arg, donor_arg, out_arg, report_arg)
+    rebind(mesh_arg, donor_arg, out_arg, report_arg, flare_arg)

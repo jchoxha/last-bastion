@@ -37,6 +37,7 @@ export async function runBlenderRebind({
   outputPath,
   reportPath,
   blenderPath,
+  armFlare = 18.0,
 }) {
   const blender = blenderPath || findBlenderPath();
   const scriptPath = new URL('./blender-rebind.py', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
@@ -51,6 +52,8 @@ export async function runBlenderRebind({
     donorPath,
     '--out',
     outputPath,
+    '--arm-flare',
+    String(armFlare),
   ];
   if (reportPath) {
     args.push('--report', reportPath);
@@ -75,6 +78,7 @@ export async function rebindHumanoidMesh(
   {
     donorPath = new URL('./animations/humanoid-action-donor.glb', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1'),
     blenderPath,
+    armFlare = 18.0,
   } = {},
 ) {
   const dir = await mkdtemp(join(tmpdir(), 'rebind-humanoid-'));
@@ -90,6 +94,7 @@ export async function rebindHumanoidMesh(
       outputPath,
       reportPath,
       blenderPath,
+      armFlare,
     });
     const reboundBytes = await readFile(outputPath);
     await validateRiggedGlb(reboundBytes, 'humanoid-v1');

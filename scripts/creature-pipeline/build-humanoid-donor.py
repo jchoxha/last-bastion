@@ -14,7 +14,7 @@ output_path = os.path.join(output_dir, 'humanoid-action-donor.glb')
 os.makedirs(output_dir, exist_ok=True)
 
 # 1. Import UAL1 to get armature and primary locomotion/reactions
-bpy.ops.import_scene.gltf(filepath=ual1_path)
+bpy.ops.import_scene.gltf(filepath=ual1_path, disable_bone_shape=True)
 
 armature = None
 for obj in bpy.data.objects:
@@ -26,9 +26,13 @@ if not armature:
     raise RuntimeError("No armature found in humanoid-ual1.glb")
 
 # Remove all mesh objects so donor is meshless / animation-only
+for pb in armature.pose.bones:
+    pb.custom_shape = None
 for obj in list(bpy.data.objects):
     if obj.type == 'MESH':
         bpy.data.objects.remove(obj, do_unlink=True)
+for m in list(bpy.data.meshes):
+    bpy.data.meshes.remove(m, do_unlink=True)
 
 # Track actions to keep and rename
 action_mapping = {
@@ -49,7 +53,7 @@ for act in bpy.data.actions:
 
 # 2. Import UAL2 to extract Sword_Regular_Combo as 'attack'
 # We import UAL2 into a new collection or read actions
-bpy.ops.import_scene.gltf(filepath=ual2_path)
+bpy.ops.import_scene.gltf(filepath=ual2_path, disable_bone_shape=True)
 for obj in list(bpy.data.objects):
     if obj != armature:
         bpy.data.objects.remove(obj, do_unlink=True)
@@ -66,6 +70,10 @@ for act in list(bpy.data.actions):
 
 print(f"Retained actions ({len(bpy.data.actions)}): {[a.name for a in bpy.data.actions]}")
 print(f"Bones count in armature: {len(armature.data.bones)}")
+
+# Clear custom shapes on all pose bones so Icosphere and dummy shapes are never referenced
+for pb in armature.pose.bones:
+    pb.custom_shape = None
 
 # Remove any leftover mesh objects and mesh datablocks completely
 for obj in list(bpy.data.objects):
