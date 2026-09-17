@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { CREATURE_MOTIONS, type CreatureMotion } from '@/lib/creatures/motions';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
@@ -279,13 +279,20 @@ export default function CreatureForge({
   const [busy, setBusy] = useState(false),
     [motion, setMotion] = useState<CreatureMotion | 'rest'>('idle'),
     [bones, setBones] = useState(false);
-  const fullAnimationSet = generatedAsset(creature.id)?.report.clips?.includes(
-    'attack',
-  );
-  const previewMotion =
-    fullAnimationSet || ['rest', 'idle', 'walk'].includes(motion)
-      ? motion
-      : 'idle';
+  const assetClips = generatedAsset(creature.id)?.report.clips;
+  const availableMotions = useMemo(() => {
+    if (assetClips && assetClips.length > 0) {
+      const known = (Object.keys(CREATURE_MOTIONS) as CreatureMotion[]).filter(
+        (m) => assetClips.includes(m),
+      );
+      const custom = assetClips.filter(
+        (m) => !(m in CREATURE_MOTIONS),
+      ) as CreatureMotion[];
+      return ['rest', ...known, ...custom] as (CreatureMotion | 'rest')[];
+    }
+    return ['rest', 'idle', 'walk'] as (CreatureMotion | 'rest')[];
+  }, [assetClips]);
+  const previewMotion = availableMotions.includes(motion) ? motion : 'idle';
   const cancel = useRef<AbortController | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -619,16 +626,11 @@ export default function CreatureForge({
                   value={previewMotion}
                   onChange={(e) => setMotion(e.target.value as typeof motion)}
                 >
-                  {[
-                    'rest',
-                    ...(fullAnimationSet
-                      ? Object.keys(CREATURE_MOTIONS)
-                      : ['idle', 'walk']),
-                  ].map((name) => (
+                  {availableMotions.map((name) => (
                     <option key={name} value={name}>
                       {name === 'rest'
                         ? 'Rest (imported bind pose)'
-                        : CREATURE_MOTIONS[name as CreatureMotion].label}
+                        : CREATURE_MOTIONS[name as CreatureMotion]?.label ?? name}
                     </option>
                   ))}
                 </select>

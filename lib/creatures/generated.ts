@@ -197,6 +197,9 @@ export function createRuntimeCreatureActor(creature: Creature) {
     if (!clip) {
       mixer.stopAllAction();
       currentAction = undefined;
+      if (mesh instanceof THREE.SkinnedMesh) {
+        mesh.skeleton.pose();
+      }
       return;
     }
     const next = mixer.clipAction(clip);
@@ -214,6 +217,33 @@ export function createRuntimeCreatureActor(creature: Creature) {
     if (fadingAction) currentAction.fadeIn(0.12);
     mixer.update(0);
   }
+  function resolveFallbackClip(target: CreatureMotion): THREE.AnimationClip | undefined {
+    const direct = previewClips.find((c) => c.name === target);
+    if (direct) return direct;
+    const findFirst = (names: string[]) => {
+      for (const n of names) {
+        const c = previewClips.find((clip) => clip.name === n);
+        if (c) return c;
+      }
+      return undefined;
+    };
+    if (['run', 'run-alt', 'charge', 'leap'].includes(target)) {
+      return findFirst(['run', 'walk', 'idle']) || walk;
+    }
+    if (['walk', 'turn-left', 'turn-right', 'turn-around'].includes(target)) {
+      return findFirst(['walk', 'idle']) || walk;
+    }
+    if (['attack', 'attack-alt', 'cast'].includes(target)) {
+      return findFirst(['attack', 'attack-alt', 'idle']);
+    }
+    if (['hit', 'stagger'].includes(target)) {
+      return findFirst(['hit', 'idle']);
+    }
+    if (['death'].includes(target)) {
+      return findFirst(['death', 'hit', 'idle']);
+    }
+    return findFirst(['idle', 'walk']) || walk;
+  }
   function setAnimation(next: CreatureMotion | 'rest', restart = false) {
     if (motion === next && !restart) return;
     motion = next;
@@ -227,20 +257,12 @@ export function createRuntimeCreatureActor(creature: Creature) {
       );
       return;
     }
-    const clip =
-      next === 'rest'
-        ? undefined
-        : previewClips.find((c) => c.name === next) ||
-          (['walk', 'run', 'charge'].includes(next) ? walk : undefined);
+    const clip = next === 'rest' ? undefined : resolveFallbackClip(next);
     if (clip) previewClipIndex = previewClips.indexOf(clip);
     playClip(clip);
   }
   const playCurrent = () => {
-    const clip =
-      motion === 'rest'
-        ? undefined
-        : previewClips.find((c) => c.name === motion) ||
-          (motion === 'walk' ? walk : undefined);
+    const clip = motion === 'rest' ? undefined : resolveFallbackClip(motion);
     if (clip) previewClipIndex = previewClips.indexOf(clip);
     playClip(clip, true);
   };
@@ -278,9 +300,10 @@ export function createRuntimeCreatureActor(creature: Creature) {
                 ? new THREE.MeshStandardMaterial({
                     map: material.map,
                     color: material.color,
-                    side: material.side,
+                    side: THREE.DoubleSide,
                   })
                 : material.clone();
+            copy.side = THREE.DoubleSide;
             ownedMaterials.add(copy);
             return copy;
           };

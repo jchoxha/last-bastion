@@ -303,22 +303,30 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
 
         if v.index in left_arm_verts:
             ax = abs(x)
-            if ax < 0.18:
+            # Pauldron / top shoulder guard:
+            if z > 0.38 and ax < 0.22:
                 weights['clavicle_l'] = 1.0
-            elif ax < 0.22:
-                t = (ax - 0.18) / 0.04
+            elif z > 0.38 and ax < 0.28:
+                weights['clavicle_l'] = 0.7
+                weights['upperarm_l'] = 0.3
+            elif ax < 0.13:
+                # Collar / inner shoulder socket
+                weights['clavicle_l'] = 1.0
+            elif ax < 0.17:
+                # Smooth transition from collar into upper arm
+                t = (ax - 0.13) / 0.04
                 weights['clavicle_l'] = 1.0 - t
                 weights['upperarm_l'] = t
-            elif ax < 0.30:
+            elif ax < 0.26:
                 weights['upperarm_l'] = 1.0
-            elif ax < 0.35:
-                t = (ax - 0.30) / 0.05
+            elif ax < 0.31:
+                t = (ax - 0.26) / 0.05
                 weights['upperarm_l'] = 1.0 - t
                 weights['lowerarm_l'] = t
-            elif ax < 0.44:
+            elif ax < 0.43:
                 weights['lowerarm_l'] = 1.0
-            elif ax < 0.48:
-                t = (ax - 0.44) / 0.04
+            elif ax < 0.47:
+                t = (ax - 0.43) / 0.04
                 weights['lowerarm_l'] = 1.0 - t
                 weights['hand_l'] = t
             else:
@@ -326,22 +334,27 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
 
         elif v.index in right_arm_verts:
             ax = abs(x)
-            if ax < 0.18:
+            if z > 0.38 and ax < 0.22:
                 weights['clavicle_r'] = 1.0
-            elif ax < 0.22:
-                t = (ax - 0.18) / 0.04
+            elif z > 0.38 and ax < 0.28:
+                weights['clavicle_r'] = 0.7
+                weights['upperarm_r'] = 0.3
+            elif ax < 0.13:
+                weights['clavicle_r'] = 1.0
+            elif ax < 0.17:
+                t = (ax - 0.13) / 0.04
                 weights['clavicle_r'] = 1.0 - t
                 weights['upperarm_r'] = t
-            elif ax < 0.30:
+            elif ax < 0.26:
                 weights['upperarm_r'] = 1.0
-            elif ax < 0.35:
-                t = (ax - 0.30) / 0.05
+            elif ax < 0.31:
+                t = (ax - 0.26) / 0.05
                 weights['upperarm_r'] = 1.0 - t
                 weights['lowerarm_r'] = t
-            elif ax < 0.44:
+            elif ax < 0.43:
                 weights['lowerarm_r'] = 1.0
-            elif ax < 0.48:
-                t = (ax - 0.44) / 0.04
+            elif ax < 0.47:
+                t = (ax - 0.43) / 0.04
                 weights['lowerarm_r'] = 1.0 - t
                 weights['hand_r'] = t
             else:
@@ -427,7 +440,10 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
         pb.matrix_basis = Matrix.Identity(4)
     bpy.context.view_layer.update()
 
-    # 10. Export GLB
+    # 10. Export GLB (disable backface culling so materials are double-sided)
+    for mat in bpy.data.materials:
+        mat.use_backface_culling = False
+
     out_dir = os.path.dirname(out_glb_path)
     if out_dir:
         os.makedirs(out_dir, exist_ok=True)
