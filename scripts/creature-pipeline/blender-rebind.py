@@ -252,13 +252,31 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
             min_x, max_x = min(c.x for c in isl_coords), max(c.x for c in isl_coords)
             min_z, max_z = min(c.z for c in isl_coords), max(c.z for c in isl_coords)
 
-            if cen.z > -0.20 and min_z > -0.22:
-                if max_x > 0.16 and (max_z > 0.04 or max_x > 0.28):
-                    left_arm_verts.update(isl)
-                elif min_x < -0.16 and (max_z > 0.04 or min_x < -0.28):
-                    right_arm_verts.update(isl)
-                else:
-                    body_verts.update(isl)
+            # An arm island is strictly lateral and located in the upper body.
+            # Torso, chestplate, backplate, and waist armor must NEVER be classified as arms!
+            is_arm_height = (min_z > -0.22 and cen.z > -0.20)
+            is_left = False
+            if is_arm_height and min_x > 0.04:
+                if cen.x > 0.24:
+                    is_left = True
+                elif cen.x > 0.15 and max_z > 0.18 and min_z > -0.05:
+                    is_left = True
+                elif cen.x > 0.20 and max_x > 0.28:
+                    is_left = True
+
+            is_right = False
+            if is_arm_height and max_x < -0.04:
+                if cen.x < -0.24:
+                    is_right = True
+                elif cen.x < -0.15 and max_z > 0.18 and min_z > -0.05:
+                    is_right = True
+                elif cen.x < -0.20 and min_x < -0.28:
+                    is_right = True
+
+            if is_left:
+                left_arm_verts.update(isl)
+            elif is_right:
+                right_arm_verts.update(isl)
             else:
                 body_verts.update(isl)
     else:
@@ -266,9 +284,9 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
         for v in target_mesh.data.vertices:
             co = v.co
             if co.z > -0.22:
-                if co.x > 0.16 and (co.z > 0.04 or co.x > 0.28):
+                if co.x > 0.24 or (co.x > 0.16 and co.z > 0.12):
                     left_arm_verts.add(v.index)
-                elif co.x < -0.16 and (co.z > 0.04 or co.x < -0.28):
+                elif co.x < -0.24 or (co.x < -0.16 and co.z > 0.12):
                     right_arm_verts.add(v.index)
                 else:
                     body_verts.add(v.index)
@@ -356,16 +374,19 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
             else:
                 weights['hand_r'] = 1.0
 
-        elif z <= 0.04 and abs(x) >= 0.03:
+        # Legs & lower body:
+        # Front loincloth / tassets (y < -0.06 and abs(x) < 0.09) stay attached to pelvis
+        elif z <= -0.02 and abs(x) >= 0.04 and not (y < -0.06 and abs(x) < 0.09):
             side = '_l' if x > 0 else '_r'
-            if z > 0.00:
-                t = z / 0.04
-                weights['pelvis'] = t * 0.5
-                weights['thigh' + side] = 1.0 - (t * 0.5)
-            elif z > -0.14:
+            if z > -0.08:
+                # Smooth blend from pelvis to thigh at hip line
+                t = (z - (-0.08)) / 0.06
+                weights['pelvis'] = t * 0.7
+                weights['thigh' + side] = 1.0 - (t * 0.7)
+            elif z > -0.16:
                 weights['thigh' + side] = 1.0
-            elif z > -0.20:
-                t = (-0.14 - z) / 0.06
+            elif z > -0.22:
+                t = (-0.16 - z) / 0.06
                 weights['thigh' + side] = 1.0 - t
                 weights['calf' + side] = t
             elif z > -0.38:
@@ -388,22 +409,24 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
                 weights['Head'] = 1.0 - ((1.0 - t) * 0.3)
 
         else:
-            if z < 0.08:
-                t = max(0.0, (z + 0.10) / 0.18)
-                weights['pelvis'] = 1.0 - t * 0.4
-                weights['spine_01'] = t * 0.4
-            elif z < 0.18:
-                t = (z - 0.08) / 0.10
+            # Torso & pelvis
+            if z < 0.06:
+                t = max(0.0, (z + 0.15) / 0.21)
+                weights['pelvis'] = 1.0 - t * 0.3
+                weights['spine_01'] = t * 0.3
+            elif z < 0.16:
+                t = (z - 0.06) / 0.10
+                weights['pelvis'] = (1.0 - t) * 0.7
+                weights['spine_01'] = 0.3 + t * 0.4
+                weights['spine_02'] = t * 0.3
+            elif z < 0.26:
+                t = (z - 0.16) / 0.10
                 weights['spine_01'] = 1.0 - t
                 weights['spine_02'] = t
-            elif z < 0.28:
-                t = (z - 0.18) / 0.10
+            else:
+                t = (z - 0.26) / 0.08
                 weights['spine_02'] = 1.0 - t
                 weights['spine_03'] = t
-            else:
-                t = (z - 0.28) / 0.06
-                weights['spine_03'] = 1.0 - (t * 0.3)
-                weights['neck_01'] = t * 0.3
 
         tot = sum(weights.values())
         if tot > 1e-6:
