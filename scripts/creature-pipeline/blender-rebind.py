@@ -249,20 +249,29 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
         for isl in islands:
             isl_coords = [target_mesh.data.vertices[idx].co for idx in isl]
             cen = sum(isl_coords, Vector((0, 0, 0))) / len(isl_coords)
-            if (cen.x > 0.24 and cen.z > -0.22) or (cen.x > 0.16 and cen.z > 0.12):
-                left_arm_verts.update(isl)
-            elif (cen.x < -0.24 and cen.z > -0.22) or (cen.x < -0.16 and cen.z > 0.12):
-                right_arm_verts.update(isl)
+            min_x, max_x = min(c.x for c in isl_coords), max(c.x for c in isl_coords)
+            min_z, max_z = min(c.z for c in isl_coords), max(c.z for c in isl_coords)
+
+            if cen.z > -0.20 and min_z > -0.22:
+                if max_x > 0.16 and (max_z > 0.04 or max_x > 0.28):
+                    left_arm_verts.update(isl)
+                elif min_x < -0.16 and (max_z > 0.04 or min_x < -0.28):
+                    right_arm_verts.update(isl)
+                else:
+                    body_verts.update(isl)
             else:
                 body_verts.update(isl)
     else:
         # Continuous watertight mesh fallback
         for v in target_mesh.data.vertices:
             co = v.co
-            if (co.x > 0.24 and co.z > -0.22) or (co.x > 0.16 and co.z > 0.12):
-                left_arm_verts.add(v.index)
-            elif (co.x < -0.24 and co.z > -0.22) or (co.x < -0.16 and co.z > 0.12):
-                right_arm_verts.add(v.index)
+            if co.z > -0.22:
+                if co.x > 0.16 and (co.z > 0.04 or co.x > 0.28):
+                    left_arm_verts.add(v.index)
+                elif co.x < -0.16 and (co.z > 0.04 or co.x < -0.28):
+                    right_arm_verts.add(v.index)
+                else:
+                    body_verts.add(v.index)
             else:
                 body_verts.add(v.index)
 
@@ -303,24 +312,16 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
 
         if v.index in left_arm_verts:
             ax = abs(x)
-            # Pauldron / top shoulder guard:
-            if z > 0.38 and ax < 0.22:
+            if ax < 0.13:
                 weights['clavicle_l'] = 1.0
-            elif z > 0.38 and ax < 0.28:
-                weights['clavicle_l'] = 0.7
-                weights['upperarm_l'] = 0.3
-            elif ax < 0.13:
-                # Collar / inner shoulder socket
-                weights['clavicle_l'] = 1.0
-            elif ax < 0.17:
-                # Smooth transition from collar into upper arm
-                t = (ax - 0.13) / 0.04
+            elif ax < 0.16:
+                t = (ax - 0.13) / 0.03
                 weights['clavicle_l'] = 1.0 - t
                 weights['upperarm_l'] = t
-            elif ax < 0.26:
+            elif ax < 0.28:
                 weights['upperarm_l'] = 1.0
-            elif ax < 0.31:
-                t = (ax - 0.26) / 0.05
+            elif ax < 0.32:
+                t = (ax - 0.28) / 0.04
                 weights['upperarm_l'] = 1.0 - t
                 weights['lowerarm_l'] = t
             elif ax < 0.43:
@@ -334,21 +335,16 @@ def rebind(mesh_path, donor_path, out_glb_path, report_path=None, arm_flare=18.0
 
         elif v.index in right_arm_verts:
             ax = abs(x)
-            if z > 0.38 and ax < 0.22:
+            if ax < 0.13:
                 weights['clavicle_r'] = 1.0
-            elif z > 0.38 and ax < 0.28:
-                weights['clavicle_r'] = 0.7
-                weights['upperarm_r'] = 0.3
-            elif ax < 0.13:
-                weights['clavicle_r'] = 1.0
-            elif ax < 0.17:
-                t = (ax - 0.13) / 0.04
+            elif ax < 0.16:
+                t = (ax - 0.13) / 0.03
                 weights['clavicle_r'] = 1.0 - t
                 weights['upperarm_r'] = t
-            elif ax < 0.26:
+            elif ax < 0.28:
                 weights['upperarm_r'] = 1.0
-            elif ax < 0.31:
-                t = (ax - 0.26) / 0.05
+            elif ax < 0.32:
+                t = (ax - 0.28) / 0.04
                 weights['upperarm_r'] = 1.0 - t
                 weights['lowerarm_r'] = t
             elif ax < 0.43:
